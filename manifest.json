@@ -2,9 +2,13 @@
   "manifest_version": 3,
   "name": "wordwise",
   "version": "1.0.0",
-  "action": { "default_popup": "index.html" },
+  "action": { "default_popup": "" },
   "content_scripts":[{
-    "js": ["src/content/main.tsx"],
+    "js": ["src/content/main-content.tsx"],
     "matches": ["<all_urls>"]
-  }]
+  }],
+  "background": {
+    "service_worker": "src/background.ts",
+    "type": "module"
+  }
 }
