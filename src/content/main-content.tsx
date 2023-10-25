@@ -1,19 +1,23 @@
-import React from "react";
-import ReactDOM from "react-dom/client";
-import { createContentRoot } from "./root";
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+import { createContentRoot } from './root'
 import '../index.css'
+import App from './App'
+import { CONTENT_MESSAGE_TYPE } from '../constants'
 
-
-
-
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+const showSidebar = () => {
   const root = createContentRoot()
-
   ReactDOM.createRoot(root).render(
     <React.StrictMode>
-      <div className="text-3xl font-bold text-red-600">wordwise</div>
+      <App />
     </React.StrictMode>
-  );
+  )
+}
+
+chrome.runtime.onMessage.addListener((message) => {
+  switch (message.type) {
+    case CONTENT_MESSAGE_TYPE.SHOW_SIDEBAR:
+      showSidebar()
+      break
+  }
 })
-
-

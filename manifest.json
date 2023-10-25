@@ -3,12 +3,22 @@
   "name": "wordwise",
   "version": "1.0.0",
   "action": { "default_popup": "" },
-  "content_scripts":[{
-    "js": ["src/content/main-content.tsx"],
-    "matches": ["<all_urls>"]
-  }],
+  "content_scripts": [
+    {
+      "js": ["src/content/main-content.tsx"],
+      "matches": ["<all_urls>"]
+    }
+  ],
   "background": {
     "service_worker": "src/background.ts",
     "type": "module"
-  }
+  },
+  "oauth2": {
+    "client_id": "215567912027-nb0bmr3n86ob94ds49pir1vsi3eidn0m.apps.googleusercontent.com",
+    "scopes": [
+      "https://www.googleapis.com/auth/userinfo.email",
+      "https://www.googleapis.com/auth/userinfo.profile"
+    ]
+  },
+  "permissions": ["identity", "storage", "identity.email"]
 }
