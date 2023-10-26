@@ -1,21 +1,23 @@
 import { BACKGROUND_MESSAGE_TYPE, CONTENT_MESSAGE_TYPE } from './constants'
+import { fetchJsonByPost } from './utils/request'
 
 console.log('start')
 
 console.log('----', chrome)
 
 const getToken = () => {
-  chrome.identity.getAuthToken({ interactive: true }, function (token) {
-    console.log(token)
-    if (!token) {
-      return
+  const callback = async (token: string) => {
+    const res = await fetchJsonByPost('http://localhost:3456/auth/token', {
+      token,
+      provider: 'google'
+    })
+    console.log('🚀 ~ file: background.ts:15 ~ res:', res)
+  }
+
+  chrome.identity.getAuthToken({ interactive: true }, (token) => {
+    if (token) {
+      callback(token)
     }
-    const query = new URLSearchParams({
-      access_token: token
-    }).toString()
-    fetch(`https://www.googleapis.com/oauth2/v3/userinfo?${query}`)
-      .then((res) => res.json())
-      .then(console.log)
   })
 }
 
