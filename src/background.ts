@@ -1,17 +1,24 @@
+import { fetchLoginApi, fetchQueryWordApi } from './api'
 import { BACKGROUND_MESSAGE_TYPE, CONTENT_MESSAGE_TYPE } from './constants'
-import { fetchJsonByPost } from './utils/request'
+import { tokenStorage, userStorage } from './utils/storage'
 
 console.log('start')
 
 console.log('----', chrome)
 
 const getToken = () => {
-  const callback = async (token: string) => {
-    const res = await fetchJsonByPost('http://localhost:3456/auth/token', {
-      token,
+  const callback = async (googleToken: string) => {
+    const [isOk, data] = await fetchLoginApi({
+      token: googleToken,
       provider: 'google'
     })
-    console.log('🚀 ~ file: background.ts:15 ~ res:', res)
+    if (!isOk) {
+      console.log('🚀 ~ file: background.ts:16 ~ callback ~ isOk:', data)
+      return
+    }
+    const { token, ...user } = data
+    tokenStorage.setToken(token)
+    userStorage.setUser(user)
   }
 
   chrome.identity.getAuthToken({ interactive: true }, (token) => {
@@ -19,6 +26,11 @@ const getToken = () => {
       callback(token)
     }
   })
+}
+
+const queryWord = async (word: string) => {
+  const res = await fetchQueryWordApi(word)
+  console.log('🚀 ~ file: background.ts:32 ~ queryWord ~ res:', res)
 }
 
 chrome.action.onClicked.addListener((tab) => {
@@ -35,14 +47,17 @@ chrome.identity.onSignInChanged.addListener((_, signed) => {
 })
 
 chrome.runtime.onMessage.addListener((message) => {
-  console.log(
-    '🚀 ~ file: background.ts:19 ~ chrome.runtime.onMessage.addListener ~ message:',
-    message
-  )
+  console.log('background message', message)
 
   switch (message.type) {
     case BACKGROUND_MESSAGE_TYPE.GET_TOKEN:
       getToken()
+      break
+
+    case BACKGROUND_MESSAGE_TYPE.QUERY_WORD:
+      console.log('-------')
+
+      queryWord(message.payload.word)
       break
   }
 })
