@@ -9,3 +9,9 @@ export type LoginResp = {
   email: string
   avatar: string
 }
+
+export type DictionaryResp = {
+  word: string
+  phonetic: string
+  translation: string
+}

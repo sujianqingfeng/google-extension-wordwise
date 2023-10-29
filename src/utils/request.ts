@@ -40,7 +40,10 @@ export function fetchJsonByGet<T = Record<string, any>>(
   data?: Record<string, any>,
   opt?: RequestInit
 ) {
-  const newUrl = `${url}?${new URLSearchParams(data).toString()}`
+  let query = new URLSearchParams(data).toString()
+  query = query ? `?${query}` : ''
+  const newUrl = `${url}${query}`
+  console.log('🚀 ~ file: request.ts:46 ~ newUrl:', newUrl)
   return fetchJson<T>(newUrl, opt)
 }
 
