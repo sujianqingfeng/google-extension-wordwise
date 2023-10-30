@@ -15,3 +15,7 @@ export type DictionaryResp = {
   phonetic: string
   translation: string
 }
+
+export type ICreateWordDto = {
+  word: string
+}

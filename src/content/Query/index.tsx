@@ -1,17 +1,27 @@
 import { useState } from 'react'
-import { fetchQueryWordApi } from '../../api'
+import { fetchCreateWordApi, fetchQueryWordApi } from '../../api'
 import Search from './Search'
 import Favorite from '../../assets/favorite.svg?react'
 
 export default function Query() {
   const [translation, setTranslation] = useState('')
+  const [word, setWord] = useState('')
   const onQuery = async (text: string) => {
     const [isOk, data] = await fetchQueryWordApi(text)
     if (!isOk) {
       return
     }
+    setWord(text)
     const { translation } = data
     setTranslation(translation)
+  }
+
+  const onFavorite = async () => {
+    const [isOk] = await fetchCreateWordApi({ word })
+    console.log('🚀 ~ file: index.tsx:21 ~ onFavorite ~ isOk:', isOk)
+    if (!isOk) {
+      return
+    }
   }
 
   return (
@@ -20,7 +30,7 @@ export default function Query() {
         <Search onQuery={onQuery} />
 
         <div>
-          <button>
+          <button onClick={onFavorite}>
             <Favorite />
           </button>
         </div>
