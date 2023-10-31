@@ -35,6 +35,23 @@ export async function fetchJson<T>(
   }
 }
 
+function createFetchByMethod(method: string) {
+  return <T = Record<string, any>>(
+    url: string,
+    data: Record<string, any>,
+    opt?: RequestInit
+  ) => {
+    return fetchJson<T>(url, {
+      method,
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: new URLSearchParams(data),
+      ...opt
+    })
+  }
+}
+
 export function fetchJsonByGet<T = Record<string, any>>(
   url: string,
   data?: Record<string, any>,
@@ -43,21 +60,9 @@ export function fetchJsonByGet<T = Record<string, any>>(
   let query = new URLSearchParams(data).toString()
   query = query ? `?${query}` : ''
   const newUrl = `${url}${query}`
-  console.log('🚀 ~ file: request.ts:46 ~ newUrl:', newUrl)
   return fetchJson<T>(newUrl, opt)
 }
 
-export function fetchJsonByPost<T = Record<string, any>>(
-  url: string,
-  data: Record<string, any>,
-  opt?: RequestInit
-) {
-  return fetchJson<T>(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded'
-    },
-    body: new URLSearchParams(data),
-    ...opt
-  })
-}
+export const fetchJsonByPost = createFetchByMethod('POST')
+export const fetchJsonByDelete = createFetchByMethod('DELETE')
+export const fetchJsonByPut = createFetchByMethod('PUT')

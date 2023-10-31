@@ -30,7 +30,7 @@ export default function Search(props: SearchProps) {
         onKeyDown={onKeyDown}
       />
       <button
-        className="bg-primary-color px-2 py-1 rounded-sm"
+        className="bg-primary-color px-2 py-1 rounded-md"
         onClick={() => onQuery(text)}
       >
         search

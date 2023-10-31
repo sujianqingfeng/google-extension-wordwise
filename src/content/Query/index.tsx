@@ -1,27 +1,38 @@
 import { useState } from 'react'
-import { fetchCreateWordApi, fetchQueryWordApi } from '../../api'
+import {
+  fetchCreateWordApi,
+  fetchDeleteWordApi,
+  fetchQueryWordApi
+} from '../../api'
 import Search from './Search'
-import Favorite from '../../assets/favorite.svg?react'
+import Collect from './Collect'
+import type { DictQueryResultDto } from '../../api/types'
 
 export default function Query() {
-  const [translation, setTranslation] = useState('')
   const [word, setWord] = useState('')
+  const [queryResult, setQueryResult] = useState<DictQueryResultDto>()
   const onQuery = async (text: string) => {
     const [isOk, data] = await fetchQueryWordApi(text)
     if (!isOk) {
       return
     }
     setWord(text)
-    const { translation } = data
-    setTranslation(translation)
+    setQueryResult(data)
   }
 
-  const onFavorite = async () => {
-    const [isOk] = await fetchCreateWordApi({ word })
-    console.log('🚀 ~ file: index.tsx:21 ~ onFavorite ~ isOk:', isOk)
+  const onCollect = async (next: boolean) => {
+    // no query result
+    if (!queryResult) {
+      return
+    }
+    const fetchApi = next ? fetchCreateWordApi : fetchDeleteWordApi
+    const [isOk] = await fetchApi({ word })
     if (!isOk) {
       return
     }
+    setQueryResult((pre) => {
+      return { ...pre!, isCollected: next }
+    })
   }
 
   return (
@@ -29,12 +40,18 @@ export default function Query() {
       <div className="w-[400px] bg-white p-2 rounded-md shadow">
         <Search onQuery={onQuery} />
 
-        <div>
-          <button onClick={onFavorite}>
-            <Favorite />
-          </button>
-        </div>
-        <div>{translation}</div>
+        {queryResult && (
+          <div>
+            <div className="flex justify-between items-center">
+              <div className="text-[20px] font-bold">{queryResult.word}</div>
+              <Collect
+                onCollect={onCollect}
+                isCollected={queryResult.isCollected}
+              />
+            </div>
+            <div>{queryResult.translation}</div>
+          </div>
+        )}
       </div>
     </div>
   )
