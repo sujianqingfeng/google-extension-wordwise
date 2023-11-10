@@ -1,15 +1,16 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
+import Query from './Query'
 import {
   appendChildToBody,
   createQueryRoot,
   createSideRoot,
   removeChildFromBody
 } from './root'
+import Side from './Side'
 import '../index.css'
-import App from './App'
 import { CONTENT_MESSAGE_TYPE } from '../constants'
-import Query from './Query'
+import { rangeWords } from './range'
 
 const sideRoot = createSideRoot()
 const queryRoot = createQueryRoot()
@@ -19,7 +20,8 @@ const render = (root: HTMLElement, node: React.ReactNode) => {
 }
 
 const showSidebar = () => {
-  render(sideRoot, <App />)
+  render(sideRoot, <Side />)
+  appendChildToBody(sideRoot)
 }
 
 const showQueryPanel = () => {
@@ -89,3 +91,7 @@ document.addEventListener('keydown', (e) => {
 document.addEventListener('keyup', (e) => {
   delete keyPressed[e.key]
 })
+
+rangeWords(['you'])
+
+console.log('----end----')

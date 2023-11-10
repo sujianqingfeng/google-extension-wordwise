@@ -55,8 +55,6 @@ chrome.runtime.onMessage.addListener((message) => {
       break
 
     case BACKGROUND_MESSAGE_TYPE.QUERY_WORD:
-      console.log('-------')
-
       queryWord(message.payload.word)
       break
   }

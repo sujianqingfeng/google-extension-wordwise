@@ -1,14 +1,14 @@
-import {
-  fetchJsonByDelete,
-  fetchJsonByGet,
-  fetchJsonByPost
-} from '../utils/request'
 import type {
   DictQueryResultDto,
   ICreateWordDto,
   LoginReq,
   LoginResp
 } from './types'
+import {
+  fetchJsonByDelete,
+  fetchJsonByGet,
+  fetchJsonByPost
+} from '../utils/request'
 
 export const fetchLoginApi = (data: LoginReq) => {
   return fetchJsonByPost<LoginResp>('/auth/token', data)
@@ -26,4 +26,8 @@ export const fetchCreateWordApi = (data: ICreateWordDto) => {
 
 export const fetchDeleteWordApi = (data: ICreateWordDto) => {
   return fetchJsonByDelete('/word', data)
+}
+
+export const fetchAllWordsApi = () => {
+  return fetchJsonByGet(`/word`)
 }
