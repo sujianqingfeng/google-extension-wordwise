@@ -5,3 +5,5 @@ export const BACKGROUND_MESSAGE_TYPE = {
 export const CONTENT_MESSAGE_TYPE = {
   SHOW_SIDEBAR: 'show_sidebar'
 }
+
+export const ENABLE_TAG_ELEMENTS = ['div', 'section']
