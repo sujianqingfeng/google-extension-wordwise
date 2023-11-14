@@ -1,6 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import Query from './Query'
+import { rangeWords } from './range'
 import {
   appendChildToBody,
   createQueryRoot,
@@ -8,9 +9,8 @@ import {
   removeChildFromBody
 } from './root'
 import Side from './Side'
-import '../index.css'
+// import '../index.css'
 import { CONTENT_MESSAGE_TYPE } from '../constants'
-import { rangeWords } from './range'
 
 const sideRoot = createSideRoot()
 const queryRoot = createQueryRoot()
