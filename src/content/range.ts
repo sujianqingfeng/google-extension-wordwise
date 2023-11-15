@@ -3,12 +3,54 @@ let globalWords: string[] = []
 
 export function rangeWords(words: string[]) {
   console.log('🚀 ~ file: range.ts:4 ~ rangeWords ~ rangeWords:', words)
-  globalWords = words
+  const textContent = document.body.textContent
+  if (textContent === null) {
+    return
+  }
+  globalWords = filterWordsFromText(words, textContent)
   requestIdleCallback(idleRange)
 }
 
+function generateWordsPattern(words: string[]) {
+  const wordsPattern = words.join('|')
+  return new RegExp(`\\b(${wordsPattern})\\b`, 'gi')
+}
+
+function filterWordsFromText(words: string[], text: string) {
+  const re = generateWordsPattern(words)
+  let match: RegExpExecArray | null
+  const matches: string[] = []
+  while ((match = re.exec(text)) !== null) {
+    const word = match[0]
+    if (word && !matches.find((item) => item === word)) {
+      matches.push(word)
+    }
+  }
+  return matches
+}
+
+type MatchWord = {
+  word: string
+  start: number
+}
+export function matchWordsIndices(text: string, words: string[]) {
+  const re = generateWordsPattern(words)
+  let match
+  const indices: MatchWord[] = []
+
+  while ((match = re.exec(text)) !== null) {
+    const word = match[0]
+    const index = match.index
+    indices.push({
+      word,
+      start: index
+    })
+  }
+
+  return indices
+}
+
 function getEnableElement(elements: Element[], { tags }: { tags: string[] }) {
-  // TODO: walk
   return elements.filter((element) => {
     const tagName = element.tagName.toLowerCase()
     return tags.includes(tagName)
@@ -35,12 +77,24 @@ function traverseElements(
   })
 }
 
-function maskWordInElement(ele: Element, word: string) {
-  console.log('🚀 ~ file: range.ts:38 ~ maskWordInElement ~ ele:', ele)
-  const text = ele.textContent
-  console.log('🚀 ~ file: range.ts:39 ~ maskWordInElement ~ text:', text)
-
-  const treeWalker = document.createTreeWalker(ele, NodeFilter.SHOW_TEXT)
+function maskWordsInElement(ele: Element, words: string[]) {
+  console.log('🚀 ~ file: range.ts:85 ~ maskWordsInElement ~ words:', words)
+  const treeWalker = document.createTreeWalker(
+    ele,
+    NodeFilter.SHOW_TEXT,
+    (node) => {
+      const parentElement = node.parentElement
+      if (
+        parentElement &&
+        ['script', 'svg'].some(
+          (tag) => parentElement.tagName.toLowerCase() === tag
+        )
+      ) {
+        return NodeFilter.FILTER_REJECT
+      }
+      return NodeFilter.FILTER_ACCEPT
+    }
+  )
   const allTextNode: Node[] = []
   let currentNode = treeWalker.nextNode()
   while (currentNode) {
@@ -52,25 +106,31 @@ function maskWordInElement(ele: Element, word: string) {
     .map((el) => {
       return { el, text: el.textContent }
     })
-    .filter((item) => item.text)
+    .filter(({ text, el }) => {
+      const hasWordWise = el.parentElement?.dataset.wordWise
+      return text && !hasWordWise
+    })
     .forEach(({ el, text }) => {
       const t = text!
-      const indices = []
-      let startPos = 0
-      while (startPos < t.length) {
-        const index = t.indexOf(word, startPos)
-        if (index === -1) {
-          break
-        }
-        indices.push(index)
-        startPos = index + word.length
+      const matchedWords = filterWordsFromText(words, t)
+      if (!matchedWords.length) {
+        return
       }
 
-      indices.forEach((index) => {
+      console.log(
+        '🚀 ~ file: range.ts:122 ~ .forEach ~ matchedWords:',
+        matchedWords
+      )
+      const indices = matchWordsIndices(t, matchedWords)
+
+      indices.forEach(({ word, start }) => {
         const range = new Range()
-        range.setStart(el, index)
-        range.setEnd(el, index + word.length)
+        range.setStart(el, start)
+        range.setEnd(el, start + word.length)
+
         const strong = document.createElement('strong')
+        strong.dataset.word = word
+        strong.dataset.wordWise = 'true'
         range.surroundContents(strong)
       })
     })
@@ -81,29 +141,9 @@ function idleRange() {
   if (!body) {
     return
   }
-  // const enableElements = getEnableElement(Array.from(body.children), {
-  //   tags: ENABLE_TAG_ELEMENTS
-  // })
-
-  const nodeIterator = document.createNodeIterator(
-    body,
-    NodeFilter.SHOW_TEXT,
-    (node) => {
-      if (node.textContent && node.textContent.trim()) {
-        return NodeFilter.FILTER_ACCEPT
-      }
-      return NodeFilter.FILTER_REJECT
-    }
-  )
-
-  let currentNode = nodeIterator.nextNode()
-  while (currentNode) {
-    console.log(
-      '🚀 ~ file: range.ts:90 ~ idleRange ~ currentNode:',
-      currentNode?.textContent
-    )
-    currentNode = nodeIterator.nextNode()
-  }
+  const enableElements = getEnableElement(Array.from(body.children), {
+    tags: ENABLE_TAG_ELEMENTS
+  })
 
   const intersectionObserverCallback = (
     entries: IntersectionObserverEntry[]
@@ -115,11 +155,11 @@ function idleRange() {
         if (!text) {
           return
         }
-        globalWords.forEach((word) => {
-          if (text.includes(word)) {
-            maskWordInElement(target, word)
-          }
-        })
+        const words = filterWordsFromText(globalWords, text)
+        if (!words.length) {
+          return
+        }
+        maskWordsInElement(target, words)
       }
     })
   }
@@ -131,11 +171,11 @@ function idleRange() {
     }
   )
 
-  // const viewPortHeight = document.documentElement.clientHeight
-  // traverseElements(enableElements, {
-  //   thresholdHeight: viewPortHeight,
-  //   traverse(ele) {
-  //     intersectionObserver.observe(ele)
-  //   }
-  // })
+  const viewPortHeight = document.documentElement.clientHeight
+  traverseElements(enableElements, {
+    thresholdHeight: viewPortHeight,
+    traverse(ele) {
+      intersectionObserver.observe(ele)
+    }
+  })
 }
