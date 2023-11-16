@@ -14,8 +14,8 @@ dependencies:
 
 devDependencies:
   '@crxjs/vite-plugin':
-    specifier: 2.0.0-beta.19
-    version: 2.0.0-beta.19
+    specifier: 2.0.0-beta.21
+    version: 2.0.0-beta.21
   '@sujian/eslint-config':
     specifier: ^1.0.2
     version: 1.0.2(eslint@8.53.0)(typescript@5.0.2)
@@ -43,6 +43,9 @@ devDependencies:
   postcss:
     specifier: ^8.4.31
     version: 8.4.31
+  postcss-prefix-selector:
+    specifier: ^1.16.0
+    version: 1.16.0(postcss@8.4.31)
   tailwindcss:
     specifier: ^3.3.3
     version: 3.3.3
@@ -295,8 +298,8 @@ packages:
       to-fast-properties: 2.0.0
     dev: true
 
-  /@crxjs/vite-plugin@2.0.0-beta.19:
-    resolution: {integrity: sha512-MHJgSwRktpb436ANPoR67cosjCZ6cpq472h4ImAs8POVw8NxZyNMTX4ayoRgTzmCNy2Xve3oOYt/pm+GO9+XfQ==}
+  /@crxjs/vite-plugin@2.0.0-beta.21:
+    resolution: {integrity: sha512-kSXgHHqCXASqJ8NmY94+KLGVwdtkJ0E7KsRQ+vbMpRliJ5ze0xnSk0l41p4txlUysmEoqaeo4Xb7rEFdcU2zjQ==}
     dependencies:
       '@rollup/pluginutils': 4.2.1
       '@webcomponents/custom-elements': 1.6.0
@@ -3340,6 +3343,14 @@ packages:
     dependencies:
       postcss: 8.4.31
       postcss-selector-parser: 6.0.13
+    dev: true
+
+  /postcss-prefix-selector@1.16.0(postcss@8.4.31):
+    resolution: {integrity: sha512-rdVMIi7Q4B0XbXqNUEI+Z4E+pueiu/CS5E6vRCQommzdQ/sgsS4dK42U7GX8oJR+TJOtT+Qv3GkNo6iijUMp3Q==}
+    peerDependencies:
+      postcss: '>4 <9'
+    dependencies:
+      postcss: 8.4.31
     dev: true
 
   /postcss-selector-parser@6.0.13:

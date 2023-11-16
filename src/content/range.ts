@@ -1,4 +1,4 @@
-import { ENABLE_TAG_ELEMENTS } from '../constants'
+import { ENABLE_TAG_ELEMENTS, EXCLUDE_TAG_ELEMENTS } from '../constants'
 let globalWords: string[] = []
 
 export function rangeWords(words: string[]) {
@@ -66,7 +66,12 @@ function traverseElements(
   options: TraverseElementsOptions
 ) {
   const { thresholdHeight, traverse } = options
-  elements.forEach((element) => {
+
+  for (const element of elements) {
+    const exclude = isExcludeElement(element.tagName)
+    if (exclude) {
+      continue
+    }
     const children = Array.from(element.children)
     const clientHeigh = element.clientHeight
     if (thresholdHeight >= clientHeigh) {
@@ -74,7 +79,11 @@ function traverseElements(
     } else if (children.length) {
       traverseElements(children, options)
     }
-  })
+  }
+}
+
+function isExcludeElement(tagName: string) {
+  return EXCLUDE_TAG_ELEMENTS.includes(tagName.toLowerCase())
 }
 
 function maskWordsInElement(ele: Element, words: string[]) {
@@ -84,12 +93,7 @@ function maskWordsInElement(ele: Element, words: string[]) {
     NodeFilter.SHOW_TEXT,
     (node) => {
       const parentElement = node.parentElement
-      if (
-        parentElement &&
-        ['script', 'svg'].some(
-          (tag) => parentElement.tagName.toLowerCase() === tag
-        )
-      ) {
+      if (parentElement && isExcludeElement(parentElement.tagName)) {
         return NodeFilter.FILTER_REJECT
       }
       return NodeFilter.FILTER_ACCEPT
@@ -116,11 +120,6 @@ function maskWordsInElement(ele: Element, words: string[]) {
       if (!matchedWords.length) {
         return
       }
-
-      console.log(
-        '🚀 ~ file: range.ts:122 ~ .forEach ~ matchedWords:',
-        matchedWords
-      )
       const indices = matchWordsIndices(t, matchedWords)
 
       indices.forEach(({ word, start }) => {

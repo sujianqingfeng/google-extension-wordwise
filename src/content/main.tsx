@@ -1,33 +1,80 @@
-import React from 'react'
-import ReactDOM from 'react-dom/client'
-import Query from './Query'
+import { keyboard, windowSelectionChange } from './events'
+import Query, { QueryProps } from './Query'
 import { rangeWords } from './range'
-import {
-  appendChildToBody,
-  createQueryRoot,
-  createSideRoot,
-  removeChildFromBody
-} from './root'
+import { createCrxRoot, createRootRender } from './root'
 import Side from './Side'
-// import '../index.css'
-import { CONTENT_MESSAGE_TYPE } from '../constants'
+import '../index.css'
+import {
+  CONTENT_MESSAGE_TYPE,
+  QUERY_ROOT_ID,
+  QUERY_PANEL_WIDTH,
+  SIDE_ROOT_ID
+} from '../constants'
 
-const sideRoot = createSideRoot()
-const queryRoot = createQueryRoot()
-
-const render = (root: HTMLElement, node: React.ReactNode) => {
-  ReactDOM.createRoot(root).render(<React.StrictMode>{node}</React.StrictMode>)
-}
+const sideRender = createRootRender(createCrxRoot(SIDE_ROOT_ID))
+const queryRender = createRootRender(createCrxRoot(QUERY_ROOT_ID))
 
 const showSidebar = () => {
-  render(sideRoot, <Side />)
-  appendChildToBody(sideRoot)
+  sideRender.rootRender(<Side />)
+  sideRender.appendToBody()
 }
 
-const showQueryPanel = () => {
-  render(queryRoot, <Query />)
-  appendChildToBody(queryRoot)
+const showQueryPanel = (queryProps?: Omit<QueryProps, 'removeQueryPanel'>) => {
+  queryRender.rootRender(
+    <Query {...queryProps} removeQueryPanel={queryRender.removeFromBody} />
+  )
+  queryRender.appendToBody()
 }
+
+keyboard({
+  singe(key) {
+    if (key === 'Escape') {
+      queryRender.removeFromBody()
+    }
+  },
+  combine(keys) {
+    if (keys['Alt'] && keys['t']) {
+      if (document.body.contains(queryRender.el)) {
+        queryRender.removeFromBody(false)
+      } else {
+        showQueryPanel({
+          top: 100,
+          left: document.body.clientWidth / 2 - QUERY_PANEL_WIDTH / 2,
+          autoFocus: true
+        })
+      }
+    }
+  }
+})
+
+const onSelectionChange = () => {
+  const selection = window.getSelection()
+  if (!selection) {
+    return
+  }
+
+  const selectionText = selection.toString()
+  if (!selectionText) {
+    return
+  }
+  const range = selection.getRangeAt(0)
+  const rect = range.getBoundingClientRect()
+
+  const { x, y, width, height } = rect
+
+  queryRender.removeFromBody()
+  showQueryPanel({
+    top: y + height,
+    left: x + width / 2 - QUERY_PANEL_WIDTH / 2,
+    text: selectionText
+  })
+}
+
+windowSelectionChange({
+  onSelectionChange
+})
+
+// rangeWords(['you'])
 
 chrome.runtime.onMessage.addListener((message) => {
   switch (message.type) {
@@ -36,62 +83,5 @@ chrome.runtime.onMessage.addListener((message) => {
       break
   }
 })
-
-// document.addEventListener('select', (e) => {
-//   // e.target.selectionStart
-//   const target = e.target as HTMLInputElement
-//   console.log('fff', target.selectionStart)
-//   const selectedText = document.getSelection()!.toString()
-//   console.log(
-//     '🚀 ~ file: main-content.tsx:30 ~ document.addEventListener ~ selectedText:',
-//     selectedText
-//   )
-// })
-
-// document.addEventListener('selectionchange', (e) => {
-//   const selection = window.getSelection()
-//   const el = selection?.getRangeAt(0)
-//   console.log(
-//     '🚀 ~ file: main-content.tsx:39 ~ document.addEventListener ~ el:',
-//     el
-//   )
-//   console.log(
-//     '🚀 ~ file: main-content.tsx:38 ~ document.addEventListener ~ selection:',
-//     selection
-//   )
-//   const selectedText = document.getSelection()!.toString()
-//   console.log(
-//     '🚀 ~ file: main-content.tsx:38 ~ document.addEventListener ~ selectedText:',
-//     selectedText
-//   )
-// })
-
-const keyPressed: Record<string, boolean> = {}
-const checkCombineKeys = () => {
-  if (keyPressed['Alt'] && keyPressed['t']) {
-    if (document.body.contains(queryRoot)) {
-      removeChildFromBody(queryRoot, false)
-    } else {
-      showQueryPanel()
-    }
-  }
-}
-const handleSingleKey = (key: string) => {
-  if (key === 'Escape') {
-    removeChildFromBody(queryRoot)
-  }
-}
-
-document.addEventListener('keydown', (e) => {
-  keyPressed[e.key] = true
-  handleSingleKey(e.key)
-  checkCombineKeys()
-})
-
-document.addEventListener('keyup', (e) => {
-  delete keyPressed[e.key]
-})
-
-rangeWords(['you'])
 
 console.log('----end----')
