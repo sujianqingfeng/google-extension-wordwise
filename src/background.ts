@@ -5,9 +5,10 @@ import { tokenStorage, userStorage } from './utils/storage'
 const isLogin = false
 let isInit = false
 
-async function init() {
+async function init(setResponse?: (response: any) => void) {
   await getUserInfo()
   isInit = true
+  setResponse && setResponse(isLogin)
 }
 
 async function getUserInfo() {
@@ -47,13 +48,21 @@ chrome.action.onClicked.addListener((tab) => {
   }
 })
 
-chrome.runtime.onMessage.addListener((message) => {
+chrome.runtime.onMessage.addListener((message, _, setResponse) => {
   console.log('background message', message)
 
   switch (message.type) {
     case BACKGROUND_MESSAGE_TYPE.GET_TOKEN:
       getToken()
       break
+
+    case BACKGROUND_MESSAGE_TYPE.GET_IS_LOGIN:
+      if (isInit) {
+        setResponse(isLogin)
+      } else {
+        init(setResponse)
+      }
+      return true
   }
 })
 

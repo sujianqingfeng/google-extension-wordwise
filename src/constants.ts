@@ -1,5 +1,6 @@
 export const BACKGROUND_MESSAGE_TYPE = {
-  GET_TOKEN: 'get_token'
+  GET_TOKEN: 'get_token',
+  GET_IS_LOGIN: 'is_login'
 }
 
 export const CONTENT_MESSAGE_TYPE = {

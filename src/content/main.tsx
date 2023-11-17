@@ -8,7 +8,8 @@ import {
   CONTENT_MESSAGE_TYPE,
   QUERY_ROOT_ID,
   QUERY_PANEL_WIDTH,
-  SIDE_ROOT_ID
+  SIDE_ROOT_ID,
+  BACKGROUND_MESSAGE_TYPE
 } from '../constants'
 import { isEnglishText } from '../utils/text'
 
@@ -27,27 +28,27 @@ const showQueryPanel = (queryProps?: Omit<QueryProps, 'removeQueryPanel'>) => {
   queryRender.appendToBody()
 }
 
-keyboard({
-  singe(key) {
-    if (key === 'Escape') {
-      queryRender.removeFromBody()
-    }
-  },
-  combine(keys) {
-    if (keys['Alt'] && keys['t']) {
-      if (document.body.contains(queryRender.el)) {
-        queryRender.removeFromBody(false)
-      } else {
-        showQueryPanel({
-          top: 100,
-          left: document.body.clientWidth / 2 - QUERY_PANEL_WIDTH / 2,
-          autoFocus: true
-        })
-      }
+// keyboard singe
+const singe = (key: string) => {
+  if (key === 'Escape') {
+    queryRender.removeFromBody()
+  }
+}
+// keyboard combine
+const combine = (keys: Record<string, boolean>) => {
+  if (keys['Alt'] && keys['t']) {
+    if (document.body.contains(queryRender.el)) {
+      queryRender.removeFromBody(false)
+    } else {
+      showQueryPanel({
+        top: 100,
+        left: document.body.clientWidth / 2 - QUERY_PANEL_WIDTH / 2,
+        autoFocus: true
+      })
     }
   }
-})
-
+}
+// window selection change
 const onSelectionChange = () => {
   const selection = window.getSelection()
   if (!selection) {
@@ -76,11 +77,18 @@ const onSelectionChange = () => {
   })
 }
 
-windowSelectionChange({
-  onSelectionChange
-})
+const start = () => {
+  windowSelectionChange({
+    onSelectionChange
+  })
 
-// rangeWords(['you'])
+  keyboard({
+    singe,
+    combine
+  })
+
+  // rangeWords(['you'])
+}
 
 chrome.runtime.onMessage.addListener((message) => {
   switch (message.type) {
@@ -89,5 +97,13 @@ chrome.runtime.onMessage.addListener((message) => {
       break
   }
 })
+
+chrome.runtime
+  .sendMessage({ type: BACKGROUND_MESSAGE_TYPE.GET_IS_LOGIN })
+  .then((isLogin) => {
+    if (isLogin) {
+      start()
+    }
+  })
 
 console.log('----end----')
