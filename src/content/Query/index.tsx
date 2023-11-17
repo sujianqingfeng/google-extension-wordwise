@@ -2,12 +2,14 @@ import type { DictQueryResultDto } from '../../api/types'
 import { CSSProperties, useRef, useState } from 'react'
 import Collect from './Collect'
 import Search from './Search'
+import TranslateText from './TranslateText'
 import {
   fetchCreateWordApi,
   fetchDeleteWordApi,
   fetchQueryWordApi
 } from '../../api'
-import { useOutsideClick } from '../../hooks/element'
+import { useOutsideClick } from '../../hooks/use-element'
+import { isText } from '../../utils/text'
 
 export type QueryProps = {
   top?: number
@@ -22,6 +24,8 @@ export default function Query(props: QueryProps) {
 
   const queryRef = useRef<HTMLDivElement>(null)
 
+  const [isTextFlag, setIsTextFlag] = useState(isText(text))
+
   const [word, setWord] = useState(text)
   const [queryResult, setQueryResult] = useState<DictQueryResultDto>()
   const onQuery = async (text: string) => {
@@ -29,7 +33,6 @@ export default function Query(props: QueryProps) {
     if (!isOk) {
       return
     }
-    setWord(text)
     setQueryResult(data)
   }
 
@@ -64,6 +67,8 @@ export default function Query(props: QueryProps) {
     queryStyle.left = left
   }
 
+  onQuery(text)
+
   return (
     <div
       ref={queryRef}
@@ -77,6 +82,8 @@ export default function Query(props: QueryProps) {
           onTextChange={setWord}
           autoFocus={autoFocus}
         />
+
+        {isTextFlag && <TranslateText text={text} />}
 
         {queryResult && (
           <div>

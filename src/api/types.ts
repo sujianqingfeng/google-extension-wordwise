@@ -32,3 +32,12 @@ export type DictQueryResultDto = {
   audio: string
   isCollected: boolean
 }
+
+// translation
+export type TranslateParams = {
+  text: string
+}
+
+export type TranslateResp = {
+  result: string
+}

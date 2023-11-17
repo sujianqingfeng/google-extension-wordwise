@@ -10,6 +10,7 @@ import {
   QUERY_PANEL_WIDTH,
   SIDE_ROOT_ID
 } from '../constants'
+import { isEnglishText } from '../utils/text'
 
 const sideRender = createRootRender(createCrxRoot(SIDE_ROOT_ID))
 const queryRender = createRootRender(createCrxRoot(QUERY_ROOT_ID))
@@ -57,6 +58,11 @@ const onSelectionChange = () => {
   if (!selectionText) {
     return
   }
+
+  if (!isEnglishText(selectionText)) {
+    return
+  }
+
   const range = selection.getRangeAt(0)
   const rect = range.getBoundingClientRect()
 

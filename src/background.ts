@@ -1,6 +1,19 @@
-import { fetchLoginApi, fetchQueryWordApi } from './api'
+import { fetchLoginApi, fetchUserInfoApi } from './api'
 import { BACKGROUND_MESSAGE_TYPE, CONTENT_MESSAGE_TYPE } from './constants'
 import { tokenStorage, userStorage } from './utils/storage'
+
+const isLogin = false
+let isInit = false
+
+async function init() {
+  await getUserInfo()
+  isInit = true
+}
+
+async function getUserInfo() {
+  const user = await fetchUserInfoApi()
+  console.log('🚀 ~ file: background.ts:14 ~ getUserInfo ~ user:', user)
+}
 
 console.log('start')
 
@@ -28,22 +41,10 @@ const getToken = () => {
   })
 }
 
-const queryWord = async (word: string) => {
-  const res = await fetchQueryWordApi(word)
-  console.log('🚀 ~ file: background.ts:32 ~ queryWord ~ res:', res)
-}
-
 chrome.action.onClicked.addListener((tab) => {
   if (tab.id) {
     chrome.tabs.sendMessage(tab.id, { type: CONTENT_MESSAGE_TYPE.SHOW_SIDEBAR })
   }
-})
-
-chrome.identity.onSignInChanged.addListener((_, signed) => {
-  console.log(
-    '🚀 ~ file: background.ts:13 ~ chrome.identity.onSignInChanged.addListener ~ signed:',
-    signed
-  )
 })
 
 chrome.runtime.onMessage.addListener((message) => {
@@ -53,9 +54,7 @@ chrome.runtime.onMessage.addListener((message) => {
     case BACKGROUND_MESSAGE_TYPE.GET_TOKEN:
       getToken()
       break
-
-    case BACKGROUND_MESSAGE_TYPE.QUERY_WORD:
-      queryWord(message.payload.word)
-      break
   }
 })
+
+init()

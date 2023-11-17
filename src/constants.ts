@@ -1,6 +1,5 @@
 export const BACKGROUND_MESSAGE_TYPE = {
-  GET_TOKEN: 'get_token',
-  QUERY_WORD: 'query_word'
+  GET_TOKEN: 'get_token'
 }
 
 export const CONTENT_MESSAGE_TYPE = {

@@ -2,7 +2,9 @@ import type {
   DictQueryResultDto,
   ICreateWordDto,
   LoginReq,
-  LoginResp
+  LoginResp,
+  TranslateParams,
+  TranslateResp
 } from './types'
 import {
   fetchJsonByDelete,
@@ -30,4 +32,14 @@ export const fetchDeleteWordApi = (data: ICreateWordDto) => {
 
 export const fetchAllWordsApi = () => {
   return fetchJsonByGet(`/word`)
+}
+
+// translation
+export const fetchTranslateApi = (data: TranslateParams) => {
+  return fetchJsonByPost<TranslateResp>('/translator/translate', data)
+}
+
+// user
+export const fetchUserInfoApi = () => {
+  return fetchJsonByGet<LoginResp>(`/user`)
 }
