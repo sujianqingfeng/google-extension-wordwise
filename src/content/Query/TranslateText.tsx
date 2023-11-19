@@ -7,13 +7,15 @@ type TranslateTextProps = {
 export default function TranslateText(props: TranslateTextProps) {
   const { text } = props
 
-  const { result } = useFetch({
+  const { result: translate } = useFetch({
     apiFn: fetchTranslateApi,
     defaultQuery: {
       text
     },
-    defaultValue: null
+    defaultValue: {
+      result: ''
+    }
   })
 
-  return <div>fff,{result}</div>
+  return <div>result: {translate.result}</div>
 }

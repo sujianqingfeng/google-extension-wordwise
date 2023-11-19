@@ -24,8 +24,14 @@ export function useFetch<T, Q = Record<string, any>>(
   const fetchApi = async (query?: Partial<Q>) => {
     setLoading(true)
     const res = await apiFn({ ...defaultQuery, ...query })
-    setResult(format ? format(res) : res)
+    console.log('🚀 ~ file: use-fetch.ts:27 ~ fetchApi ~ res:', res)
+    const [isOk, data] = res
+    if (isOk) {
+      setResult(format ? format(data) : data)
+    }
     setLoading(false)
+
+    // TODO:
     return res as T
   }
 

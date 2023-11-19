@@ -5,6 +5,9 @@ export default {
     extend: {
       colors: {
         'primary-color': '#de7897'
+      },
+      zIndex: {
+        9999: 9999
       }
     }
   },

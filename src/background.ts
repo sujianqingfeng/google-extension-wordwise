@@ -2,12 +2,13 @@ import { fetchLoginApi, fetchUserInfoApi } from './api'
 import { BACKGROUND_MESSAGE_TYPE, CONTENT_MESSAGE_TYPE } from './constants'
 import { tokenStorage, userStorage } from './utils/storage'
 
-const isLogin = false
+let isLogin = false
 let isInit = false
 
 async function init(setResponse?: (response: any) => void) {
   await getUserInfo()
   isInit = true
+  isLogin = true
   setResponse && setResponse(isLogin)
 }
 

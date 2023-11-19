@@ -101,6 +101,7 @@ chrome.runtime.onMessage.addListener((message) => {
 chrome.runtime
   .sendMessage({ type: BACKGROUND_MESSAGE_TYPE.GET_IS_LOGIN })
   .then((isLogin) => {
+    console.log('🚀 ~ file: main.tsx:104 ~ .then ~ isLogin:', isLogin)
     if (isLogin) {
       start()
     }

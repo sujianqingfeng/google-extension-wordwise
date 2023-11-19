@@ -1,13 +1,8 @@
-import type { DictQueryResultDto } from '../../api/types'
 import { CSSProperties, useRef, useState } from 'react'
-import Collect from './Collect'
 import Search from './Search'
 import TranslateText from './TranslateText'
-import {
-  fetchCreateWordApi,
-  fetchDeleteWordApi,
-  fetchQueryWordApi
-} from '../../api'
+
+import TranslateWord from './TranslateWord'
 import { useOutsideClick } from '../../hooks/use-element'
 import { isText } from '../../utils/text'
 
@@ -20,36 +15,26 @@ export type QueryProps = {
 }
 
 export default function Query(props: QueryProps) {
-  const { top, left, removeQueryPanel, text = '', autoFocus = false } = props
+  const {
+    top,
+    left,
+    removeQueryPanel,
+    text: defaultText = '',
+    autoFocus = false
+  } = props
 
+  console.log(
+    '🚀 ~ file: index.tsx:27 ~ Query ~ defaultText:',
+    defaultText,
+    isText(defaultText)
+  )
+  const [text, setText] = useState(defaultText)
+  const [isTextFlag, setIsTextFlag] = useState(isText(defaultText))
   const queryRef = useRef<HTMLDivElement>(null)
 
-  const [isTextFlag, setIsTextFlag] = useState(isText(text))
-
-  const [word, setWord] = useState(text)
-  const [queryResult, setQueryResult] = useState<DictQueryResultDto>()
-  const onQuery = async (text: string) => {
-    const [isOk, data] = await fetchQueryWordApi(text)
-    if (!isOk) {
-      return
-    }
-    setQueryResult(data)
-  }
-
-  const onCollect = async (next: boolean) => {
-    // no query result
-    if (!queryResult) {
-      return
-    }
-    const fetchApi = next ? fetchCreateWordApi : fetchDeleteWordApi
-    const [isOk] = await fetchApi({ word })
-    if (!isOk) {
-      return
-    }
-
-    setQueryResult((pre) => {
-      return { ...pre!, isCollected: next }
-    })
+  const onQuery = (text: string) => {
+    setIsTextFlag(isText(text))
+    setText(text)
   }
 
   useOutsideClick({
@@ -67,8 +52,6 @@ export default function Query(props: QueryProps) {
     queryStyle.left = left
   }
 
-  onQuery(text)
-
   return (
     <div
       ref={queryRef}
@@ -78,24 +61,16 @@ export default function Query(props: QueryProps) {
       <div className="w-[400px] bg-white p-2 rounded-md shadow">
         <Search
           onQuery={onQuery}
-          text={word}
-          onTextChange={setWord}
+          text={text}
+          onTextChange={setText}
           autoFocus={autoFocus}
         />
+        {isTextFlag}
 
-        {isTextFlag && <TranslateText text={text} />}
-
-        {queryResult && (
-          <div>
-            <div className="flex justify-between items-center">
-              <div className="text-[20px] font-bold">{queryResult.word}</div>
-              <Collect
-                onCollect={onCollect}
-                isCollected={queryResult.isCollected}
-              />
-            </div>
-            <div>{queryResult.translation}</div>
-          </div>
+        {isTextFlag ? (
+          <TranslateText text={text} />
+        ) : (
+          <TranslateWord word={text} />
         )}
       </div>
     </div>
