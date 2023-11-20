@@ -23,9 +23,10 @@ export function createCrxRoot(id: string) {
 }
 
 export const createRootRender = (el: HTMLElement) => {
-  const root = ReactDOM.createRoot(el)
+  let root: null | ReactDOM.Root = null
 
   const rootRender = (node: React.ReactNode) => {
+    root = ReactDOM.createRoot(el)
     root.render(<React.StrictMode>{node}</React.StrictMode>)
   }
 
@@ -34,6 +35,7 @@ export const createRootRender = (el: HTMLElement) => {
   }
 
   const removeFromBody = (isExamine = true) => {
+    root?.unmount()
     removeChildFromBody(el, isExamine)
   }
 

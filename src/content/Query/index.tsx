@@ -23,11 +23,6 @@ export default function Query(props: QueryProps) {
     autoFocus = false
   } = props
 
-  console.log(
-    '🚀 ~ file: index.tsx:27 ~ Query ~ defaultText:',
-    defaultText,
-    isText(defaultText)
-  )
   const [text, setText] = useState(defaultText)
   const [isTextFlag, setIsTextFlag] = useState(isText(defaultText))
   const queryRef = useRef<HTMLDivElement>(null)
