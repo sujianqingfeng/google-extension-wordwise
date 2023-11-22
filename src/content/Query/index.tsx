@@ -1,7 +1,6 @@
 import { CSSProperties, useRef, useState } from 'react'
 import Search from './Search'
 import TranslateText from './TranslateText'
-
 import TranslateWord from './TranslateWord'
 import { useOutsideClick } from '../../hooks/use-element'
 import { isText } from '../../utils/text'
@@ -60,7 +59,6 @@ export default function Query(props: QueryProps) {
           onTextChange={setText}
           autoFocus={autoFocus}
         />
-        {isTextFlag}
 
         {isTextFlag ? (
           <TranslateText text={text} />

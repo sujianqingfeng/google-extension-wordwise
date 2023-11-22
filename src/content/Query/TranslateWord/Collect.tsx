@@ -1,5 +1,5 @@
-import Favorite from '../../assets/favorite.svg?react'
-import FavoriteFilled from '../../assets/favorite-filled.svg?react'
+import FavoriteFilled from '../../../assets/favorite-filled.svg?react'
+import Favorite from '../../../assets/favorite.svg?react'
 
 type CollectProps = {
   onCollect: (next: boolean) => void

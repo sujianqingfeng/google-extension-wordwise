@@ -1,3 +1,4 @@
+import Loading from './Loading'
 import { fetchTranslateApi } from '../../api'
 import { useFetch } from '../../hooks/use-fetch'
 
@@ -7,7 +8,7 @@ type TranslateTextProps = {
 export default function TranslateText(props: TranslateTextProps) {
   const { text } = props
 
-  const { result: translate } = useFetch({
+  const { result: translate, loading } = useFetch({
     apiFn: fetchTranslateApi,
     defaultQuery: {
       text
@@ -16,6 +17,14 @@ export default function TranslateText(props: TranslateTextProps) {
       result: ''
     }
   })
+  if (loading) {
+    return <Loading />
+  }
 
-  return <div>result: {translate.result}</div>
+  return (
+    <div className="text-sm font-normal">
+      <div className="mt-2">{text}</div>
+      <div className="mt-2">{translate.result}</div>
+    </div>
+  )
 }

@@ -1,6 +1,9 @@
 import type {
-  DictQueryResultDto,
   ICreateWordDto,
+  IDictQueryResultResp,
+  IQueryWordCollectedParams,
+  IQueryWordCollectedResp,
+  IQueryWordParams,
   LoginReq,
   LoginResp,
   TranslateParams,
@@ -17,8 +20,8 @@ export const fetchLoginApi = (data: LoginReq) => {
 }
 
 // dictionary
-export const fetchQueryWordApi = (word: string) => {
-  return fetchJsonByGet<DictQueryResultDto>(`/dictionary/query/${word}`)
+export const fetchQueryWordApi = (params: IQueryWordParams) => {
+  return fetchJsonByGet<IDictQueryResultResp>(`/dictionary/query`, params)
 }
 
 // word
@@ -32,6 +35,10 @@ export const fetchDeleteWordApi = (data: ICreateWordDto) => {
 
 export const fetchAllWordsApi = () => {
   return fetchJsonByGet(`/word`)
+}
+
+export const fetchWordIsCollectedApi = (params: IQueryWordCollectedParams) => {
+  return fetchJsonByGet<IQueryWordCollectedResp>(`/word/isCollected`, params)
 }
 
 // translation

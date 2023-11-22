@@ -55,7 +55,7 @@ const onSelectionChange = () => {
     return
   }
 
-  const selectionText = selection.toString()
+  const selectionText = selection.toString().trim()
   if (!selectionText) {
     return
   }

@@ -14,24 +14,41 @@ export type ICreateWordDto = {
   word: string
 }
 
-export type DictQueryResultDto = {
-  id: string
+// word
+export type IQueryWordParams = {
   word: string
-  sw: string
-  phonetic: string
-  definition: string
-  translation: string
-  pos: string
-  collins: number
-  oxford: number
-  tag: string
-  bnc: number
-  frq: number
-  exchange: string
-  detail: string
-  audio: string
+}
+
+export type IQueryWordCollectedParams = {
+  word: string
+}
+export type IQueryWordCollectedResp = {
   isCollected: boolean
 }
+
+// dictionary
+
+export type IDictionaryQueryForm = {
+  name: string
+  value: string
+}
+
+export type IDictionaryQueryTranslate = {
+  translate: string
+  position: string
+}
+
+export type IDictionaryQueryResult = {
+  word: string
+  ukPhonetic?: string
+  usPhonetic?: string
+  ukSpeech?: string
+  usSpeech?: string
+  forms: IDictionaryQueryForm[]
+  translates: IDictionaryQueryTranslate[]
+}
+
+export type IDictQueryResultResp = IDictionaryQueryResult & {}
 
 // translation
 export type TranslateParams = {
