@@ -4,6 +4,7 @@ import type {
   IQueryWordCollectedParams,
   IQueryWordCollectedResp,
   IQueryWordParams,
+  IWordRespItem,
   LoginReq,
   LoginResp,
   TranslateParams,
@@ -34,7 +35,7 @@ export const fetchDeleteWordApi = (data: ICreateWordDto) => {
 }
 
 export const fetchAllWordsApi = () => {
-  return fetchJsonByGet(`/word`)
+  return fetchJsonByGet<IWordRespItem[]>(`/word/all`)
 }
 
 export const fetchWordIsCollectedApi = (params: IQueryWordCollectedParams) => {

@@ -18,12 +18,14 @@ export function removeChildFromBody(child: HTMLElement, isExamine = true) {
 export function createCrxRoot(id: string) {
   const div = document.createElement('div')
   div.id = id
-  div.className = 'word-wise'
+  div.className = 'word-wise box-border'
   return div
 }
 
-export const createRootRender = (el: HTMLElement) => {
+export const createRootRender = (id: string) => {
+  const el = createCrxRoot(id)
   let root: null | ReactDOM.Root = null
+  let _isShowing = false
 
   const rootRender = (node: React.ReactNode) => {
     root = ReactDOM.createRoot(el)
@@ -32,15 +34,20 @@ export const createRootRender = (el: HTMLElement) => {
 
   const appendToBody = () => {
     appendChildToBody(el)
+    _isShowing = true
   }
 
   const removeFromBody = (isExamine = true) => {
     root?.unmount()
     removeChildFromBody(el, isExamine)
+    _isShowing = false
   }
 
   return {
     el,
+    get isShowing() {
+      return _isShowing
+    },
     rootRender,
     appendToBody,
     removeFromBody

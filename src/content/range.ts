@@ -1,5 +1,4 @@
 import { ENABLE_TAG_ELEMENTS, EXCLUDE_TAG_ELEMENTS } from '../constants'
-let globalWords: string[] = []
 
 export function rangeWords(words: string[]) {
   console.log('🚀 ~ file: range.ts:4 ~ rangeWords ~ rangeWords:', words)
@@ -7,8 +6,8 @@ export function rangeWords(words: string[]) {
   if (textContent === null) {
     return
   }
-  globalWords = filterWordsFromText(words, textContent)
-  requestIdleCallback(idleRange)
+  const filterWords = filterWordsFromText(words, textContent)
+  idleRange(filterWords)
 }
 
 function generateWordsPattern(words: string[]) {
@@ -127,7 +126,8 @@ function maskWordsInElement(ele: Element, words: string[]) {
         range.setStart(el, start)
         range.setEnd(el, start + word.length)
 
-        const strong = document.createElement('strong')
+        const strong = document.createElement('span')
+        strong.className = 'word-wise-mask'
         strong.dataset.word = word
         strong.dataset.wordWise = 'true'
         range.surroundContents(strong)
@@ -135,7 +135,7 @@ function maskWordsInElement(ele: Element, words: string[]) {
     })
 }
 
-function idleRange() {
+function idleRange(filterWords: string[]) {
   const body = document.querySelector('body')
   if (!body) {
     return
@@ -154,7 +154,7 @@ function idleRange() {
         if (!text) {
           return
         }
-        const words = filterWordsFromText(globalWords, text)
+        const words = filterWordsFromText(filterWords, text)
         if (!words.length) {
           return
         }

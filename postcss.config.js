@@ -3,7 +3,13 @@ export default {
     tailwindcss: {},
     autoprefixer: {},
     'postcss-prefix-selector': {
-      prefix: '.word-wise'
+      prefix: '.word-wise',
+      transform: function (prefix, selector, prefixedSelector, filePath) {
+        if (/\/content\/main.css/.test(filePath)) {
+          return selector
+        }
+        return prefixedSelector
+      }
     }
   }
 }

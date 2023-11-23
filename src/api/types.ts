@@ -22,12 +22,17 @@ export type IQueryWordParams = {
 export type IQueryWordCollectedParams = {
   word: string
 }
+
 export type IQueryWordCollectedResp = {
   isCollected: boolean
 }
 
-// dictionary
+export type IWordRespItem = {
+  id: string
+  word: string
+}
 
+// dictionary
 export type IDictionaryQueryForm = {
   name: string
   value: string

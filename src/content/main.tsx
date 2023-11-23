@@ -1,7 +1,8 @@
+import type { IWordRespItem } from '../api/types'
 import { keyboard, windowSelectionChange } from './events'
 import Query, { QueryProps } from './Query'
 import { rangeWords } from './range'
-import { createCrxRoot, createRootRender } from './root'
+import { createRootRender } from './root'
 import Side from './Side'
 import '../index.css'
 import {
@@ -13,12 +14,18 @@ import {
 } from '../constants'
 import { isEnglishText } from '../utils/text'
 
-const sideRender = createRootRender(createCrxRoot(SIDE_ROOT_ID))
-const queryRender = createRootRender(createCrxRoot(QUERY_ROOT_ID))
+const sideRender = createRootRender(SIDE_ROOT_ID)
+const queryRender = createRootRender(QUERY_ROOT_ID)
 
 const showSidebar = () => {
-  sideRender.rootRender(<Side />)
-  sideRender.appendToBody()
+  if (sideRender.isShowing) {
+    sideRender.removeFromBody()
+  } else {
+    sideRender.rootRender(
+      <Side removeSide={() => sideRender.removeFromBody()} />
+    )
+    sideRender.appendToBody()
+  }
 }
 
 const showQueryPanel = (queryProps?: Omit<QueryProps, 'removeQueryPanel'>) => {
@@ -65,8 +72,14 @@ const onSelectionChange = () => {
   }
 
   const range = selection.getRangeAt(0)
-  const rect = range.getBoundingClientRect()
 
+  // no operation when the selection is in the query panel
+  const parentElement = range.commonAncestorContainer.parentElement
+  if (queryRender.el.contains(parentElement)) {
+    return
+  }
+
+  const rect = range.getBoundingClientRect()
   const { x, y, width, height } = rect
 
   queryRender.removeFromBody()
@@ -77,7 +90,15 @@ const onSelectionChange = () => {
   })
 }
 
-const start = () => {
+const appendCss = async () => {
+  const { default: defaultCss } = await import('./main.css?inline')
+  const style = document.createElement('style')
+
+  style.textContent = defaultCss
+  document.body.appendChild(style)
+}
+
+const start = async () => {
   windowSelectionChange({
     onSelectionChange
   })
@@ -87,7 +108,17 @@ const start = () => {
     combine
   })
 
-  // rangeWords(['you'])
+  const words: IWordRespItem[] = await chrome.runtime.sendMessage({
+    type: BACKGROUND_MESSAGE_TYPE.GET_WORDS
+  })
+
+  if (words.length) {
+    appendCss()
+    const stringWords = words.map((item) => item.word)
+    requestIdleCallback(() => {
+      rangeWords(stringWords)
+    })
+  }
 }
 
 chrome.runtime.onMessage.addListener((message) => {

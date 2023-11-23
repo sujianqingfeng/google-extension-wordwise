@@ -1,27 +1,39 @@
-import { fetchLoginApi, fetchUserInfoApi } from './api'
+import type { IWordRespItem, LoginResp } from './api/types'
+import { fetchAllWordsApi, fetchLoginApi, fetchUserInfoApi } from './api'
 import { BACKGROUND_MESSAGE_TYPE, CONTENT_MESSAGE_TYPE } from './constants'
 import { tokenStorage, userStorage } from './utils/storage'
 
+type SetResponse = (response: any) => void
+
 let isLogin = false
 let isInit = false
+let user: LoginResp
+let words: IWordRespItem[] = []
 
-async function init(setResponse?: (response: any) => void) {
+async function init(setResponse?: SetResponse) {
   await getUserInfo()
   isInit = true
-  isLogin = true
   setResponse && setResponse(isLogin)
 }
 
 async function getUserInfo() {
-  const user = await fetchUserInfoApi()
-  console.log('🚀 ~ file: background.ts:14 ~ getUserInfo ~ user:', user)
+  const [isOk, networkUser] = await fetchUserInfoApi()
+  if (isOk) {
+    user = networkUser
+    isLogin = true
+    fetchAllWords()
+  }
 }
 
-console.log('start')
+async function fetchAllWords() {
+  const [isOk, allWords] = await fetchAllWordsApi()
+  if (!isOk) {
+    return
+  }
+  words = allWords
+}
 
-console.log('----', chrome)
-
-const getToken = () => {
+function getToken(setResponse?: SetResponse) {
   const callback = async (googleToken: string) => {
     const [isOk, data] = await fetchLoginApi({
       token: googleToken,
@@ -34,6 +46,7 @@ const getToken = () => {
     const { token, ...user } = data
     tokenStorage.setToken(token)
     userStorage.setUser(user)
+    setResponse && setResponse(user)
   }
 
   chrome.identity.getAuthToken({ interactive: true }, (token) => {
@@ -54,8 +67,8 @@ chrome.runtime.onMessage.addListener((message, _, setResponse) => {
 
   switch (message.type) {
     case BACKGROUND_MESSAGE_TYPE.GET_TOKEN:
-      getToken()
-      break
+      getToken(setResponse)
+      return true
 
     case BACKGROUND_MESSAGE_TYPE.GET_IS_LOGIN:
       if (isInit) {
@@ -64,7 +77,16 @@ chrome.runtime.onMessage.addListener((message, _, setResponse) => {
         init(setResponse)
       }
       return true
+
+    case BACKGROUND_MESSAGE_TYPE.GET_USER:
+      setResponse(user)
+      return true
+
+    case BACKGROUND_MESSAGE_TYPE.GET_WORDS:
+      setResponse(words)
+      return true
   }
 })
 
+console.log('start')
 init()

@@ -28,11 +28,12 @@ export default function TranslateWord(props: TranslateWordProps) {
     defaultValue: {}
   })
 
-  const { result: collectedResult } = useFetch<IQueryWordCollectedResp>({
-    apiFn: fetchWordIsCollectedApi,
-    defaultQuery: { word },
-    defaultValue: {}
-  })
+  const { result: collectedResult, fetchApi: fetchWordIsCollected } =
+    useFetch<IQueryWordCollectedResp>({
+      apiFn: fetchWordIsCollectedApi,
+      defaultQuery: { word },
+      defaultValue: {}
+    })
 
   const onCollect = async (next: boolean) => {
     // no query result
@@ -44,10 +45,7 @@ export default function TranslateWord(props: TranslateWordProps) {
     if (!isOk) {
       return
     }
-
-    // setQueryResult((pre) => {
-    //   return { ...pre!, isCollected: next }
-    // })
+    fetchWordIsCollected()
   }
 
   if (loading) {
