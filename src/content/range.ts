@@ -49,6 +49,21 @@ export function matchWordsIndices(text: string, words: string[]) {
   return indices
 }
 
+export function matchWordsIndex(text: string, words: string[]) {
+  const re = generateWordsPattern(words)
+  let match
+
+  while ((match = re.exec(text)) !== null) {
+    const word = match[0]
+    const index = match.index
+    return {
+      word,
+      start: index
+    }
+  }
+  return null
+}
+
 function getEnableElement(elements: Element[], { tags }: { tags: string[] }) {
   return elements.filter((element) => {
     const tagName = element.tagName.toLowerCase()
@@ -85,54 +100,71 @@ function isExcludeElement(tagName: string) {
   return EXCLUDE_TAG_ELEMENTS.includes(tagName.toLowerCase())
 }
 
-function maskWordsInElement(ele: Element, words: string[]) {
+export function maskWordsInElement(ele: Element, words: string[]) {
   console.log('🚀 ~ file: range.ts:85 ~ maskWordsInElement ~ words:', words)
   const treeWalker = document.createTreeWalker(
     ele,
     NodeFilter.SHOW_TEXT,
     (node) => {
+      // no text content
+      if (!node.textContent) {
+        return NodeFilter.FILTER_REJECT
+      }
+
       const parentElement = node.parentElement
+      // exclude some elements
       if (parentElement && isExcludeElement(parentElement.tagName)) {
         return NodeFilter.FILTER_REJECT
       }
+
+      // not mask word wise element
+      const hasWordWise = parentElement?.dataset.wordWise
+      if (hasWordWise) {
+        return NodeFilter.FILTER_REJECT
+      }
+
+      const matchedWords = filterWordsFromText(words, node.textContent)
+      if (!matchedWords.length) {
+        return NodeFilter.FILTER_REJECT
+      }
+
       return NodeFilter.FILTER_ACCEPT
     }
   )
-  const allTextNode: Node[] = []
-  let currentNode = treeWalker.nextNode()
-  while (currentNode) {
-    allTextNode.push(currentNode)
-    currentNode = treeWalker.nextNode()
+
+  const currentNode = treeWalker.nextNode()
+  console.log(
+    '🚀 ~ file: range.ts:137 ~ maskWordsInElement ~ currentNode:',
+    currentNode
+  )
+  if (!currentNode) {
+    return
   }
 
-  allTextNode
-    .map((el) => {
-      return { el, text: el.textContent }
-    })
-    .filter(({ text, el }) => {
-      const hasWordWise = el.parentElement?.dataset.wordWise
-      return text && !hasWordWise
-    })
-    .forEach(({ el, text }) => {
-      const t = text!
-      const matchedWords = filterWordsFromText(words, t)
-      if (!matchedWords.length) {
-        return
-      }
-      const indices = matchWordsIndices(t, matchedWords)
+  const t = currentNode.textContent!
 
-      indices.forEach(({ word, start }) => {
-        const range = new Range()
-        range.setStart(el, start)
-        range.setEnd(el, start + word.length)
+  const matchedWords = filterWordsFromText(words, t)
+  if (!matchedWords.length) {
+    return
+  }
 
-        const strong = document.createElement('span')
-        strong.className = 'word-wise-mask'
-        strong.dataset.word = word
-        strong.dataset.wordWise = 'true'
-        range.surroundContents(strong)
-      })
-    })
+  const index = matchWordsIndex(t, matchedWords)
+  if (!index) {
+    return
+  }
+
+  const { word, start } = index
+  const range = new Range()
+  range.setStart(currentNode, start)
+  range.setEnd(currentNode, start + word.length)
+
+  const strong = document.createElement('span')
+  strong.className = 'word-wise-mask'
+  strong.dataset.word = word
+  strong.dataset.wordWise = 'true'
+  range.surroundContents(strong)
+
+  maskWordsInElement(ele, words)
 }
 
 function idleRange(filterWords: string[]) {

@@ -2,11 +2,16 @@ export const BACKGROUND_MESSAGE_TYPE = {
   GET_TOKEN: 'get_token',
   GET_IS_LOGIN: 'is_login',
   GET_USER: 'get_user',
-  GET_WORDS: 'get_words'
+  GET_WORDS: 'get_words',
+  OPERATE_WORD: 'operate_word'
 }
 
 export const CONTENT_MESSAGE_TYPE = {
   SHOW_SIDEBAR: 'show_sidebar'
+}
+
+export const CUSTOM_EVENT_TYPE = {
+  RANGE_WORDS: 'range_words'
 }
 
 export const ENABLE_TAG_ELEMENTS = ['div', 'section']

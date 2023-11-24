@@ -56,6 +56,17 @@ function getToken(setResponse?: SetResponse) {
   })
 }
 
+function operateWord({ isAdd, word }: { isAdd: boolean; word: string }) {
+  if (isAdd) {
+    words.push({
+      word,
+      id: ''
+    })
+  } else {
+    words = words.filter((item) => item.word !== word)
+  }
+}
+
 chrome.action.onClicked.addListener((tab) => {
   if (tab.id) {
     chrome.tabs.sendMessage(tab.id, { type: CONTENT_MESSAGE_TYPE.SHOW_SIDEBAR })
@@ -85,6 +96,10 @@ chrome.runtime.onMessage.addListener((message, _, setResponse) => {
     case BACKGROUND_MESSAGE_TYPE.GET_WORDS:
       setResponse(words)
       return true
+
+    case BACKGROUND_MESSAGE_TYPE.OPERATE_WORD:
+      operateWord(message.payload)
+      break
   }
 })
 

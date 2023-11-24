@@ -1,7 +1,7 @@
 import type { IWordRespItem } from '../api/types'
 import { keyboard, windowSelectionChange } from './events'
 import Query, { QueryProps } from './Query'
-import { rangeWords } from './range'
+import { maskWordsInElement, rangeWords } from './range'
 import { createRootRender } from './root'
 import Side from './Side'
 import '../index.css'
@@ -10,9 +10,12 @@ import {
   QUERY_ROOT_ID,
   QUERY_PANEL_WIDTH,
   SIDE_ROOT_ID,
-  BACKGROUND_MESSAGE_TYPE
+  BACKGROUND_MESSAGE_TYPE,
+  CUSTOM_EVENT_TYPE
 } from '../constants'
 import { isEnglishText } from '../utils/text'
+
+let currenQueryWordEl: HTMLElement | null = null
 
 const sideRender = createRootRender(SIDE_ROOT_ID)
 const queryRender = createRootRender(QUERY_ROOT_ID)
@@ -75,9 +78,14 @@ const onSelectionChange = () => {
 
   // no operation when the selection is in the query panel
   const parentElement = range.commonAncestorContainer.parentElement
+  console.log(
+    '🚀 ~ file: main.tsx:78 ~ onSelectionChange ~ parentElement:',
+    parentElement
+  )
   if (queryRender.el.contains(parentElement)) {
     return
   }
+  currenQueryWordEl = parentElement
 
   const rect = range.getBoundingClientRect()
   const { x, y, width, height } = rect
@@ -126,6 +134,13 @@ chrome.runtime.onMessage.addListener((message) => {
     case CONTENT_MESSAGE_TYPE.SHOW_SIDEBAR:
       showSidebar()
       break
+  }
+})
+
+document.addEventListener(CUSTOM_EVENT_TYPE.RANGE_WORDS, (e: any) => {
+  const words = e.detail as string[]
+  if (currenQueryWordEl) {
+    maskWordsInElement(currenQueryWordEl, words)
   }
 })
 

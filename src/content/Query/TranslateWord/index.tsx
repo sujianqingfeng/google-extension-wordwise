@@ -13,6 +13,7 @@ import {
   fetchQueryWordApi,
   fetchWordIsCollectedApi
 } from '../../../api'
+import { BACKGROUND_MESSAGE_TYPE, CUSTOM_EVENT_TYPE } from '../../../constants'
 import { useFetch } from '../../../hooks/use-fetch'
 import Loading from '../Loading'
 
@@ -45,6 +46,19 @@ export default function TranslateWord(props: TranslateWordProps) {
     if (!isOk) {
       return
     }
+    // TODO: remove range words
+    if (next) {
+      document.dispatchEvent(
+        new CustomEvent(CUSTOM_EVENT_TYPE.RANGE_WORDS, { detail: [word] })
+      )
+    }
+    chrome.runtime.sendMessage({
+      type: BACKGROUND_MESSAGE_TYPE.OPERATE_WORD,
+      payload: {
+        word,
+        isAdd: next
+      }
+    })
     fetchWordIsCollected()
   }
 
@@ -73,7 +87,7 @@ export default function TranslateWord(props: TranslateWordProps) {
           speech={result?.usSpeech}
         />
       </div>
-      <div className="flex gap-2 mt-2">
+      <div className="flex gap-2 mt-2 flex-wrap">
         {result.forms?.map((f, i) => <WordForm key={i} {...f} />)}
       </div>
       <div className="flex flex-col gap-1 mt-2">
