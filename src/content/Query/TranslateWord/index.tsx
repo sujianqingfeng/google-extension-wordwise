@@ -91,7 +91,7 @@ export default function TranslateWord(props: TranslateWordProps) {
         {result.forms?.map((f, i) => <WordForm key={i} {...f} />)}
       </div>
       <div className="flex flex-col gap-1 mt-2">
-        {result.translates?.map((trs, i) => <Translate key={i} {...trs} />)}
+        {result.translations?.map((trs, i) => <Translate key={i} {...trs} />)}
       </div>
     </div>
   )

@@ -44,6 +44,7 @@ function getToken(setResponse?: SetResponse) {
       return
     }
     const { token, ...user } = data
+    console.log('🚀 ~ file: background.ts:47 ~ callback ~ user:', user)
     tokenStorage.setToken(token)
     userStorage.setUser(user)
     setResponse && setResponse(user)

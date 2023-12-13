@@ -163,6 +163,9 @@ export function maskWordsInElement(ele: Element, words: string[]) {
   strong.dataset.word = word
   strong.dataset.wordWise = 'true'
   range.surroundContents(strong)
+  strong.addEventListener('click', () => {
+    console.log('-------click')
+  })
 
   maskWordsInElement(ele, words)
 }

@@ -39,7 +39,7 @@ export type IDictionaryQueryForm = {
 }
 
 export type IDictionaryQueryTranslate = {
-  translate: string
+  trans: string
   position: string
 }
 
@@ -50,7 +50,7 @@ export type IDictionaryQueryResult = {
   ukSpeech?: string
   usSpeech?: string
   forms: IDictionaryQueryForm[]
-  translates: IDictionaryQueryTranslate[]
+  translations: IDictionaryQueryTranslate[]
 }
 
 export type IDictQueryResultResp = IDictionaryQueryResult & {}
