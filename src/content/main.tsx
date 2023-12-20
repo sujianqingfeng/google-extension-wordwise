@@ -13,6 +13,7 @@ import {
   BACKGROUND_MESSAGE_TYPE,
   CUSTOM_EVENT_TYPE
 } from '../constants'
+import { MaskClickEventDetail } from '../types'
 import { isEnglishText } from '../utils/text'
 
 let currenQueryWordEl: HTMLElement | null = null
@@ -142,6 +143,18 @@ document.addEventListener(CUSTOM_EVENT_TYPE.RANGE_WORDS, (e: any) => {
   if (currenQueryWordEl) {
     maskWordsInElement(currenQueryWordEl, words)
   }
+})
+
+document.addEventListener(CUSTOM_EVENT_TYPE.MASK_CLICK_EVENT, (e: any) => {
+  const { word, rect } = e.detail as MaskClickEventDetail
+  const { x, y, width, height } = rect
+
+  queryRender.removeFromBody()
+  showQueryPanel({
+    top: y + height,
+    left: x + width / 2 - QUERY_PANEL_WIDTH / 2,
+    text: word
+  })
 })
 
 chrome.runtime

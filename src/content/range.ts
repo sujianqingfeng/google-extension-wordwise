@@ -1,4 +1,9 @@
-import { ENABLE_TAG_ELEMENTS, EXCLUDE_TAG_ELEMENTS } from '../constants'
+import {
+  CUSTOM_EVENT_TYPE,
+  ENABLE_TAG_ELEMENTS,
+  EXCLUDE_TAG_ELEMENTS
+} from '../constants'
+import { MaskClickEventDetail } from '../types'
 
 export function rangeWords(words: string[]) {
   console.log('🚀 ~ file: range.ts:4 ~ rangeWords ~ rangeWords:', words)
@@ -163,11 +168,23 @@ export function maskWordsInElement(ele: Element, words: string[]) {
   strong.dataset.word = word
   strong.dataset.wordWise = 'true'
   range.surroundContents(strong)
-  strong.addEventListener('click', () => {
-    console.log('-------click')
-  })
+  strong.addEventListener('click', maskWordClickEvent)
 
   maskWordsInElement(ele, words)
+}
+
+function maskWordClickEvent(e: MouseEvent) {
+  const target = e.target as HTMLElement
+  const word = target.dataset['word']!
+  const rect = target.getBoundingClientRect()
+  document.dispatchEvent(
+    new CustomEvent<MaskClickEventDetail>(CUSTOM_EVENT_TYPE.MASK_CLICK_EVENT, {
+      detail: {
+        word,
+        rect
+      }
+    })
+  )
 }
 
 function idleRange(filterWords: string[]) {

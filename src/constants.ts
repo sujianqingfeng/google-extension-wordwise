@@ -11,7 +11,8 @@ export const CONTENT_MESSAGE_TYPE = {
 }
 
 export const CUSTOM_EVENT_TYPE = {
-  RANGE_WORDS: 'range_words'
+  RANGE_WORDS: 'range_words',
+  MASK_CLICK_EVENT: 'mask_click_event'
 }
 
 export const ENABLE_TAG_ELEMENTS = ['div', 'section']
