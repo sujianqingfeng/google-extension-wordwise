@@ -3,7 +3,7 @@ import {
   ENABLE_TAG_ELEMENTS,
   EXCLUDE_TAG_ELEMENTS
 } from '../constants'
-import { MaskClickEventDetail } from '../types'
+import { MaskClickEventDetail, WrapperElementOptions } from '../types'
 
 export function rangeWords(words: string[]) {
   console.log('🚀 ~ file: range.ts:4 ~ rangeWords ~ rangeWords:', words)
@@ -163,14 +163,22 @@ export function maskWordsInElement(ele: Element, words: string[]) {
   range.setStart(currentNode, start)
   range.setEnd(currentNode, start + word.length)
 
+  const wrapper = createWrapperElement({
+    word,
+    onClick: maskWordClickEvent
+  })
+
+  range.surroundContents(wrapper)
+  maskWordsInElement(ele, words)
+}
+
+function createWrapperElement({ word, onClick }: WrapperElementOptions) {
   const strong = document.createElement('span')
   strong.className = 'word-wise-mask'
   strong.dataset.word = word
   strong.dataset.wordWise = 'true'
-  range.surroundContents(strong)
-  strong.addEventListener('click', maskWordClickEvent)
-
-  maskWordsInElement(ele, words)
+  strong.addEventListener('click', onClick)
+  return strong
 }
 
 function maskWordClickEvent(e: MouseEvent) {

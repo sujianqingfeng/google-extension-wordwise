@@ -48,6 +48,7 @@ function getToken(setResponse?: SetResponse) {
     tokenStorage.setToken(token)
     userStorage.setUser(user)
     setResponse && setResponse(user)
+    isLogin = true
   }
 
   chrome.identity.getAuthToken({ interactive: true }, (token) => {

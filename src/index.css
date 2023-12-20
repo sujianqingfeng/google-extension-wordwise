@@ -4,4 +4,8 @@
 
 
 
-
+@layer base {
+  .bg-base {
+    @apply bg-white dark:bg-slate-900
+  }
+}

@@ -18,6 +18,7 @@ export default function Side(props: SideProps) {
     })
     console.log('🚀 ~ file: Side.tsx:8 ~ onAuthClick ~ user:', user)
     setUser(user)
+    setIsLogin(true)
   }
 
   useEffect(() => {
@@ -44,7 +45,7 @@ export default function Side(props: SideProps) {
       {isLogin ? (
         <User {...user!} />
       ) : (
-        <div className="flex justify-center items-center">
+        <div className="mt-2 flex justify-center items-center">
           <button
             className="bg-slate-100 rounded-md uppercase p-2 text-md"
             onClick={onAuthClick}

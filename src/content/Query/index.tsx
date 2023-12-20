@@ -11,6 +11,7 @@ export type QueryProps = {
   removeQueryPanel: () => void
   text?: string
   autoFocus?: boolean
+  showSearch?: boolean
 }
 
 export default function Query(props: QueryProps) {
@@ -19,7 +20,8 @@ export default function Query(props: QueryProps) {
     left,
     removeQueryPanel,
     text: defaultText = '',
-    autoFocus = false
+    autoFocus = false,
+    showSearch = false
   } = props
 
   const [text, setText] = useState(defaultText)
@@ -52,13 +54,15 @@ export default function Query(props: QueryProps) {
       style={queryStyle}
       className="fixed flex justify-center items-start text-black"
     >
-      <div className="w-[400px] bg-white p-2 rounded-md shadow">
-        <Search
-          onQuery={onQuery}
-          text={text}
-          onTextChange={setText}
-          autoFocus={autoFocus}
-        />
+      <div className="w-[400px] bg-base p-2 rounded-md shadow">
+        {showSearch && (
+          <Search
+            onQuery={onQuery}
+            text={text}
+            onTextChange={setText}
+            autoFocus={autoFocus}
+          />
+        )}
 
         {isTextFlag ? (
           <TranslateText text={text} />

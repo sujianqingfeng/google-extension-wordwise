@@ -68,7 +68,7 @@ export default function TranslateWord(props: TranslateWordProps) {
 
   return (
     <div>
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center dark:text-gray-300">
         <div className="text-[20px] font-bold">{result?.word}</div>
         <Collect
           onCollect={onCollect}
@@ -90,7 +90,7 @@ export default function TranslateWord(props: TranslateWordProps) {
       <div className="flex gap-2 mt-2 flex-wrap">
         {result.forms?.map((f, i) => <WordForm key={i} {...f} />)}
       </div>
-      <div className="flex flex-col gap-1 mt-2">
+      <div className="flex flex-col gap-1 mt-2 dark:text-gray-400">
         {result.translations?.map((trs, i) => <Translate key={i} {...trs} />)}
       </div>
     </div>
