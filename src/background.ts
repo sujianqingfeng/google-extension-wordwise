@@ -1,6 +1,8 @@
 import type { IWordRespItem, LoginResp } from './api/types'
+import { createBirpc } from 'birpc'
 import { fetchAllWordsApi, fetchLoginApi, fetchUserInfoApi } from './api'
 import { BACKGROUND_MESSAGE_TYPE, CONTENT_MESSAGE_TYPE } from './constants'
+import { BackgroundFunctions, ContentFunctions } from './types'
 import { tokenStorage, userStorage } from './utils/storage'
 
 type SetResponse = (response: any) => void
@@ -35,6 +37,10 @@ async function fetchAllWords() {
 
 function getToken(setResponse?: SetResponse) {
   const callback = async (googleToken: string) => {
+    console.log(
+      '🚀 ~ file: background.ts:38 ~ callback ~ googleToken:',
+      googleToken
+    )
     const [isOk, data] = await fetchLoginApi({
       token: googleToken,
       provider: 'google'
@@ -52,6 +58,10 @@ function getToken(setResponse?: SetResponse) {
   }
 
   chrome.identity.getAuthToken({ interactive: true }, (token) => {
+    console.log(
+      '🚀 ~ file: background.ts:59 ~ chrome.identity.getAuthToken ~ token:',
+      token
+    )
     if (token) {
       callback(token)
     }
@@ -72,6 +82,28 @@ function operateWord({ isAdd, word }: { isAdd: boolean; word: string }) {
 chrome.action.onClicked.addListener((tab) => {
   if (tab.id) {
     chrome.tabs.sendMessage(tab.id, { type: CONTENT_MESSAGE_TYPE.SHOW_SIDEBAR })
+  }
+})
+
+const backgroundFunctions: BackgroundFunctions = {
+  getToken() {
+    console.log('---getToken')
+    return 'fff'
+  }
+}
+
+createBirpc<ContentFunctions, BackgroundFunctions>(backgroundFunctions, {
+  post: (data, tab) => {
+    console.log('🚀 ~ file: background.ts:97 ~ tab:', tab)
+    console.log('🚀 ~ file: background.ts:97 ~ data:', data)
+    if (tab.id) {
+      chrome.tabs.sendMessage(tab.id, data)
+    }
+  },
+  on: (data) => {
+    chrome.runtime.onMessage.addListener((msg, sender) => {
+      data(msg, sender.tab)
+    })
   }
 })
 
