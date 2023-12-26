@@ -53,7 +53,9 @@ const combine = (keys: Record<string, boolean>) => {
       showQueryPanel({
         top: 100,
         left: document.body.clientWidth / 2 - QUERY_PANEL_WIDTH / 2,
-        autoFocus: true
+        autoFocus: true,
+        showSearch: true,
+        text: ''
       })
     }
   }
@@ -88,13 +90,11 @@ const onSelectionChange = () => {
   currenQueryWordEl = parentElement
 
   const rect = range.getBoundingClientRect()
-  const { x, y, width, height } = rect
 
   queryRender.removeFromBody()
   showQueryPanel({
-    top: y + height,
-    left: x + width / 2 - QUERY_PANEL_WIDTH / 2,
-    text: selectionText
+    text: selectionText,
+    triggerRect: rect
   })
 }
 
@@ -134,15 +134,13 @@ document.addEventListener(CUSTOM_EVENT_TYPE.RANGE_WORDS, (e: any) => {
   }
 })
 
+// listen mask click event
 document.addEventListener(CUSTOM_EVENT_TYPE.MASK_CLICK_EVENT, (e: any) => {
   const { word, rect } = e.detail as MaskClickEventDetail
-  const { x, y, width, height } = rect
-
   queryRender.removeFromBody()
   showQueryPanel({
-    top: y + height,
-    left: x + width / 2 - QUERY_PANEL_WIDTH / 2,
-    text: word
+    text: word,
+    triggerRect: rect
   })
 })
 

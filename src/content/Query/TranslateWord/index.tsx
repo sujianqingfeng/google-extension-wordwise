@@ -21,12 +21,14 @@ import { createContentRpc } from '../../rpc'
 const rpc = createContentRpc()
 
 type TranslateWordProps = {
+  autoFetch?: boolean
   word: string
 }
 export default function TranslateWord(props: TranslateWordProps) {
-  const { word } = props
+  const { word, autoFetch = true } = props
 
   const { result, loading } = useFetch<IDictQueryResultResp, IQueryWordParams>({
+    autoFetch,
     apiFn: fetchQueryWordApi,
     defaultQuery: { word },
     defaultValue: {}

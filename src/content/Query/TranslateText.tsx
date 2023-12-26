@@ -1,5 +1,5 @@
-import Loading from './Loading'
 import { fetchTranslateApi } from '../../api'
+import Loading from '../../components/Loading'
 import { useFetch } from '../../hooks/use-fetch'
 
 type TranslateTextProps = {

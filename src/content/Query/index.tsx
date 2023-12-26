@@ -1,8 +1,10 @@
-import { CSSProperties, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import Search from './Search'
 import TranslateText from './TranslateText'
 import TranslateWord from './TranslateWord'
+import { useClientRect } from '../../hooks/use-client-rect'
 import { useOutsideClick } from '../../hooks/use-element'
+import { usePlacement } from '../../hooks/use-placement'
 import { isText } from '../../utils/text'
 
 export type QueryProps = {
@@ -12,6 +14,7 @@ export type QueryProps = {
   text?: string
   autoFocus?: boolean
   showSearch?: boolean
+  triggerRect?: DOMRect
 }
 
 export default function Query(props: QueryProps) {
@@ -21,12 +24,14 @@ export default function Query(props: QueryProps) {
     removeQueryPanel,
     text: defaultText = '',
     autoFocus = false,
-    showSearch = false
+    showSearch = false,
+    triggerRect = null
   } = props
 
   const [text, setText] = useState(defaultText)
   const [isTextFlag, setIsTextFlag] = useState(isText(defaultText))
   const queryRef = useRef<HTMLDivElement>(null)
+  const [queryRect] = useClientRect(queryRef)
 
   const onQuery = (text: string) => {
     setIsTextFlag(isText(text))
@@ -40,21 +45,15 @@ export default function Query(props: QueryProps) {
     }
   })
 
-  const queryStyle: CSSProperties = {}
-  if (top) {
-    queryStyle.top = top
-  }
-  if (left) {
-    queryStyle.left = left
-  }
+  const position = usePlacement({ triggerRect, contentRect: queryRect })
 
   return (
     <div
       ref={queryRef}
-      style={queryStyle}
+      style={{ top: top ?? position.top, left: left ?? position.left }}
       className="fixed flex justify-center items-start text-black"
     >
-      <div className="w-[400px] bg-base p-2 rounded-md shadow">
+      <div className="w-[350px] bg-base p-2 rounded-md shadow">
         {showSearch && (
           <Search
             onQuery={onQuery}
@@ -64,10 +63,9 @@ export default function Query(props: QueryProps) {
           />
         )}
 
-        {isTextFlag ? (
-          <TranslateText text={text} />
-        ) : (
-          <TranslateWord word={text} />
+        {text && isTextFlag && <TranslateText text={text} />}
+        {text && !isTextFlag && (
+          <TranslateWord autoFetch={!showSearch} word={text} />
         )}
       </div>
     </div>
