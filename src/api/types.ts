@@ -10,6 +10,8 @@ export type LoginResp = {
   avatar: string
 }
 
+export type IUser = Omit<LoginResp, 'token'>
+
 export type ICreateWordDto = {
   word: string
 }
@@ -39,8 +41,8 @@ export type IDictionaryQueryForm = {
 }
 
 export type IDictionaryQueryTranslate = {
-  trans: string
-  position: string
+  translation: string
+  partName: string
 }
 
 export type IDictionaryQueryResult = {
@@ -53,7 +55,7 @@ export type IDictionaryQueryResult = {
   translations: IDictionaryQueryTranslate[]
 }
 
-export type IDictQueryResultResp = IDictionaryQueryResult & {}
+export type IDictQueryResultResp = IDictionaryQueryResult
 
 // translation
 export type TranslateParams = {

@@ -1,10 +1,10 @@
-import Volume from '../../../assets/volume.svg?react'
+import { TbVolume } from 'react-icons/tb'
+
 type PhoneticProps = {
   label: string
   phonetic?: string
   speech?: string
 }
-
 export default function Phonetic(props: PhoneticProps) {
   const { phonetic, label, speech } = props
 
@@ -30,7 +30,7 @@ export default function Phonetic(props: PhoneticProps) {
         }`}
       >
         {phonetic}
-        {speech && <Volume height={12} width={12} />}
+        {speech && <TbVolume size={12} />}
       </div>
     </div>
   )

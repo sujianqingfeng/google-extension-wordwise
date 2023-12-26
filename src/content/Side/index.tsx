@@ -1,11 +1,18 @@
+import type { IUser } from '../../api/types'
+import type { BackgroundFunctions } from '../../types'
 import { createBirpc } from 'birpc'
 import { useEffect, useState } from 'react'
 import AuthButton from './AuthButton'
 import SideHeader from './SideHeader'
 import User from './User'
-import { LoginResp } from '../../api/types'
-import { BACKGROUND_MESSAGE_TYPE } from '../../constants'
-import { BackgroundFunctions } from '../../types'
+
+const rpc = createBirpc<BackgroundFunctions>(
+  {},
+  {
+    on: (data) => chrome.runtime.onMessage.addListener(data),
+    post: (data) => chrome.runtime.sendMessage(data)
+  }
+)
 
 type SideProps = {
   removeSide: () => void
@@ -13,46 +20,28 @@ type SideProps = {
 
 export default function Side(props: SideProps) {
   const [isLogin, setIsLogin] = useState(false)
-  const [user, setUser] = useState<LoginResp>()
+  const [user, setUser] = useState<IUser>()
   const [loading, setLoading] = useState(false)
 
   const onAuthClick = async () => {
-    console.log(
-      '🚀 ~ file: index.tsx:43 ~ onAuthClick ~ onAuthClick:',
-      onAuthClick
-    )
-    const rpc = createBirpc<BackgroundFunctions>(
-      {},
-      {
-        on: (data) => chrome.runtime.onMessage.addListener(data),
-        post: (data) => chrome.runtime.sendMessage(data)
-      }
-    )
-    const a = await rpc.getToken()
-    console.log('🚀 ~ file: index.tsx:32 ~ onAuthClick ~ a:', a)
-
-    // setLoading(true)
-    // const user = await chrome.runtime.sendMessage({
-    //   type: BACKGROUND_MESSAGE_TYPE.GET_TOKEN
-    // })
-    // console.log('🚀 ~ file: Side.tsx:8 ~ onAuthClick ~ user:', user)
-    // setLoading(false)
-    // setUser(user)
-    // setIsLogin(true)
+    setLoading(true)
+    const [isOk, user] = await rpc.getAuthUser()
+    if (!isOk) {
+      return
+    }
+    setLoading(false)
+    setUser(user)
+    setIsLogin(true)
   }
 
   useEffect(() => {
     const getInfo = async () => {
-      const isLogin = await chrome.runtime.sendMessage({
-        type: BACKGROUND_MESSAGE_TYPE.GET_IS_LOGIN
-      })
-      // setIsLogin(isLogin)
+      const isLogin = await rpc.getIsLogin()
+      setIsLogin(isLogin)
       if (isLogin) {
-        const user = await chrome.runtime.sendMessage({
-          type: BACKGROUND_MESSAGE_TYPE.GET_USER
-        })
-        console.log('user🚀 ~ file: Side.tsx:8 ~ onAuthClick ~ user:', user)
+        const user = await rpc.getUser()
         setUser(user)
+        console.log('🚀 ~ file: index.tsx:45 ~ getInfo ~ user:', user)
       }
     }
     getInfo()

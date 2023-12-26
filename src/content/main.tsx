@@ -1,8 +1,8 @@
-import type { IWordRespItem } from '../api/types'
 import { keyboard, windowSelectionChange } from './events'
 import Query, { QueryProps } from './Query'
 import { maskWordsInElement, rangeWords } from './range'
 import { createRootRender } from './root'
+import { createContentRpc } from './rpc'
 import Side from './Side'
 import '../index.css'
 import {
@@ -10,7 +10,6 @@ import {
   QUERY_ROOT_ID,
   QUERY_PANEL_WIDTH,
   SIDE_ROOT_ID,
-  BACKGROUND_MESSAGE_TYPE,
   CUSTOM_EVENT_TYPE
 } from '../constants'
 import { MaskClickEventDetail } from '../types'
@@ -107,7 +106,7 @@ const appendCss = async () => {
   document.body.appendChild(style)
 }
 
-const start = async () => {
+async function start() {
   windowSelectionChange({
     onSelectionChange
   })
@@ -117,9 +116,7 @@ const start = async () => {
     combine
   })
 
-  const words: IWordRespItem[] = await chrome.runtime.sendMessage({
-    type: BACKGROUND_MESSAGE_TYPE.GET_WORDS
-  })
+  const words = await rpc.getWords()
 
   if (words.length) {
     appendCss()
@@ -129,14 +126,6 @@ const start = async () => {
     })
   }
 }
-
-chrome.runtime.onMessage.addListener((message) => {
-  switch (message.type) {
-    case CONTENT_MESSAGE_TYPE.SHOW_SIDEBAR:
-      showSidebar()
-      break
-  }
-})
 
 document.addEventListener(CUSTOM_EVENT_TYPE.RANGE_WORDS, (e: any) => {
   const words = e.detail as string[]
@@ -157,13 +146,22 @@ document.addEventListener(CUSTOM_EVENT_TYPE.MASK_CLICK_EVENT, (e: any) => {
   })
 })
 
-chrome.runtime
-  .sendMessage({ type: BACKGROUND_MESSAGE_TYPE.GET_IS_LOGIN })
-  .then((isLogin) => {
-    console.log('🚀 ~ file: main.tsx:104 ~ .then ~ isLogin:', isLogin)
-    if (isLogin) {
-      start()
-    }
-  })
+// listen background message
+chrome.runtime.onMessage.addListener((message) => {
+  switch (message.type) {
+    case CONTENT_MESSAGE_TYPE.SHOW_SIDEBAR:
+      showSidebar()
+      break
+  }
+})
 
-console.log('----end----')
+const rpc = createContentRpc()
+
+async function main() {
+  const isLogin = await rpc.getIsLogin()
+  if (isLogin) {
+    start()
+  }
+}
+
+main()

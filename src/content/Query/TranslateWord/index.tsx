@@ -13,9 +13,12 @@ import {
   fetchQueryWordApi,
   fetchWordIsCollectedApi
 } from '../../../api'
-import { BACKGROUND_MESSAGE_TYPE, CUSTOM_EVENT_TYPE } from '../../../constants'
+import Loading from '../../../components/Loading'
+import { CUSTOM_EVENT_TYPE } from '../../../constants'
 import { useFetch } from '../../../hooks/use-fetch'
-import Loading from '../Loading'
+import { createContentRpc } from '../../rpc'
+
+const rpc = createContentRpc()
 
 type TranslateWordProps = {
   word: string
@@ -52,18 +55,12 @@ export default function TranslateWord(props: TranslateWordProps) {
         new CustomEvent(CUSTOM_EVENT_TYPE.RANGE_WORDS, { detail: [word] })
       )
     }
-    chrome.runtime.sendMessage({
-      type: BACKGROUND_MESSAGE_TYPE.OPERATE_WORD,
-      payload: {
-        word,
-        isAdd: next
-      }
-    })
+    next ? rpc.addWord(word) : rpc.removeWord(word)
     fetchWordIsCollected()
   }
 
   if (loading) {
-    return <Loading />
+    return <Loading size={30} />
   }
 
   return (

@@ -1,3 +1,5 @@
+import type { IUser, IWordRespItem } from './api/types'
+
 export type MaskClickEventDetail = {
   word: string
   rect: DOMRect
@@ -9,7 +11,12 @@ export type WrapperElementOptions = {
 }
 
 export type BackgroundFunctions = {
-  getToken(): string
+  getAuthUser: () => Promise<[false, any] | [true, IUser]>
+  getIsLogin: () => Promise<boolean>
+  getUser: () => IUser
+  getWords: () => IWordRespItem[]
+  addWord: (word: string) => void
+  removeWord: (word: string) => void
 }
 
 export type ContentFunctions = {}
