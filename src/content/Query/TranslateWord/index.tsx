@@ -62,7 +62,11 @@ export default function TranslateWord(props: TranslateWordProps) {
   }
 
   if (loading) {
-    return <Loading size={30} />
+    return (
+      <div className="flex justify-center items-center h-10">
+        <Loading />
+      </div>
+    )
   }
 
   return (
