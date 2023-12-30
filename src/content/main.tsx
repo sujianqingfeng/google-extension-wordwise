@@ -1,10 +1,15 @@
 import { keyboard, windowSelectionChange } from './events'
 import Query, { QueryProps } from './Query'
 import { maskWordsInElement, rangeWords } from './range'
-import { createRootRender } from './root'
+import {
+  appendChildToBody,
+  createRootRender,
+  createTypographyHoverElement
+} from './root'
 import { createContentRpc } from './rpc'
 import Side from './Side'
 import '../index.css'
+import { typography } from './typography'
 import {
   CONTENT_MESSAGE_TYPE,
   QUERY_ROOT_ID,
@@ -119,7 +124,6 @@ async function start() {
   const words = await rpc.getWords()
 
   if (words.length) {
-    appendCss()
     const stringWords = words.map((item) => item.word)
     requestIdleCallback(() => {
       rangeWords(stringWords)
@@ -144,6 +148,27 @@ document.addEventListener(CUSTOM_EVENT_TYPE.MASK_CLICK_EVENT, (e: any) => {
   })
 })
 
+let typographyHoverEl: HTMLSpanElement | null = null
+document.addEventListener(CUSTOM_EVENT_TYPE.TYPOGRAPHY_HOVER, (e: any) => {
+  const { target } = e.detail as { target: Element }
+  console.log(
+    '🚀 ~ file: main.tsx:151 ~ document.addEventListener ~ target:',
+    target
+  )
+  if (typographyHoverEl === null) {
+    typographyHoverEl = createTypographyHoverElement()
+  }
+  target.appendChild(typographyHoverEl)
+  // const { top, left, width, height } = target.getBoundingClientRect()
+  // typographyHoverEl.style.top = `${top + height}px`
+  // typographyHoverEl.style.left = `${left + width}px`
+  target.addEventListener('mouseout', () => {
+    if (typographyHoverEl && target.contains(typographyHoverEl)) {
+      target.removeChild(typographyHoverEl)
+    }
+  })
+})
+
 // listen background message
 chrome.runtime.onMessage.addListener((message) => {
   switch (message.type) {
@@ -163,3 +188,8 @@ async function main() {
 }
 
 main()
+
+requestIdleCallback(() => {
+  appendCss()
+  typography()
+})

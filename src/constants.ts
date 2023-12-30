@@ -4,7 +4,8 @@ export const CONTENT_MESSAGE_TYPE = {
 
 export const CUSTOM_EVENT_TYPE = {
   RANGE_WORDS: 'range_words',
-  MASK_CLICK_EVENT: 'mask_click_event'
+  MASK_CLICK_EVENT: 'mask_click_event',
+  TYPOGRAPHY_HOVER: 'typography_hover'
 }
 
 export const ENABLE_TAG_ELEMENTS = ['div', 'section']

@@ -53,3 +53,10 @@ export const createRootRender = (id: string) => {
     removeFromBody
   }
 }
+
+export function createTypographyHoverElement() {
+  const el = document.createElement('span')
+  el.className = 'word-wise-typography-hover'
+  el.appendChild(document.createTextNode('W'))
+  return el
+}

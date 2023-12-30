@@ -1,4 +1,18 @@
 .word-wise-mask{
   border-bottom: 2px dashed #de7897;
   cursor: pointer;
+
+}
+
+
+.word-wise-typography-hover{
+  font-size: 16px;
+  border-radius: 4px;
+  background-color: #fff;
+  padding: 2px;
+  color: #de7897;
+  margin-left: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  border: 1px solid gray;
 }
