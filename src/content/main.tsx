@@ -4,7 +4,8 @@ import { maskWordsInElement, rangeWords } from './range'
 import {
   appendChildToBody,
   createRootRender,
-  createTypographyHoverElement
+  createTypographyHoverElement,
+  removeChildFromBody
 } from './root'
 import { createContentRpc } from './rpc'
 import Side from './Side'
@@ -18,6 +19,7 @@ import {
   CUSTOM_EVENT_TYPE
 } from '../constants'
 import { MaskClickEventDetail } from '../types'
+import { debounce } from '../utils'
 import { isEnglishText } from '../utils/text'
 
 let currenQueryWordEl: HTMLElement | null = null
@@ -148,25 +150,49 @@ document.addEventListener(CUSTOM_EVENT_TYPE.MASK_CLICK_EVENT, (e: any) => {
   })
 })
 
-let typographyHoverEl: HTMLSpanElement | null = null
-document.addEventListener(CUSTOM_EVENT_TYPE.TYPOGRAPHY_HOVER, (e: any) => {
-  const { target } = e.detail as { target: Element }
+// typography hover
+let typographyHoverEl: HTMLDivElement | null = null
+let typographyTarget: HTMLElement | null = null
+function typographyElClick() {
   console.log(
-    '🚀 ~ file: main.tsx:151 ~ document.addEventListener ~ target:',
-    target
+    '🚀 ~ file: main.tsx:167 ~ typographyHoverEl.addEventListener ~ click:',
+    typographyTarget
   )
+  if (!typographyTarget) {
+    return
+  }
+
+  const translationEl = document.createElement('div')
+  translationEl.innerHTML = `<div>ffffffff</div>`
+  typographyTarget.appendChild(translationEl)
+}
+document.addEventListener(CUSTOM_EVENT_TYPE.TYPOGRAPHY_HOVER, (e: any) => {
+  console.log('🚀 ~ file: main.tsx:195 ~ document.addEventListener ~ e:', e)
+
+  const { target } = e.detail as { target: HTMLElement }
   if (typographyHoverEl === null) {
     typographyHoverEl = createTypographyHoverElement()
   }
-  target.appendChild(typographyHoverEl)
-  // const { top, left, width, height } = target.getBoundingClientRect()
-  // typographyHoverEl.style.top = `${top + height}px`
-  // typographyHoverEl.style.left = `${left + width}px`
-  target.addEventListener('mouseout', () => {
-    if (typographyHoverEl && target.contains(typographyHoverEl)) {
-      target.removeChild(typographyHoverEl)
+  typographyHoverEl.style.top = `${
+    target.offsetTop + target.clientHeight - 26
+  }px`
+  typographyHoverEl.style.left = `${target.offsetLeft + target.clientWidth}px`
+
+  typographyTarget = target
+  typographyHoverEl.removeEventListener('click', typographyElClick)
+  typographyHoverEl.addEventListener('click', typographyElClick)
+
+  appendChildToBody(typographyHoverEl)
+  const mouseoutCallback = () => {
+    if (typographyHoverEl) {
+      removeChildFromBody(typographyHoverEl)
     }
-  })
+  }
+  const debounceMouseout = debounce(mouseoutCallback, 500)
+  target.addEventListener('mouseout', debounceMouseout)
+  typographyHoverEl.addEventListener('mouseout', debounceMouseout)
+  typographyHoverEl.addEventListener('mouseover', debounceMouseout.cancel)
+  target.addEventListener('mouseover', debounceMouseout.cancel)
 })
 
 // listen background message

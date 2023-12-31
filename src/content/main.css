@@ -6,13 +6,18 @@
 
 
 .word-wise-typography-hover{
-  font-size: 16px;
+  font-size: 12px;
   border-radius: 4px;
   background-color: #fff;
-  padding: 2px;
   color: #de7897;
   margin-left: 4px;
   cursor: pointer;
   font-weight: bold;
   border: 1px solid gray;
+  position: absolute;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 26px;
+  height: 26px;
 }
