@@ -173,10 +173,17 @@ document.addEventListener(CUSTOM_EVENT_TYPE.TYPOGRAPHY_HOVER, (e: any) => {
   if (typographyHoverEl === null) {
     typographyHoverEl = createTypographyHoverElement()
   }
-  typographyHoverEl.style.top = `${
-    target.offsetTop + target.clientHeight - 26
-  }px`
-  typographyHoverEl.style.left = `${target.offsetLeft + target.clientWidth}px`
+  const scrollDistance =
+    window.scrollY ||
+    document.documentElement.scrollTop ||
+    document.body.scrollTop
+
+  const rect = target.getBoundingClientRect()
+  const top = rect.y + target.clientHeight + scrollDistance - 26
+  const left = target.offsetLeft + target.clientWidth
+
+  typographyHoverEl.style.top = `${top}px`
+  typographyHoverEl.style.left = `${left}px`
 
   typographyTarget = target
   typographyHoverEl.removeEventListener('click', typographyElClick)
@@ -185,7 +192,7 @@ document.addEventListener(CUSTOM_EVENT_TYPE.TYPOGRAPHY_HOVER, (e: any) => {
   appendChildToBody(typographyHoverEl)
   const mouseoutCallback = () => {
     if (typographyHoverEl) {
-      removeChildFromBody(typographyHoverEl)
+      // removeChildFromBody(typographyHoverEl)
     }
   }
   const debounceMouseout = debounce(mouseoutCallback, 500)
