@@ -36,6 +36,7 @@ async function getAuthUser(): Promise<[false, any] | [true, IUser]> {
   const { token: googleToken } = await chrome.identity.getAuthToken({
     interactive: true
   })
+
   if (!googleToken) {
     return [false, 'token is null']
   }

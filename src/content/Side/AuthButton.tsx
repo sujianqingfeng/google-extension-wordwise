@@ -15,7 +15,7 @@ export default function AuthButton(props: AuthButtonProps) {
   }
   return (
     <button
-      className="bg-slate-100 rounded-md p-2 text-md flex align-center justify-center items-center gap-2"
+      className="bg-primary-color rounded-md p-2 text-md flex align-center justify-center items-center gap-2"
       onClick={onClick}
     >
       {loading && <Loading />}

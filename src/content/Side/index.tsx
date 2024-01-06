@@ -48,7 +48,7 @@ export default function Side(props: SideProps) {
   }, [])
 
   return (
-    <div className="fixed right-0 top-0 bottom-0 w-[400px] z-9999 bg-white shadow">
+    <div className="fixed right-0 top-0 bottom-0 w-[400px] z-9999 bg-base shadow">
       <SideHeader onClose={props.removeSide} />
 
       {isLogin ? (
