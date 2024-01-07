@@ -19,7 +19,6 @@ const TEXT_TAGS = [
 const REJECT_TAGS = ['a', 'button', 'pre']
 
 export function typography() {
-  console.log('🚀 ~ file: typography.ts:4 ~ typography ~ typography:')
   const body = document.body
 
   const treeWalker = document.createTreeWalker(
@@ -65,18 +64,36 @@ export function typography() {
   )
 
   while (treeWalker.nextNode()) {
-    // console.log(
-    //   '🚀 ~ file: typography.ts:26 ~ typography ~ currentNode:',
-    //   treeWalker.currentNode
-    // )
-    treeWalker.currentNode.addEventListener('mouseover', (e) => {
-      document.dispatchEvent(
-        new CustomEvent(CUSTOM_EVENT_TYPE.TYPOGRAPHY_HOVER, {
-          detail: {
-            target: e.target
-          }
-        })
-      )
-    })
+    treeWalker.currentNode.addEventListener(
+      'mouseover',
+      currentNodeMouseoverHandler
+    )
   }
+}
+
+function currentNodeMouseoverHandler(e: Event) {
+  if (!e.target) {
+    return
+  }
+  const target = e.target as HTMLElement
+  if (target.dataset.wordWise) {
+    return
+  }
+
+  const isTranslated = target.querySelector('.word-wise-typography-translation')
+  if (isTranslated) {
+    return
+  }
+
+  if (target.classList.contains('word-wise-typography-translation')) {
+    return
+  }
+
+  document.dispatchEvent(
+    new CustomEvent(CUSTOM_EVENT_TYPE.TYPOGRAPHY_HOVER, {
+      detail: {
+        target: e.target
+      }
+    })
+  )
 }

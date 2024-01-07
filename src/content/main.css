@@ -21,3 +21,9 @@
   width: 26px;
   height: 26px;
 }
+
+
+.word-wise-typography-translation {
+  font-size: 0.6em;
+  filter: grayscale(50%);
+}

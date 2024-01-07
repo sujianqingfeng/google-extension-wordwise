@@ -11,6 +11,7 @@ import { createContentRpc } from './rpc'
 import Side from './Side'
 import '../index.css'
 import { typography } from './typography'
+import { fetchTranslateApi } from '../api'
 import {
   CONTENT_MESSAGE_TYPE,
   QUERY_ROOT_ID,
@@ -128,6 +129,8 @@ async function start() {
   if (words.length) {
     const stringWords = words.map((item) => item.word)
     requestIdleCallback(() => {
+      appendCss()
+      typography()
       rangeWords(stringWords)
     })
   }
@@ -153,22 +156,24 @@ document.addEventListener(CUSTOM_EVENT_TYPE.MASK_CLICK_EVENT, (e: any) => {
 // typography hover
 let typographyHoverEl: HTMLDivElement | null = null
 let typographyTarget: HTMLElement | null = null
-function typographyElClick() {
-  console.log(
-    '🚀 ~ file: main.tsx:167 ~ typographyHoverEl.addEventListener ~ click:',
-    typographyTarget
-  )
+async function typographyElClick() {
   if (!typographyTarget) {
     return
   }
 
+  const [isOk, data] = await fetchTranslateApi({
+    text: typographyTarget.innerText
+  })
+
+  if (!isOk) {
+    return
+  }
+  const { result } = data
   const translationEl = document.createElement('div')
-  translationEl.innerHTML = `<div>ffffffff</div>`
+  translationEl.innerHTML = `<div class='word-wise-typography-translation'>${result}</div>`
   typographyTarget.appendChild(translationEl)
 }
 document.addEventListener(CUSTOM_EVENT_TYPE.TYPOGRAPHY_HOVER, (e: any) => {
-  console.log('🚀 ~ file: main.tsx:195 ~ document.addEventListener ~ e:', e)
-
   const { target } = e.detail as { target: HTMLElement }
   if (typographyHoverEl === null) {
     typographyHoverEl = createTypographyHoverElement()
@@ -192,7 +197,7 @@ document.addEventListener(CUSTOM_EVENT_TYPE.TYPOGRAPHY_HOVER, (e: any) => {
   appendChildToBody(typographyHoverEl)
   const mouseoutCallback = () => {
     if (typographyHoverEl) {
-      // removeChildFromBody(typographyHoverEl)
+      removeChildFromBody(typographyHoverEl)
     }
   }
   const debounceMouseout = debounce(mouseoutCallback, 500)
@@ -221,8 +226,3 @@ async function main() {
 }
 
 main()
-
-requestIdleCallback(() => {
-  appendCss()
-  typography()
-})
