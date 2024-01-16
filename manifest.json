@@ -6,7 +6,7 @@
   "content_scripts": [
     {
       "js": ["src/content/main.tsx"],
-      "matches": ["https://react.dev/*"]
+      "matches": ["<all_urls>"]
     }
   ],
   "background": {
@@ -14,7 +14,7 @@
     "type": "module"
   },
   "oauth2": {
-    "client_id": "215567912027-nb0bmr3n86ob94ds49pir1vsi3eidn0m.apps.googleusercontent.com",
+    "client_id": "760731858259-dk73o2d8mcrl4e7hh336af0rlgvccbqk.apps.googleusercontent.com",
     "scopes": [
       "https://www.googleapis.com/auth/userinfo.email",
       "https://www.googleapis.com/auth/userinfo.profile"

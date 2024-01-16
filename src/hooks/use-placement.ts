@@ -3,11 +3,6 @@ interface IUsePlacementProps {
   contentRect: DOMRect | null
 }
 
-interface IPosition {
-  left: number
-  top: number
-}
-
 export function usePlacement({ triggerRect, contentRect }: IUsePlacementProps) {
   const position = {
     left: 0,
