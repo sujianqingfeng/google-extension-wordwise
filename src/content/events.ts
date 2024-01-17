@@ -28,6 +28,10 @@ export function keyboard(options: KeyBoardOptions) {
   document.addEventListener('keydown', (e) => {
     keyPressed[e.key] = true
     combine(keyPressed)
+    setTimeout(() => {
+      // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+      delete keyPressed[e.key]
+    }, 400)
     singe(e.key)
   })
 
