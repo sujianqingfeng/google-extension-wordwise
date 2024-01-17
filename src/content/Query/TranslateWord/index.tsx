@@ -25,7 +25,8 @@ type TranslateWordProps = {
   word: string
 }
 export default function TranslateWord(props: TranslateWordProps) {
-  const { word, autoFetch = true } = props
+  const { word: _word, autoFetch = true } = props
+  const word = _word.toLowerCase()
 
   const { result, loading } = useFetch<IDictQueryResultResp, IQueryWordParams>({
     autoFetch,
