@@ -6,7 +6,6 @@ export function useClientRect(elRef: React.RefObject<HTMLElement | null>) {
   const updateClientRect = useMemo(() => {
     return () => {
       const rect = elRef.current?.getBoundingClientRect() || null
-      console.log('🚀 ~ file: use-client-rect.ts:9 ~ return ~ rect:', rect)
       setClientRect(rect)
     }
   }, [])

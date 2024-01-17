@@ -5,25 +5,19 @@ import {
 } from '../constants'
 import { MaskClickEventDetail, WrapperElementOptions } from '../types'
 
-export function rangeWords(words: string[]) {
-  console.log('🚀 ~ file: range.ts:4 ~ rangeWords ~ rangeWords:', words)
-  const textContent = document.body.textContent
-  if (textContent === null) {
-    return
-  }
-  const filterWords = filterWordsFromText(words, textContent)
-  idleRange(filterWords)
-}
-
 function generateWordsPattern(words: string[]) {
   const wordsPattern = words.join('|')
   return new RegExp(`\\b(${wordsPattern})\\b`, 'gi')
 }
 
 function filterWordsFromText(words: string[], text: string) {
+  const matches: string[] = []
+
+  if (words.length === 0 || !text.trim()) {
+    return matches
+  }
   const re = generateWordsPattern(words)
   let match: RegExpExecArray | null
-  const matches: string[] = []
   while ((match = re.exec(text)) !== null) {
     const word = match[0]
     if (word && !matches.find((item) => item === word)) {
@@ -106,7 +100,7 @@ function isExcludeElement(tagName: string) {
 }
 
 export function maskWordsInElement(ele: Element, words: string[]) {
-  console.log('🚀 ~ file: range.ts:85 ~ maskWordsInElement ~ words:', words)
+  // console.log('🚀 ~ file: range.ts:85 ~ maskWordsInElement ~ words:', words)
   const treeWalker = document.createTreeWalker(
     ele,
     NodeFilter.SHOW_TEXT,
@@ -138,10 +132,6 @@ export function maskWordsInElement(ele: Element, words: string[]) {
   )
 
   const currentNode = treeWalker.nextNode()
-  console.log(
-    '🚀 ~ file: range.ts:137 ~ maskWordsInElement ~ currentNode:',
-    currentNode
-  )
   if (!currentNode) {
     return
   }
@@ -195,7 +185,7 @@ function maskWordClickEvent(e: MouseEvent) {
   )
 }
 
-function idleRange(filterWords: string[]) {
+function range(filterWords: string[]) {
   const body = document.querySelector('body')
   if (!body) {
     return
@@ -237,4 +227,17 @@ function idleRange(filterWords: string[]) {
       intersectionObserver.observe(ele)
     }
   })
+}
+
+export function rangeWords(words: string[]) {
+  console.log('🚀 ~ file: range.ts:4 ~ rangeWords ~ rangeWords:', words)
+  const textContent = document.body.textContent
+  if (textContent === null) {
+    return
+  }
+  const filterWords = filterWordsFromText(words, textContent)
+  if (filterWords.length === 0) {
+    return
+  }
+  range(filterWords)
 }

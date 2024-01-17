@@ -88,10 +88,7 @@ const onSelectionChange = () => {
 
   // no operation when the selection is in the query panel
   const parentElement = range.commonAncestorContainer.parentElement
-  console.log(
-    '🚀 ~ file: main.tsx:78 ~ onSelectionChange ~ parentElement:',
-    parentElement
-  )
+
   if (queryRender.el.contains(parentElement)) {
     return
   }
@@ -124,13 +121,17 @@ async function start() {
     combine
   })
 
+  appendCss()
+
+  requestIdleCallback(() => {
+    typography()
+  })
+
   const words = await rpc.getWords()
 
   if (words.length) {
     const stringWords = words.map((item) => item.word)
     requestIdleCallback(() => {
-      appendCss()
-      typography()
       rangeWords(stringWords)
     })
   }
