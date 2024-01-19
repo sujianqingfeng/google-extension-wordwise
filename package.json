@@ -8,6 +8,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
+    "pack": "web-ext build --source-dir dist",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "test": "vitest"
@@ -34,6 +35,7 @@
     "typescript": "^5.0.2",
     "vite": "^4.4.5",
     "vite-plugin-svgr": "^4.1.0",
-    "vitest": "^0.34.6"
+    "vitest": "^0.34.6",
+    "web-ext": "^7.10.0"
   }
 }
