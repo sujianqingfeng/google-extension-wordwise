@@ -3,7 +3,7 @@ name: Publish
 on:
   push:
     tags:
-      - 'v*.*.*'
+      - '*.*.*'
 
 jobs:
   build:
@@ -38,10 +38,12 @@ jobs:
       - run: pnpm run build
       - run: pnpm run pack
 
-      - uses: martinbeentjes/npm-get-version-action@v1.3.1
+      - name: Get the version
+        id: get_version
+        run: echo ::set-output name=VERSION::$(git describe --tags)
 
       - uses: softprops/action-gh-release@v1
         with:
           prerelease: false
           token: ${{ secrets.GITHUB_TOKEN }}
-          files: web-ext-artifacts/word-wise-${{ steps.package-version.outputs.current-version}}.zip
+          files: web-ext-artifacts/word-wise-${{ steps.get_version.outputs.VERSION }}.zip
