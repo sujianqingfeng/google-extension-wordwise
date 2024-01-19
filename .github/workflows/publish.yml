@@ -45,5 +45,5 @@ jobs:
       - uses: softprops/action-gh-release@v1
         with:
           prerelease: false
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.TOKEN }}
           files: web-ext-artifacts/wordwise-${{ steps.get_version.outputs.VERSION }}.zip
