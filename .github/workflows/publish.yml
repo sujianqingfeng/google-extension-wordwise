@@ -18,9 +18,8 @@ jobs:
       - run: pnpm run build
       - run: pnpm run pack
 
-      - name: get-npm-version
-        id: package-version
-        uses: martinbeentjes/npm-get-version-action@v1.3.1
+      - name: Get package version
+      - uses: martinbeentjes/npm-get-version-action@v1.3.1
 
       - name: Release
       - uses: marvinpinto/action-automatic-releases@latest
