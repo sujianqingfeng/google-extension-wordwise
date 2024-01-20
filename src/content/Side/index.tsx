@@ -1,10 +1,11 @@
-import type { IUser } from '../../api/types'
+import type { IAuthProvidersRespItem, IUser } from '../../api/types'
 import type { BackgroundFunctions } from '../../types'
 import { createBirpc } from 'birpc'
 import { useEffect, useState } from 'react'
 import AuthButton from './AuthButton'
 import SideHeader from './SideHeader'
 import User from './User'
+import { fetchAuthProvidersApi } from '../../api'
 
 const rpc = createBirpc<BackgroundFunctions>(
   {},
@@ -22,10 +23,13 @@ export default function Side(props: SideProps) {
   const [isLogin, setIsLogin] = useState(false)
   const [user, setUser] = useState<IUser>()
   const [loading, setLoading] = useState(false)
+  const [authProvides, setAuthProviders] = useState<IAuthProvidersRespItem[]>(
+    []
+  )
 
-  const onAuthClick = async () => {
+  const onAuthClick = async (item: IAuthProvidersRespItem) => {
     setLoading(true)
-    const [isOk, user] = await rpc.getAuthUser()
+    const [isOk, user] = await rpc.getAuthUser(item.authUrl)
     if (!isOk) {
       return
     }
@@ -41,8 +45,14 @@ export default function Side(props: SideProps) {
       if (isLogin) {
         const user = await rpc.getUser()
         setUser(user)
-        console.log('🚀 ~ file: index.tsx:45 ~ getInfo ~ user:', user)
+        return
       }
+
+      const [isOk, data] = await fetchAuthProvidersApi()
+      if (!isOk) {
+        return
+      }
+      setAuthProviders(data)
     }
     getInfo()
   }, [])
@@ -55,7 +65,13 @@ export default function Side(props: SideProps) {
         <User {...user!} />
       ) : (
         <div className="mt-2 flex justify-center items-center">
-          <AuthButton loading={loading} onAuthClick={onAuthClick} />
+          {authProvides.map((item) => (
+            <AuthButton
+              key={item.provider}
+              loading={loading}
+              onAuthClick={() => onAuthClick(item)}
+            />
+          ))}
         </div>
       )}
     </div>

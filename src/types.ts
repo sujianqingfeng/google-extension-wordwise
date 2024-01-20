@@ -11,7 +11,7 @@ export type WrapperElementOptions = {
 }
 
 export type BackgroundFunctions = {
-  getAuthUser: () => Promise<[false, any] | [true, IUser]>
+  getAuthUser: (authUrl: string) => Promise<[false, any] | [true, IUser]>
   getIsLogin: () => Promise<boolean>
   getUser: () => IUser
   getWords: () => IWordRespItem[]

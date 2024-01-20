@@ -1,4 +1,5 @@
 import type {
+  IAuthProvidersRespItem,
   ICreateWordDto,
   IDictQueryResultResp,
   IQueryWordCollectedParams,
@@ -17,7 +18,11 @@ import {
 } from '../utils/request'
 
 export const fetchLoginApi = (data: LoginReq) => {
-  return fetchJsonByPost<LoginResp>('/auth/token', data)
+  return fetchJsonByPost<LoginResp>('/auth', data)
+}
+
+export const fetchAuthProvidersApi = () => {
+  return fetchJsonByGet<IAuthProvidersRespItem[]>('/auth/providers')
 }
 
 // dictionary

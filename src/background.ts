@@ -32,18 +32,32 @@ async function fetchAllWords() {
   words = allWords
 }
 
-async function getAuthUser(): Promise<[false, any] | [true, IUser]> {
-  const { token: googleToken } = await chrome.identity.getAuthToken({
+async function getAuthUser(
+  authUrl: string
+): Promise<[false, any] | [true, IUser]> {
+  const redirectUrl: string | undefined = chrome.identity.getRedirectURL()
+
+  authUrl = authUrl.replace(/redirect_uri=.+?&/, `redirect_uri=${redirectUrl}&`)
+
+  const callbackUrl = await chrome.identity.launchWebAuthFlow({
+    url: authUrl,
     interactive: true
   })
 
-  if (!googleToken) {
-    return [false, 'token is null']
+  if (!callbackUrl) {
+    return [false, 'callbackUrl is null']
+  }
+
+  const callbackUrlParams = new URL(callbackUrl)
+  const code = callbackUrlParams.searchParams.get('code')
+  if (!code) {
+    return [false, 'code is null']
   }
 
   const [isOk, data] = await fetchLoginApi({
-    token: googleToken,
-    provider: 'google'
+    code,
+    provider: 'google',
+    redirectUrl
   })
 
   if (!isOk) {
@@ -51,7 +65,6 @@ async function getAuthUser(): Promise<[false, any] | [true, IUser]> {
   }
 
   const { token, ...rest } = data
-  console.log('🚀 ~ file: background.ts:47 ~ callback ~ user:', rest)
   tokenStorage.setToken(token)
   userStorage.setUser(rest)
   isLogin = true
@@ -85,8 +98,9 @@ const backgroundFunctions: BackgroundFunctions = {
 
 createBirpc<ContentFunctions, BackgroundFunctions>(backgroundFunctions, {
   post: (data, tab) => {
-    if (!tab.id) {
-      throw new Error('tab id is null')
+    if (!tab || !tab.id) {
+      // throw new Error('tab id is null')
+      return
     }
     chrome.tabs.sendMessage(tab.id, data)
   },

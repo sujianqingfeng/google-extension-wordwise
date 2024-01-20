@@ -1,6 +1,12 @@
-export type LoginReq = {
-  token: string
+export type IAuthProvidersRespItem = {
+  authUrl: string
   provider: string
+}
+
+export type LoginReq = {
+  code: string
+  provider: string
+  redirectUrl: string
 }
 
 export type LoginResp = {
