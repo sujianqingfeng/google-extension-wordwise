@@ -1,4 +1,5 @@
 import { TbVolume } from 'react-icons/tb'
+import { BASE_URL } from '../../../utils/request'
 
 type PhoneticProps = {
   label: string
@@ -16,7 +17,11 @@ export default function Phonetic(props: PhoneticProps) {
     if (!speech) {
       return
     }
-    const audio = new Audio(speech)
+    const newSpeech = speech.replace(
+      'https://dict.youdao.com',
+      `${BASE_URL}/yd`
+    )
+    const audio = new Audio(newSpeech)
     audio.play()
   }
 

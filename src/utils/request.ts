@@ -1,6 +1,6 @@
 import { tokenStorage } from './storage'
 
-const baseUrl = import.meta.env.VITE_BASE_API_URL
+export const BASE_URL = import.meta.env.VITE_BASE_API_URL
 
 export async function fetchJson<T>(
   url: string,
@@ -17,7 +17,7 @@ export async function fetchJson<T>(
       h.authorization = `Bearer ${token}`
     }
 
-    const res = await fetch(`${baseUrl}${url}`, { ...opt, headers })
+    const res = await fetch(`${BASE_URL}${url}`, { ...opt, headers })
     if (!res.ok) {
       return [false, new Error('Failed to fetch data')]
     }
