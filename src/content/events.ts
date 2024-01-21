@@ -1,20 +1,25 @@
-type SelectionChangeOptions = {
-  onSelectionChange: () => void
-}
-export function windowSelectionChange(options: SelectionChangeOptions) {
-  const { onSelectionChange } = options
-
+export function createWindowSelection() {
   let isSelecting = false
-  document.addEventListener('selectstart', () => {
-    isSelecting = true
-  })
 
-  document.addEventListener('mouseup', () => {
-    if (isSelecting) {
-      isSelecting = false
-      onSelectionChange()
+  const onSelectionChange = (callback: () => void) => {
+    document.addEventListener('selectstart', () => {
+      isSelecting = true
+    })
+
+    document.addEventListener('mouseup', () => {
+      if (isSelecting) {
+        callback()
+        isSelecting = false
+      }
+    })
+  }
+
+  return {
+    onSelectionChange,
+    get isSelecting() {
+      return isSelecting
     }
-  })
+  }
 }
 
 type KeyBoardOptions = {
@@ -26,6 +31,7 @@ export function keyboard(options: KeyBoardOptions) {
   const keyPressed: Record<string, boolean> = {}
 
   document.addEventListener('keydown', (e) => {
+    console.log('🚀 ~ document.addEventListener ~ e:', e)
     keyPressed[e.key] = true
     combine(keyPressed)
     setTimeout(() => {
@@ -39,4 +45,6 @@ export function keyboard(options: KeyBoardOptions) {
     // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
     delete keyPressed[e.key]
   })
+
+  return keyPressed
 }

@@ -5,18 +5,22 @@ export function isEnglishText(text: string) {
   return englishTextRegex.test(text)
 }
 
-function isPascalCase(str: string) {
-  return /^[A-Z][a-z]*$/.test(str)
+export function similarPascalCase(str: string): boolean {
+  const customPatternRegex = /^[A-Z][a-zA-Z]*[A-Z][a-zA-Z]*$/
+
+  // Test if the string matches the custom pattern
+  return customPatternRegex.test(str)
 }
 
-function isCamelCase(str: string) {
-  return /^[a-z][a-z]*$/.test(str)
+export function similarCamelCase(str: string) {
+  const customPatternRegex = /^[a-z]+[A-Z][a-zA-Z0-9]*$/
+  return customPatternRegex.test(str)
 }
 
 export function isText(text: string) {
   const trimText = text.trim()
 
-  if (isCamelCase(trimText) || isPascalCase(trimText)) {
+  if (similarCamelCase(trimText) || similarPascalCase(trimText)) {
     return true
   }
 

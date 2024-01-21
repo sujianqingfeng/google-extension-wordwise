@@ -1,4 +1,4 @@
-import { keyboard, windowSelectionChange } from './events'
+import { createWindowSelection } from './events'
 import Query, { QueryProps } from './Query'
 import { maskWordsInElement, rangeWords } from './range'
 import {
@@ -19,7 +19,7 @@ import {
   SIDE_ROOT_ID,
   CUSTOM_EVENT_TYPE
 } from '../constants'
-import { MaskClickEventDetail } from '../types'
+import { Context, MaskClickEventDetail } from '../types'
 import { debounce } from '../utils'
 import { isEnglishText } from '../utils/text'
 
@@ -46,30 +46,12 @@ const showQueryPanel = (queryProps?: Omit<QueryProps, 'removeQueryPanel'>) => {
   queryRender.appendToBody()
 }
 
-// keyboard singe
-const singe = (key: string) => {
-  if (key === 'Escape') {
-    queryRender.removeFromBody()
-  }
-}
-// keyboard combine
-const combine = (keys: Record<string, boolean>) => {
-  if (keys['Alt'] && keys['t']) {
-    if (document.body.contains(queryRender.el)) {
-      queryRender.removeFromBody(false)
-    } else {
-      showQueryPanel({
-        top: 100,
-        left: document.body.clientWidth / 2 - QUERY_PANEL_WIDTH / 2,
-        autoFocus: true,
-        showSearch: true,
-        text: ''
-      })
-    }
-  }
-}
 // window selection change
-const onSelectionChange = () => {
+const onSelectionChange = (context: Context) => {
+  if (!context.isPressedAlt) {
+    return
+  }
+
   const selection = window.getSelection()
   if (!selection) {
     return
@@ -111,14 +93,34 @@ const appendCss = async () => {
   document.body.appendChild(style)
 }
 
+let currentPressedKeyEvent: KeyboardEvent | null = null
 async function start() {
-  windowSelectionChange({
-    onSelectionChange
+  document.addEventListener('keydown', (e) => {
+    currentPressedKeyEvent = e
+    if (e.key === 'Escape') {
+      queryRender.removeFromBody()
+    } else if (e.key === 't' && e.altKey) {
+      if (document.body.contains(queryRender.el)) {
+        queryRender.removeFromBody(false)
+      } else {
+        showQueryPanel({
+          top: 100,
+          left: document.body.clientWidth / 2 - QUERY_PANEL_WIDTH / 2,
+          autoFocus: true,
+          showSearch: true,
+          text: ''
+        })
+      }
+    }
   })
 
-  keyboard({
-    singe,
-    combine
+  document.addEventListener('keyup', (e) => {
+    if (currentPressedKeyEvent === null) {
+      return
+    }
+    if (e.key === currentPressedKeyEvent.key) {
+      currentPressedKeyEvent = null
+    }
   })
 
   appendCss()
@@ -126,6 +128,26 @@ async function start() {
   requestIdleCallback(() => {
     typography()
   })
+
+  const context: Context = {
+    get isSelecting() {
+      return windowSelectionInstance.isSelecting
+    },
+    get isPressedAlt() {
+      return currentPressedKeyEvent?.altKey || false
+    }
+  }
+
+  const windowSelectionInstance = createWindowSelection()
+  windowSelectionInstance.onSelectionChange(
+    onSelectionChange.bind(null, context)
+  )
+
+  const debouncePickupWordMousemove = debounce(
+    pickupWordMousemove.bind(null, context),
+    500
+  )
+  document.addEventListener('mousemove', debouncePickupWordMousemove)
 
   const words = await rpc.getWords()
 
@@ -174,6 +196,7 @@ async function typographyElClick() {
   translationEl.innerHTML = `<div class='word-wise-typography-translation'>${result}</div>`
   typographyTarget.appendChild(translationEl)
 }
+
 document.addEventListener(CUSTOM_EVENT_TYPE.TYPOGRAPHY_HOVER, (e: any) => {
   const { target } = e.detail as { target: HTMLElement }
   if (typographyHoverEl === null) {
@@ -227,3 +250,82 @@ async function main() {
 }
 
 main()
+
+function pickupWordMousemove(context: Context, event: MouseEvent) {
+  {
+    if (context.isSelecting || !context.isPressedAlt) {
+      return
+    }
+
+    // 获取鼠标位置
+    const mouseX = event.clientX
+    const mouseY = event.clientY
+
+    const range = document.caretRangeFromPoint(mouseX, mouseY)
+    if (!range) {
+      return
+    }
+    // console.log('🚀 ~ range:', range, range?.startOffset)
+    const textNode = range.startContainer
+
+    if (queryRender.el.contains(textNode)) {
+      return
+    }
+
+    if (textNode.nodeType !== Node.TEXT_NODE) {
+      return
+    }
+
+    const text = textNode.textContent || ''
+
+    if (!isEnglishText(text)) {
+      return
+    }
+
+    const offset = range.startOffset
+
+    const currentChar = text[offset]
+    // console.log('🚀 ~ debounceMouseout ~ currentChar:', currentChar)
+    if (currentChar === ' ' || currentChar === undefined) {
+      return
+    }
+
+    let l = offset,
+      r = offset
+
+    for (let i = 0; i < offset; i++) {
+      l -= 1
+      const char = text[l]
+      if (char === ' ') {
+        l += 1
+        break
+      }
+    }
+
+    for (let i = 0; i < text.length - offset; i++) {
+      r += 1
+      const char = text[r]
+      if (char === ' ') {
+        break
+      }
+    }
+
+    const currentWord = text.slice(l, r)
+    console.log('🚀 ~ currentWord:', currentWord)
+
+    const textRange = document.createRange()
+    textRange.setStart(textNode, l)
+    textRange.setEnd(textNode, r)
+    const selection = window.getSelection()
+    selection?.removeAllRanges()
+    selection?.addRange(textRange)
+
+    const rect = textRange.getBoundingClientRect()
+
+    queryRender.removeFromBody()
+    showQueryPanel({
+      text: currentWord,
+      triggerRect: rect
+    })
+  }
+}

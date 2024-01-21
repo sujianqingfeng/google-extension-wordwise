@@ -20,3 +20,8 @@ export type BackgroundFunctions = {
 }
 
 export type ContentFunctions = {}
+
+export type Context = {
+  isSelecting: boolean
+  isPressedAlt: boolean
+}
