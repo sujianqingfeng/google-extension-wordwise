@@ -21,7 +21,7 @@ import {
 } from '../constants'
 import { Context, MaskClickEventDetail } from '../types'
 import { debounce } from '../utils'
-import { isEnglishText } from '../utils/text'
+import { breakChar, isEnglishText } from '../utils/text'
 
 let currenQueryWordEl: HTMLElement | null = null
 
@@ -91,6 +91,85 @@ const appendCss = async () => {
 
   style.textContent = defaultCss
   document.body.appendChild(style)
+}
+
+function pickupWordMousemove(context: Context, event: MouseEvent) {
+  {
+    if (context.isSelecting || !context.isPressedAlt) {
+      return
+    }
+
+    // 获取鼠标位置
+    const mouseX = event.clientX
+    const mouseY = event.clientY
+
+    const range = document.caretRangeFromPoint(mouseX, mouseY)
+    if (!range) {
+      return
+    }
+    // console.log('🚀 ~ range:', range, range?.startOffset)
+    const textNode = range.startContainer
+
+    if (queryRender.el.contains(textNode)) {
+      return
+    }
+
+    if (textNode.nodeType !== Node.TEXT_NODE) {
+      return
+    }
+
+    const text = textNode.textContent || ''
+
+    if (!isEnglishText(text)) {
+      return
+    }
+
+    const offset = range.startOffset
+
+    const currentChar = text[offset]
+    // console.log('🚀 ~ debounceMouseout ~ currentChar:', currentChar)
+    if (currentChar === ' ' || currentChar === undefined) {
+      return
+    }
+
+    let l = offset,
+      r = offset
+
+    for (let i = 0; i < offset; i++) {
+      l -= 1
+      const char = text[l]
+      if (breakChar(char)) {
+        l += 1
+        break
+      }
+    }
+
+    for (let i = 0; i < text.length - offset; i++) {
+      r += 1
+      const char = text[r]
+      if (breakChar(char)) {
+        break
+      }
+    }
+
+    const currentWord = text.slice(l, r)
+    // console.log('🚀 ~ currentWord:', currentWord)
+
+    const textRange = document.createRange()
+    textRange.setStart(textNode, l)
+    textRange.setEnd(textNode, r)
+    const selection = window.getSelection()
+    selection?.removeAllRanges()
+    selection?.addRange(textRange)
+
+    const rect = textRange.getBoundingClientRect()
+
+    queryRender.removeFromBody()
+    showQueryPanel({
+      text: currentWord,
+      triggerRect: rect
+    })
+  }
 }
 
 let currentPressedKeyEvent: KeyboardEvent | null = null
@@ -250,82 +329,3 @@ async function main() {
 }
 
 main()
-
-function pickupWordMousemove(context: Context, event: MouseEvent) {
-  {
-    if (context.isSelecting || !context.isPressedAlt) {
-      return
-    }
-
-    // 获取鼠标位置
-    const mouseX = event.clientX
-    const mouseY = event.clientY
-
-    const range = document.caretRangeFromPoint(mouseX, mouseY)
-    if (!range) {
-      return
-    }
-    // console.log('🚀 ~ range:', range, range?.startOffset)
-    const textNode = range.startContainer
-
-    if (queryRender.el.contains(textNode)) {
-      return
-    }
-
-    if (textNode.nodeType !== Node.TEXT_NODE) {
-      return
-    }
-
-    const text = textNode.textContent || ''
-
-    if (!isEnglishText(text)) {
-      return
-    }
-
-    const offset = range.startOffset
-
-    const currentChar = text[offset]
-    // console.log('🚀 ~ debounceMouseout ~ currentChar:', currentChar)
-    if (currentChar === ' ' || currentChar === undefined) {
-      return
-    }
-
-    let l = offset,
-      r = offset
-
-    for (let i = 0; i < offset; i++) {
-      l -= 1
-      const char = text[l]
-      if (char === ' ') {
-        l += 1
-        break
-      }
-    }
-
-    for (let i = 0; i < text.length - offset; i++) {
-      r += 1
-      const char = text[r]
-      if (char === ' ') {
-        break
-      }
-    }
-
-    const currentWord = text.slice(l, r)
-    console.log('🚀 ~ currentWord:', currentWord)
-
-    const textRange = document.createRange()
-    textRange.setStart(textNode, l)
-    textRange.setEnd(textNode, r)
-    const selection = window.getSelection()
-    selection?.removeAllRanges()
-    selection?.addRange(textRange)
-
-    const rect = textRange.getBoundingClientRect()
-
-    queryRender.removeFromBody()
-    showQueryPanel({
-      text: currentWord,
-      triggerRect: rect
-    })
-  }
-}

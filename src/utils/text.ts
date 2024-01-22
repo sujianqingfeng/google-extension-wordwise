@@ -28,3 +28,21 @@ export function isText(text: string) {
     trimText.includes(char)
   )
 }
+
+export function breakChar(char: string) {
+  return [
+    ' ',
+    ',',
+    '.',
+    '!',
+    '?',
+    ';',
+    ':',
+    '(',
+    ')',
+    '[',
+    ']',
+    '{',
+    '}'
+  ].includes(char)
+}
