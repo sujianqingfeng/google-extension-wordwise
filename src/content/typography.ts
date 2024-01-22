@@ -1,6 +1,7 @@
 // text typography
 
 import { CUSTOM_EVENT_TYPE } from '../constants'
+import { debounce } from '../utils'
 
 const TEXT_TAGS = [
   'p',
@@ -16,66 +17,31 @@ const TEXT_TAGS = [
   'section',
   'figure'
 ]
-const REJECT_TAGS = ['a', 'button', 'pre']
 
 export function typography() {
-  const body = document.body
-
-  const treeWalker = document.createTreeWalker(
-    body,
-    NodeFilter.SHOW_ELEMENT,
-    (node) => {
-      const el = node as HTMLElement
-      // console.log('🚀 ~ file: typography.ts:27 ~ typography ~ el:', el)
-
-      if (TEXT_TAGS.includes(el.tagName.toLowerCase())) {
-        // el.children
-        if (el.children.length > 0) {
-          const reject = Array.from(el.children).every((el) => {
-            return REJECT_TAGS.includes(el.tagName.toLowerCase())
-          })
-          if (reject) {
-            return NodeFilter.FILTER_REJECT
-          }
-
-          const skip = Array.from(el.children).some((el) => {
-            return TEXT_TAGS.includes(el.tagName.toLowerCase())
-          })
-          if (skip) {
-            return NodeFilter.FILTER_SKIP
-          }
-        }
-
-        const text = el.textContent?.trim()
-        // no text content
-        if (!text) {
-          return NodeFilter.FILTER_REJECT
-        }
-
-        // no space
-        if (!/\s/.test(text)) {
-          return NodeFilter.FILTER_REJECT
-        }
-
-        return NodeFilter.FILTER_ACCEPT
-      }
-      return NodeFilter.FILTER_REJECT
-    }
-  )
-
-  while (treeWalker.nextNode()) {
-    treeWalker.currentNode.addEventListener(
-      'mouseover',
-      currentNodeMouseoverHandler
-    )
-  }
+  document.addEventListener('mousemove', debounce(onTypographyMousemove, 500))
 }
 
-function currentNodeMouseoverHandler(e: Event) {
-  if (!e.target) {
+function onTypographyMousemove(e: MouseEvent) {
+  const el = document.elementFromPoint(e.clientX, e.clientY)
+  if (!el) {
     return
   }
-  const target = e.target as HTMLElement
+
+  if (!TEXT_TAGS.includes(el.tagName.toLowerCase())) {
+    return
+  }
+
+  const text = el.textContent?.trim()
+  if (!text) {
+    return
+  }
+
+  if (!/\s/.test(text)) {
+    return
+  }
+
+  const target = el as HTMLElement
   if (target.dataset.wordWise) {
     return
   }
@@ -92,7 +58,7 @@ function currentNodeMouseoverHandler(e: Event) {
   document.dispatchEvent(
     new CustomEvent(CUSTOM_EVENT_TYPE.TYPOGRAPHY_HOVER, {
       detail: {
-        target: e.target
+        target: target
       }
     })
   )
