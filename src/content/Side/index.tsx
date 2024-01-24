@@ -3,6 +3,7 @@ import type { BackgroundFunctions } from '../../types'
 import { createBirpc } from 'birpc'
 import { useEffect, useState } from 'react'
 import AuthButton from './AuthButton'
+import Later from './Later'
 import SideHeader from './SideHeader'
 import User from './User'
 import { fetchAuthProvidersApi } from '../../api'
@@ -62,7 +63,10 @@ export default function Side(props: SideProps) {
       <SideHeader onClose={props.removeSide} />
 
       {isLogin ? (
-        <User {...user!} />
+        <div>
+          <User {...user!} />
+          <Later />
+        </div>
       ) : (
         <div className="mt-2 flex justify-center items-center">
           {authProvides.map((item) => (
