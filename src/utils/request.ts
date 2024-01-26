@@ -66,3 +66,29 @@ export function fetchJsonByGet<T = Record<string, any>>(
 export const fetchJsonByPost = createFetchByMethod('POST')
 export const fetchJsonByDelete = createFetchByMethod('DELETE')
 export const fetchJsonByPut = createFetchByMethod('PUT')
+
+export function createWithTokenFetcher(method: string) {
+  return async (url: string, token: string) => {
+    const headers: HeadersInit = {}
+
+    if (token) {
+      headers.Authorization = `Bearer ${token}`
+    }
+
+    const response = await fetch(`${BASE_URL}${url}`, { headers, method })
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch data')
+    }
+
+    const { code, data, msg } = await response.json()
+
+    if (code !== 0) {
+      throw new Error(msg)
+    }
+
+    return data
+  }
+}
+
+export const withTokenFetcher = createWithTokenFetcher('GET')

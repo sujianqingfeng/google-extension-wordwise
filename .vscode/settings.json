@@ -3,6 +3,7 @@
     "Birpc",
     "sujian",
     "tailwindcss",
+    "webext",
     "wordwise"
   ],
   "prettier.enable": false,

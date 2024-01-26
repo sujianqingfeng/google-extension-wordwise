@@ -2,11 +2,11 @@ import type { IAuthProvidersRespItem, IUser } from '../../api/types'
 import type { BackgroundFunctions } from '../../types'
 import { createBirpc } from 'birpc'
 import { useEffect, useState } from 'react'
-import AuthButton from './AuthButton'
-import Later from './Later'
-import SideHeader from './SideHeader'
-import User from './User'
 import { fetchAuthProvidersApi } from '../../api'
+import AuthButton from '../../entries/sider/AuthButton'
+import Later from '../../entries/sider/Later'
+import SideHeader from '../../entries/sider/SideHeader'
+import User from '../../entries/sider/User'
 
 const rpc = createBirpc<BackgroundFunctions>(
   {},

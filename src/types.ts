@@ -1,4 +1,4 @@
-import type { IUser, IWordRespItem } from './api/types'
+import type { IUser, IWordRespItem, LoginResp } from './api/types'
 
 export type MaskClickEventDetail = {
   word: string
@@ -24,4 +24,8 @@ export type ContentFunctions = {}
 export type Context = {
   isSelecting: boolean
   isPressedAlt: boolean
+}
+
+export interface BackgroundContext {
+  user: LoginResp | null
 }
