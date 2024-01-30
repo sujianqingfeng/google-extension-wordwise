@@ -9,6 +9,9 @@ export default defineConfig({
     permissions: ['identity', 'storage', 'identity.email'],
     action: { default_popup: '' }
   },
+  runner: {
+    disabled: true
+  },
   vite: () => ({
     plugins: [react()]
   })

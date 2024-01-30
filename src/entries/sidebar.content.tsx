@@ -3,7 +3,7 @@ import type {
   ShadowRootContentScriptUi
 } from 'wxt/client'
 import ReactDOM from 'react-dom/client'
-import App from './sider/Siderbar'
+import Sidebar from './sider/Sidebar'
 import { onMessage } from '../messaging/content'
 import '~/assets/main.css'
 
@@ -19,7 +19,7 @@ function createSidebar(ctx: ContentScriptContext) {
         anchor: 'body',
         onMount: (container) => {
           const root = ReactDOM.createRoot(container)
-          root.render(<App removeSidebar={ui!.remove} />)
+          root.render(<Sidebar removeSidebar={ui!.remove} />)
           isMounted = true
           return root
         },

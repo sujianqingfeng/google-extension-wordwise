@@ -2,6 +2,15 @@ import { registerBackgroundMessage } from '../messaging/background'
 import { sendContentMessage } from '../messaging/content'
 import { BackgroundContext } from '@/types'
 
+async function fetchUser(context: BackgroundContext) {
+  try {
+    const user = await withTokenFetcher('/user', '')
+    context.user = user
+  } catch (e) {
+    console.log('🚀 ~ fetchUser ~ e:', e)
+  }
+}
+
 export default defineBackground(() => {
   console.log('Hello background!', { id: browser.runtime.id })
 
@@ -10,6 +19,7 @@ export default defineBackground(() => {
   }
 
   registerBackgroundMessage(context)
+  fetchUser(context)
 
   browser.action.onClicked.addListener((tab) => {
     if (tab.id) {
