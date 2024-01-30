@@ -68,7 +68,7 @@ export const fetchJsonByDelete = createFetchByMethod('DELETE')
 export const fetchJsonByPut = createFetchByMethod('PUT')
 
 export function createWithTokenFetcher(method: string) {
-  return async (options: { token: string; url: string }) => {
+  return async (options: { token?: string; url: string }) => {
     const { token, url } = options
     const headers: HeadersInit = {}
 
