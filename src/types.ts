@@ -29,3 +29,7 @@ export type Context = {
 export interface BackgroundContext {
   user: LoginResp | null
 }
+
+export interface QueryContentContext {
+  isSelecting: boolean
+}

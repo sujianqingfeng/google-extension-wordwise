@@ -1,5 +1,5 @@
 import { createWindowSelection } from './events'
-import Query, { QueryProps } from './Query'
+import Query, { QueryProps } from '../entries/query'
 import { maskWordsInElement, rangeWords } from './range'
 import {
   appendChildToBody,

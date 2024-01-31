@@ -35,8 +35,8 @@ function createSidebar(ctx: ContentScriptContext) {
 }
 
 export default defineContentScript({
-  // matches: ['<all_urls>'],
-  matches: ['https://wxt.dev'],
+  matches: ['<all_urls>'],
+  // matches: ['https://wxt.dev'],
   cssInjectionMode: 'ui',
   runAt: 'document_idle',
   async main(ctx) {

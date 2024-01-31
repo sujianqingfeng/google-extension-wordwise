@@ -68,8 +68,12 @@ export const fetchJsonByDelete = createFetchByMethod('DELETE')
 export const fetchJsonByPut = createFetchByMethod('PUT')
 
 export function createWithTokenFetcher(method: string) {
-  return async (options: { token?: string; url: string }) => {
-    const { token, url } = options
+  return async <T = Record<string, any>>(options: {
+    url: string
+    token?: string
+    body?: Record<string, any>
+  }) => {
+    const { token, url, body } = options
     const headers: HeadersInit = {}
 
     if (token) {
@@ -78,7 +82,11 @@ export function createWithTokenFetcher(method: string) {
 
     const mergeUrl = `${BASE_URL}${url}`
     console.log('🚀 ~ return ~ mergeUrl:', mergeUrl)
-    const response = await fetch(mergeUrl, { headers, method })
+    const response = await fetch(mergeUrl, {
+      headers,
+      method,
+      body: body ? new URLSearchParams(body) : undefined
+    })
 
     if (!response.ok) {
       throw new Error('Failed to fetch data')
@@ -90,8 +98,9 @@ export function createWithTokenFetcher(method: string) {
       throw new Error(msg)
     }
 
-    return data
+    return data as T
   }
 }
 
 export const withTokenFetcher = createWithTokenFetcher('GET')
+export const postWithTokenFetcher = createWithTokenFetcher('POST')

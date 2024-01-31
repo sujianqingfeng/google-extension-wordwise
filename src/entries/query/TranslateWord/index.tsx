@@ -16,7 +16,7 @@ import {
 import Loading from '../../../components/Loading'
 import { CUSTOM_EVENT_TYPE } from '../../../constants'
 import { useFetch } from '../../../hooks/use-fetch'
-import { createContentRpc } from '../../rpc'
+import { createContentRpc } from '../../../content/rpc'
 
 const rpc = createContentRpc()
 

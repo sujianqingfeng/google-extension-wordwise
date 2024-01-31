@@ -15,3 +15,5 @@ export const QUERY_ROOT_ID = 'wordwise-query-crx-root'
 export const SIDE_ROOT_ID = 'wordwise-side-crx-root'
 
 export const QUERY_PANEL_WIDTH = 400
+
+export const TOKEN = 'local:token'

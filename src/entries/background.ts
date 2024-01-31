@@ -1,11 +1,17 @@
+import { storage } from 'wxt/storage'
 import { registerBackgroundMessage } from '../messaging/background'
 import { sendContentMessage } from '../messaging/content'
+import { fetchUserInfoApi } from '@/api'
+import { TOKEN } from '@/constants'
 import { BackgroundContext } from '@/types'
 
 async function fetchUser(context: BackgroundContext) {
   try {
-    const user = await withTokenFetcher('/user', '')
-    context.user = user
+    const token = await storage.getItem<string>(TOKEN)
+    if (token) {
+      const user = await fetchUserInfoApi(token)
+      context.user = user
+    }
   } catch (e) {
     console.log('🚀 ~ fetchUser ~ e:', e)
   }

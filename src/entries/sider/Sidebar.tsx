@@ -30,8 +30,8 @@ export default function Sidebar(props: SideProps) {
     <div className="fixed top-0 right-0 bottom-0 z-9999 w-[300px] bg-base shadow-sm">
       <SideHeader onClose={props.removeSidebar} />
 
-      {user && <Dashboard />}
-      {!user && <Auth />}
+      {user && <Dashboard user={user} />}
+      {!user && <Auth authSuccess={setUser} />}
     </div>
   )
 }

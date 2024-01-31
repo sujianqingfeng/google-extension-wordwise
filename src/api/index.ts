@@ -17,8 +17,11 @@ import {
   fetchJsonByPost
 } from '../utils/request'
 
-export const fetchLoginApi = (data: LoginReq) => {
-  return fetchJsonByPost<LoginResp>('/auth', data)
+export const fetchLoginApi = (body: LoginReq) => {
+  return postWithTokenFetcher<LoginResp>({
+    url: '/auth',
+    body
+  })
 }
 
 export const fetchAuthProvidersApi = () => {
@@ -53,6 +56,9 @@ export const fetchTranslateApi = (data: TranslateParams) => {
 }
 
 // user
-export const fetchUserInfoApi = () => {
-  return fetchJsonByGet<LoginResp>(`/user`)
+export const fetchUserInfoApi = (token: string) => {
+  return withTokenFetcher<LoginResp>({
+    url: '/user',
+    token
+  })
 }
