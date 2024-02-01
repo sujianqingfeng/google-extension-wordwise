@@ -74,6 +74,7 @@ export function createWithTokenFetcher(method: string) {
     body?: Record<string, any>
   }) => {
     const { token, url, body } = options
+    console.log('🚀 ~ createWithTokenFetcher ~ options:', options)
     const headers: HeadersInit = {}
 
     if (token) {
@@ -104,3 +105,4 @@ export function createWithTokenFetcher(method: string) {
 
 export const withTokenFetcher = createWithTokenFetcher('GET')
 export const postWithTokenFetcher = createWithTokenFetcher('POST')
+export const deleteWithTokenFetcher = createWithTokenFetcher('DELETE')

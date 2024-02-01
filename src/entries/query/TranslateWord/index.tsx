@@ -1,22 +1,17 @@
 import type {
   IDictQueryResultResp,
-  IQueryWordCollectedResp,
-  IQueryWordParams
+  IQueryWordCollectedResp
 } from '../../../api/types'
+import useSWR from 'swr'
+import useSWRMutation from 'swr/mutation'
 import Collect from './Collect'
 import Phonetic from './Phonetic'
 import Translate from './Translate'
 import WordForm from './WordForm'
-import {
-  fetchCreateWordApi,
-  fetchDeleteWordApi,
-  fetchQueryWordApi,
-  fetchWordIsCollectedApi
-} from '../../../api'
 import Loading from '../../../components/Loading'
 import { CUSTOM_EVENT_TYPE } from '../../../constants'
-import { useFetch } from '../../../hooks/use-fetch'
 import { createContentRpc } from '../../../content/rpc'
+import { useToken } from '@/hooks/use-token'
 
 const rpc = createContentRpc()
 
@@ -28,38 +23,47 @@ export default function TranslateWord(props: TranslateWordProps) {
   const { word: _word, autoFetch = true } = props
   const word = _word.toLowerCase()
 
-  const { result, loading } = useFetch<IDictQueryResultResp, IQueryWordParams>({
-    autoFetch,
-    apiFn: fetchQueryWordApi,
-    defaultQuery: { word },
-    defaultValue: {}
-  })
+  const { token } = useToken()
+  const { data: result, isLoading: loading } = useSWR(
+    { url: `/dictionary/query?word=${word}`, token },
+    withTokenFetcher<IDictQueryResultResp>
+  )
 
-  const { result: collectedResult, fetchApi: fetchWordIsCollected } =
-    useFetch<IQueryWordCollectedResp>({
-      apiFn: fetchWordIsCollectedApi,
-      defaultQuery: { word },
-      defaultValue: {}
-    })
+  const { data: collectedResult, mutate: mutateCollect } = useSWR(
+    {
+      url: `/word/isCollected?word=${word}`,
+      token
+    },
+    withTokenFetcher<IQueryWordCollectedResp>
+  )
+
+  const { trigger: collectWord } = useSWRMutation(
+    { url: '/word', token, body: { word } },
+    postWithTokenFetcher
+  )
+  const { trigger: removeWord } = useSWRMutation(
+    { url: '/word', token, body: { word } },
+    deleteWithTokenFetcher
+  )
 
   const onCollect = async (next: boolean) => {
+    console.log('🚀 ~ onCollect ~ next:', next)
     // no query result
     if (!result) {
       return
     }
-    const fetchApi = next ? fetchCreateWordApi : fetchDeleteWordApi
-    const [isOk] = await fetchApi({ word })
-    if (!isOk) {
-      return
-    }
+
+    next ? await collectWord() : await removeWord()
+
     // TODO: remove range words
     if (next) {
       document.dispatchEvent(
         new CustomEvent(CUSTOM_EVENT_TYPE.RANGE_WORDS, { detail: [word] })
       )
     }
-    next ? rpc.addWord(word) : rpc.removeWord(word)
-    fetchWordIsCollected()
+    // next ? rpc.addWord(word) : rpc.removeWord(word)
+    // fetchWordIsCollected()
+    mutateCollect()
   }
 
   if (loading) {
@@ -92,10 +96,10 @@ export default function TranslateWord(props: TranslateWordProps) {
         />
       </div>
       <div className="flex gap-2 mt-2 flex-wrap">
-        {result.forms?.map((f, i) => <WordForm key={i} {...f} />)}
+        {result?.forms?.map((f, i) => <WordForm key={i} {...f} />)}
       </div>
       <div className="flex flex-col gap-1 mt-2 dark:text-gray-400">
-        {result.translations?.map((trs, i) => <Translate key={i} {...trs} />)}
+        {result?.translations?.map((trs, i) => <Translate key={i} {...trs} />)}
       </div>
     </div>
   )

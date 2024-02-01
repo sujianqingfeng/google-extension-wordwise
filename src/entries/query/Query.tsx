@@ -6,8 +6,10 @@ import { useClientRect } from '../../hooks/use-client-rect'
 import { useOutsideClick } from '../../hooks/use-element'
 import { usePlacement } from '../../hooks/use-placement'
 import { isText } from '../../utils/text'
+import { TokenContext } from '@/hooks/use-token'
 
 export type QueryProps = {
+  token: string
   top?: number
   left?: number
   removeQueryPanel: () => void
@@ -19,6 +21,7 @@ export type QueryProps = {
 
 export default function Query(props: QueryProps) {
   const {
+    token,
     top,
     left,
     removeQueryPanel,
@@ -41,33 +44,36 @@ export default function Query(props: QueryProps) {
   useOutsideClick({
     ref: queryRef,
     onOutsideClick() {
-      removeQueryPanel()
+      // TODO:
+      // removeQueryPanel()
     }
   })
 
   const position = usePlacement({ triggerRect, contentRect: queryRect })
 
   return (
-    <div
-      ref={queryRef}
-      style={{ top: top ?? position.top, left: left ?? position.left }}
-      className="fixed flex justify-center items-start text-black"
-    >
-      <div className="w-[350px] bg-base p-2 rounded-md shadow">
-        {showSearch && (
-          <Search
-            onQuery={onQuery}
-            text={text}
-            onTextChange={setText}
-            autoFocus={autoFocus}
-          />
-        )}
+    <TokenContext.Provider value={token}>
+      <div
+        ref={queryRef}
+        style={{ top: top ?? position.top, left: left ?? position.left }}
+        className="fixed flex justify-center items-start bg-base z-9999"
+      >
+        <div className="w-[350px] bg-base p-2 rounded-md shadow">
+          {showSearch && (
+            <Search
+              onQuery={onQuery}
+              text={text}
+              onTextChange={setText}
+              autoFocus={autoFocus}
+            />
+          )}
 
-        {text && isTextFlag && <TranslateText text={text} />}
-        {text && !isTextFlag && (
-          <TranslateWord autoFetch={!showSearch} word={text} />
-        )}
+          {text && isTextFlag && <TranslateText text={text} />}
+          {text && !isTextFlag && (
+            <TranslateWord autoFetch={!showSearch} word={text} />
+          )}
+        </div>
       </div>
-    </div>
+    </TokenContext.Provider>
   )
 }

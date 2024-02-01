@@ -1,9 +1,15 @@
-import type { QueryContentContext } from '@/types'
+import type { QueryContentContext, QueryUI } from '@/types'
+import type {
+  ContentScriptContext,
+  ShadowRootContentScriptUi
+} from 'wxt/client'
 import ReactDOM from 'react-dom/client'
-import Query from './query'
+import Query from './query/Query'
 import { createBackgroundMessage } from '@/messaging/background'
 import '~/assets/main.css'
-import { ContentScriptContext, ShadowRootContentScriptUi } from 'wxt/client'
+
+import { storage } from 'wxt/storage'
+import { TOKEN } from '@/constants'
 
 function createWindowSelection(context: QueryContentContext) {
   const onSelectionChange = (callback: () => void) => {
@@ -24,7 +30,7 @@ function createWindowSelection(context: QueryContentContext) {
   }
 }
 
-const onSelectionChange = (context: QueryContentContext) => {
+const onSelectionChange = async (context: QueryContentContext) => {
   // if (!context.isPressedAlt) {
   //   return
   // }
@@ -48,31 +54,36 @@ const onSelectionChange = (context: QueryContentContext) => {
   // no operation when the selection is in the query panel
   const parentElement = range.commonAncestorContainer.parentElement
 
-  // if (queryRender.el.contains(parentElement)) {
-  //   return
-  // }
-  // currenQueryWordEl = parentElement
+  if (
+    context.queryUI.container &&
+    context.queryUI.container.contains(parentElement)
+  ) {
+    return
+  }
+  context.currentQueryTriggerEl = parentElement
 
-  // const rect = range.getBoundingClientRect()
+  const rect = range.getBoundingClientRect()
 
-  // queryRender.removeFromBody()
-  // showQueryPanel({
-  //   text: selectionText,
-  //   triggerRect: rect
-  // })
+  const token = await storage.getItem<string>(TOKEN)
+
+  if (!token) {
+    return
+  }
+  context.queryUI.mount({
+    text: selectionText,
+    triggerRect: rect,
+    token
+  })
 }
 
-function createQuery(ctx: ContentScriptContext) {
+function createQueryUI(ctx: ContentScriptContext): QueryUI {
   let isMounted = false
   let ui: ShadowRootContentScriptUi<ReactDOM.Root> | null = null
 
-  return async function toggle(options: {
-    text?: string
-    triggerRect?: DOMRect
-  }) {
+  const mount = async (options: { text?: string; triggerRect?: DOMRect }) => {
     if (!ui) {
       ui = await createShadowRootUi(ctx, {
-        name: 'word-wise-sidebar',
+        name: 'word-wise-query',
         position: 'inline',
         anchor: 'body',
         onMount: (container) => {
@@ -88,7 +99,22 @@ function createQuery(ctx: ContentScriptContext) {
       })
     }
 
-    isMounted ? ui.remove() : ui.mount()
+    ui.mount()
+  }
+
+  const remove = () => {
+    ui?.remove()
+  }
+
+  return {
+    mount,
+    remove,
+    get isMounted() {
+      return isMounted
+    },
+    get container() {
+      return ui?.uiContainer
+    }
   }
 }
 
@@ -107,11 +133,13 @@ export default defineContentScript({
       return
     }
 
-    const context: QueryContentContext = {
-      isSelecting: false
-    }
+    const queryUI = createQueryUI(ctx)
 
-    const toggle = createQuery(ctx)
+    const context: QueryContentContext = {
+      isSelecting: false,
+      queryUI,
+      currentQueryTriggerEl: null
+    }
 
     createWindowSelection(context).onSelectionChange(
       onSelectionChange.bind(null, context)

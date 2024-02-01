@@ -28,8 +28,22 @@ export type Context = {
 
 export interface BackgroundContext {
   user: LoginResp | null
+  words: IWordRespItem[]
+}
+
+export interface QueryUI {
+  isMounted: boolean
+  mount: (options: {
+    text?: string
+    triggerRect?: DOMRect
+    token: string
+  }) => void
+  remove: () => void
+  container: HTMLElement | undefined
 }
 
 export interface QueryContentContext {
   isSelecting: boolean
+  queryUI: QueryUI
+  currentQueryTriggerEl: HTMLElement | null
 }
