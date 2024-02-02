@@ -1,7 +1,6 @@
-import type { IDictionaryQueryForm } from '../../../api/types'
+import type { IDictionaryQueryForm } from '@/api/types'
 
 type WordFormProps = IDictionaryQueryForm
-
 export default function WordForm(props: WordFormProps) {
   const { name, value } = props
 

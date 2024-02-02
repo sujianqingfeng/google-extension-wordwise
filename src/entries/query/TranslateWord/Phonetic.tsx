@@ -1,5 +1,4 @@
 import { TbVolume } from 'react-icons/tb'
-import { BASE_URL } from '../../../utils/request'
 
 type PhoneticProps = {
   label: string

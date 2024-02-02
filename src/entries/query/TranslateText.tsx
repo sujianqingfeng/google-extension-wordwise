@@ -1,6 +1,6 @@
-import { fetchTranslateApi } from '../../api'
-import Loading from '../../components/Loading'
-import { useFetch } from '../../hooks/use-fetch'
+import type { TranslateResp } from '@/api/types'
+import useSWR from 'swr'
+import Loading from '@/components/Loading'
 
 type TranslateTextProps = {
   text: string
@@ -8,15 +8,13 @@ type TranslateTextProps = {
 export default function TranslateText(props: TranslateTextProps) {
   const { text } = props
 
-  const { result: translate, loading } = useFetch({
-    apiFn: fetchTranslateApi,
-    defaultQuery: {
-      text
-    },
-    defaultValue: {
-      result: ''
-    }
-  })
+  const { token } = useToken()
+
+  const { data: translate, isLoading: loading } = useSWR(
+    { url: `/translator/translate`, token, body: { text } },
+    postWithTokenFetcher<TranslateResp>
+  )
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-10">
@@ -28,7 +26,7 @@ export default function TranslateText(props: TranslateTextProps) {
   return (
     <div className="text-sm font-normal dark:text-gray-300">
       <div className="mt-2">{text}</div>
-      <div className="mt-2">{translate.result}</div>
+      <div className="mt-2">{translate?.result}</div>
     </div>
   )
 }

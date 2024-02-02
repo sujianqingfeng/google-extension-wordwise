@@ -1,4 +1,5 @@
 import { RefObject, useEffect } from 'react'
+import { QUERY_SHADOW_TAG_NAME, SIDEBAR_SHADOW_TAG_NAME } from '@/constants'
 
 type UseOutsideClickOptions = {
   ref: RefObject<Element>
@@ -9,7 +10,11 @@ export function useOutsideClick(options: UseOutsideClickOptions) {
 
   useEffect(() => {
     function handleOutsideClick(event: MouseEvent) {
-      if (ref.current && !ref.current.contains(event.target as Node)) {
+      const tagName = (event.target as HTMLElement).tagName.toLowerCase()
+      if (
+        tagName !== QUERY_SHADOW_TAG_NAME &&
+        tagName !== SIDEBAR_SHADOW_TAG_NAME
+      ) {
         onOutsideClick && onOutsideClick()
       }
     }

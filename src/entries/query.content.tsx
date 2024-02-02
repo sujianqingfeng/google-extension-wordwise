@@ -4,12 +4,12 @@ import type {
   ShadowRootContentScriptUi
 } from 'wxt/client'
 import ReactDOM from 'react-dom/client'
-import Query from './query/Query'
-import { createBackgroundMessage } from '@/messaging/background'
-import '~/assets/main.css'
-
 import { storage } from 'wxt/storage'
-import { TOKEN } from '@/constants'
+import Query from './query/Query'
+import { QUERY_SHADOW_TAG_NAME, TOKEN } from '@/constants'
+import { createBackgroundMessage } from '@/messaging/background'
+
+import '~/assets/main.css'
 
 function createWindowSelection(context: QueryContentContext) {
   const onSelectionChange = (callback: () => void) => {
@@ -80,10 +80,14 @@ function createQueryUI(ctx: ContentScriptContext): QueryUI {
   let isMounted = false
   let ui: ShadowRootContentScriptUi<ReactDOM.Root> | null = null
 
-  const mount = async (options: { text?: string; triggerRect?: DOMRect }) => {
+  const mount = async (options: {
+    text?: string
+    triggerRect?: DOMRect
+    token: string
+  }) => {
     if (!ui) {
       ui = await createShadowRootUi(ctx, {
-        name: 'word-wise-query',
+        name: QUERY_SHADOW_TAG_NAME,
         position: 'inline',
         anchor: 'body',
         onMount: (container) => {

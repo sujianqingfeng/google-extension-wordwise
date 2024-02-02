@@ -3,8 +3,10 @@ import type {
   ShadowRootContentScriptUi
 } from 'wxt/client'
 import ReactDOM from 'react-dom/client'
-import Sidebar from './sider/Sidebar'
+import Sidebar from './sidebar/Sidebar'
 import { onMessage } from '../messaging/content'
+import { SIDEBAR_SHADOW_TAG_NAME } from '@/constants'
+
 import '~/assets/main.css'
 
 function createSidebar(ctx: ContentScriptContext) {
@@ -14,7 +16,7 @@ function createSidebar(ctx: ContentScriptContext) {
   return async function toggle() {
     if (!ui) {
       ui = await createShadowRootUi(ctx, {
-        name: 'word-wise-sidebar',
+        name: SIDEBAR_SHADOW_TAG_NAME,
         position: 'inline',
         anchor: 'body',
         onMount: (container) => {

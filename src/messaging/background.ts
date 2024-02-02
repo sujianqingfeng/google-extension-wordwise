@@ -41,6 +41,18 @@ function _createBackgroundMessage(context: BackgroundContext) {
       const { token } = data
       storage.setItem(TOKEN, token)
       return data
+    },
+    addWord(word: string) {
+      context.words.push({
+        word,
+        id: ''
+      })
+    },
+    removeWord(word: string) {
+      const index = context.words.findIndex((item) => item.word === word)
+      if (index !== -1) {
+        context.words.splice(index, 1)
+      }
     }
   }
 }

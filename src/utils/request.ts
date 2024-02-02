@@ -74,7 +74,6 @@ export function createWithTokenFetcher(method: string) {
     body?: Record<string, any>
   }) => {
     const { token, url, body } = options
-    console.log('🚀 ~ createWithTokenFetcher ~ options:', options)
     const headers: HeadersInit = {}
 
     if (token) {
@@ -82,7 +81,6 @@ export function createWithTokenFetcher(method: string) {
     }
 
     const mergeUrl = `${BASE_URL}${url}`
-    console.log('🚀 ~ return ~ mergeUrl:', mergeUrl)
     const response = await fetch(mergeUrl, {
       headers,
       method,

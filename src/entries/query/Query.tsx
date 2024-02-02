@@ -44,8 +44,7 @@ export default function Query(props: QueryProps) {
   useOutsideClick({
     ref: queryRef,
     onOutsideClick() {
-      // TODO:
-      // removeQueryPanel()
+      removeQueryPanel()
     }
   })
 

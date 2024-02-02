@@ -1,21 +1,4 @@
-import type {
-  IAuthProvidersRespItem,
-  ICreateWordDto,
-  IDictQueryResultResp,
-  IQueryWordCollectedParams,
-  IQueryWordCollectedResp,
-  IQueryWordParams,
-  IWordRespItem,
-  LoginReq,
-  LoginResp,
-  TranslateParams,
-  TranslateResp
-} from './types'
-import {
-  fetchJsonByDelete,
-  fetchJsonByGet,
-  fetchJsonByPost
-} from '../utils/request'
+import type { IWordRespItem, LoginReq, LoginResp } from './types'
 
 export const fetchLoginApi = (body: LoginReq) => {
   return postWithTokenFetcher<LoginResp>({
@@ -24,35 +7,11 @@ export const fetchLoginApi = (body: LoginReq) => {
   })
 }
 
-export const fetchAuthProvidersApi = () => {
-  return fetchJsonByGet<IAuthProvidersRespItem[]>('/auth/providers')
-}
-
-// dictionary
-export const fetchQueryWordApi = (params: IQueryWordParams) => {
-  return fetchJsonByGet<IDictQueryResultResp>(`/dictionary/query`, params)
-}
-
-// word
-export const fetchCreateWordApi = (data: ICreateWordDto) => {
-  return fetchJsonByPost('/word', data)
-}
-
-export const fetchDeleteWordApi = (data: ICreateWordDto) => {
-  return fetchJsonByDelete('/word', data)
-}
-
-export const fetchAllWordsApi = () => {
-  return fetchJsonByGet<IWordRespItem[]>(`/word/all`)
-}
-
-export const fetchWordIsCollectedApi = (params: IQueryWordCollectedParams) => {
-  return fetchJsonByGet<IQueryWordCollectedResp>(`/word/isCollected`, params)
-}
-
-// translation
-export const fetchTranslateApi = (data: TranslateParams) => {
-  return fetchJsonByPost<TranslateResp>('/translator/translate', data)
+export const fetchAllWordsApi = (token: string) => {
+  return withTokenFetcher<IWordRespItem[]>({
+    url: `/word/all`,
+    token
+  })
 }
 
 // user

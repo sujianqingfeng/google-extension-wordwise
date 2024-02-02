@@ -3,10 +3,10 @@ import type { BackgroundFunctions } from '../../types'
 import { createBirpc } from 'birpc'
 import { useEffect, useState } from 'react'
 import { fetchAuthProvidersApi } from '../../api'
-import AuthButton from '../../entries/sider/AuthButton'
-import Later from '../../entries/sider/Later'
-import SideHeader from '../../entries/sider/SideHeader'
-import User from '../../entries/sider/User'
+import AuthButton from '../../entries/sidebar/AuthButton'
+import Later from '../../entries/sidebar/Later'
+import SideHeader from '../../entries/sidebar/SideHeader'
+import User from '../../entries/sidebar/User'
 
 const rpc = createBirpc<BackgroundFunctions>(
   {},

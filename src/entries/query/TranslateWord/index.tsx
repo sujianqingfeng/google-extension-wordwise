@@ -1,26 +1,23 @@
-import type {
-  IDictQueryResultResp,
-  IQueryWordCollectedResp
-} from '../../../api/types'
+import type { IDictQueryResultResp, IQueryWordCollectedResp } from '@/api/types'
 import useSWR from 'swr'
 import useSWRMutation from 'swr/mutation'
 import Collect from './Collect'
 import Phonetic from './Phonetic'
 import Translate from './Translate'
 import WordForm from './WordForm'
-import Loading from '../../../components/Loading'
-import { CUSTOM_EVENT_TYPE } from '../../../constants'
-import { createContentRpc } from '../../../content/rpc'
+import Loading from '@/components/Loading'
+import { CUSTOM_EVENT_TYPE } from '@/constants'
 import { useToken } from '@/hooks/use-token'
+import { createBackgroundMessage } from '@/messaging/background'
 
-const rpc = createContentRpc()
+const bgs = createBackgroundMessage()
 
 type TranslateWordProps = {
   autoFetch?: boolean
   word: string
 }
 export default function TranslateWord(props: TranslateWordProps) {
-  const { word: _word, autoFetch = true } = props
+  const { word: _word } = props
   const word = _word.toLowerCase()
 
   const { token } = useToken()
@@ -47,7 +44,6 @@ export default function TranslateWord(props: TranslateWordProps) {
   )
 
   const onCollect = async (next: boolean) => {
-    console.log('🚀 ~ onCollect ~ next:', next)
     // no query result
     if (!result) {
       return
@@ -61,8 +57,7 @@ export default function TranslateWord(props: TranslateWordProps) {
         new CustomEvent(CUSTOM_EVENT_TYPE.RANGE_WORDS, { detail: [word] })
       )
     }
-    // next ? rpc.addWord(word) : rpc.removeWord(word)
-    // fetchWordIsCollected()
+    next ? bgs.addWord(word) : bgs.removeWord(word)
     mutateCollect()
   }
 
