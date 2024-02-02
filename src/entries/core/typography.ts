@@ -1,7 +1,7 @@
 // text typography
 
-import { CUSTOM_EVENT_TYPE } from '../constants'
-import { debounce } from '../utils'
+import { CUSTOM_EVENT_TYPE } from '../../constants'
+import { debounce } from '../../utils'
 
 const TEXT_TAGS = [
   'p',
