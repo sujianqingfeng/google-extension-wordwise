@@ -42,6 +42,7 @@ export interface QueryUI {
 }
 
 export interface QueryContentContext {
+  isPressedAlt: boolean
   isSelecting: boolean
   queryUI: QueryUI
   currentQueryTriggerEl: HTMLElement | null

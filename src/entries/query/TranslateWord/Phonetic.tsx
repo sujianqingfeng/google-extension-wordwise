@@ -29,7 +29,7 @@ export default function Phonetic(props: PhoneticProps) {
       <span className="dark:text-gray-400">{label}</span>
       <div
         onClick={onPlay}
-        className={`bg-gray-100 dark:bg-slate-400 rounded-full px-1 flex items-center gap-1 ${
+        className={`bg-gray-100 dark:bg-slate-400/10 rounded-full px-1 flex items-center gap-1 ${
           speech ? 'cursor-pointer' : ''
         }`}
       >

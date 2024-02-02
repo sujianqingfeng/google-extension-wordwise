@@ -35,9 +35,9 @@ function createWindowSelection(context: QueryContentContext) {
 }
 
 const onSelectionChange = async (context: QueryContentContext) => {
-  // if (!context.isPressedAlt) {
-  //   return
-  // }
+  if (!context.isPressedAlt) {
+    return
+  }
 
   const selection = window.getSelection()
   if (!selection) {
@@ -118,6 +118,16 @@ function createQueryUI(ctx: ContentScriptContext): QueryUI {
   }
 }
 
+function createKeyType(context: QueryContentContext) {
+  document.addEventListener('keydown', (e) => {
+    context.isPressedAlt = e.altKey
+  })
+
+  document.addEventListener('keyup', (e) => {
+    context.isPressedAlt = e.altKey
+  })
+}
+
 export default defineContentScript({
   matches: ['<all_urls>'],
   // matches: ['https://wxt.dev'],
@@ -141,6 +151,7 @@ export default defineContentScript({
     const queryUI = createQueryUI(ctx)
 
     const context: QueryContentContext = {
+      isPressedAlt: false,
       isSelecting: false,
       queryUI,
       currentQueryTriggerEl: null
@@ -150,6 +161,8 @@ export default defineContentScript({
       const { word, rect } = e.detail as MaskClickEventDetail
       queryUI.mount({ text: word, triggerRect: rect, token })
     })
+
+    createKeyType(context)
 
     createWindowSelection(context).onSelectionChange(
       onSelectionChange.bind(null, context)
