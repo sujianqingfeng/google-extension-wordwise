@@ -1,6 +1,6 @@
 import { createWindowSelection } from './events'
 import Query, { QueryProps } from '../entries/query/Query'
-import { maskWordsInElement, rangeWords } from './range'
+import { maskWordsInElement, rangeWords } from '../entries/core/range'
 import {
   appendChildToBody,
   createRootRender,

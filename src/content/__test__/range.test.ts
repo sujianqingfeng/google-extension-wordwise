@@ -1,5 +1,5 @@
 import { test, describe, expect } from 'vitest'
-import { matchWordsIndices } from '../range'
+import { matchWordsIndices } from '../../entries/core/range'
 
 describe('range', () => {
   test('', () => {

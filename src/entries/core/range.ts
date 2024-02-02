@@ -2,8 +2,8 @@ import {
   CUSTOM_EVENT_TYPE,
   ENABLE_TAG_ELEMENTS,
   EXCLUDE_TAG_ELEMENTS
-} from '../constants'
-import { MaskClickEventDetail, WrapperElementOptions } from '../types'
+} from '../../constants'
+import { MaskClickEventDetail, WrapperElementOptions } from '../../types'
 
 function generateWordsPattern(words: string[]) {
   const wordsPattern = words.join('|')

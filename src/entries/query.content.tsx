@@ -1,4 +1,8 @@
-import type { QueryContentContext, QueryUI } from '@/types'
+import type {
+  MaskClickEventDetail,
+  QueryContentContext,
+  QueryUI
+} from '@/types'
 import type {
   ContentScriptContext,
   ShadowRootContentScriptUi
@@ -6,7 +10,7 @@ import type {
 import ReactDOM from 'react-dom/client'
 import { storage } from 'wxt/storage'
 import Query from './query/Query'
-import { QUERY_SHADOW_TAG_NAME, TOKEN } from '@/constants'
+import { CUSTOM_EVENT_TYPE, QUERY_SHADOW_TAG_NAME, TOKEN } from '@/constants'
 import { createBackgroundMessage } from '@/messaging/background'
 
 import '~/assets/main.css'
@@ -77,7 +81,6 @@ const onSelectionChange = async (context: QueryContentContext) => {
 }
 
 function createQueryUI(ctx: ContentScriptContext): QueryUI {
-  let isMounted = false
   let ui: ShadowRootContentScriptUi<ReactDOM.Root> | null = null
 
   const mount = async (options: {
@@ -85,23 +88,19 @@ function createQueryUI(ctx: ContentScriptContext): QueryUI {
     triggerRect?: DOMRect
     token: string
   }) => {
-    if (!ui) {
-      ui = await createShadowRootUi(ctx, {
-        name: QUERY_SHADOW_TAG_NAME,
-        position: 'inline',
-        anchor: 'body',
-        onMount: (container) => {
-          const root = ReactDOM.createRoot(container)
-          root.render(<Query removeQueryPanel={ui!.remove} {...options} />)
-          isMounted = true
-          return root
-        },
-        onRemove: (root) => {
-          root?.unmount()
-          isMounted = false
-        }
-      })
-    }
+    ui = await createShadowRootUi(ctx, {
+      name: QUERY_SHADOW_TAG_NAME,
+      position: 'inline',
+      anchor: 'body',
+      onMount: (container) => {
+        const root = ReactDOM.createRoot(container)
+        root.render(<Query removeQueryPanel={ui!.remove} {...options} />)
+        return root
+      },
+      onRemove: (root) => {
+        root?.unmount()
+      }
+    })
 
     ui.mount()
   }
@@ -113,9 +112,6 @@ function createQueryUI(ctx: ContentScriptContext): QueryUI {
   return {
     mount,
     remove,
-    get isMounted() {
-      return isMounted
-    },
     get container() {
       return ui?.uiContainer
     }
@@ -131,9 +127,14 @@ export default defineContentScript({
     console.log('🚀 ~ ctx: query')
 
     const bgs = createBackgroundMessage()
-    const user = await bgs.getUser()
 
+    const user = await bgs.getUser()
     if (!user) {
+      return
+    }
+
+    const token = await storage.getItem<string>(TOKEN)
+    if (!token) {
       return
     }
 
@@ -144,6 +145,11 @@ export default defineContentScript({
       queryUI,
       currentQueryTriggerEl: null
     }
+
+    document.addEventListener(CUSTOM_EVENT_TYPE.MASK_CLICK_EVENT, (e: any) => {
+      const { word, rect } = e.detail as MaskClickEventDetail
+      queryUI.mount({ text: word, triggerRect: rect, token })
+    })
 
     createWindowSelection(context).onSelectionChange(
       onSelectionChange.bind(null, context)

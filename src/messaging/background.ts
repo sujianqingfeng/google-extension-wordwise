@@ -53,6 +53,9 @@ function _createBackgroundMessage(context: BackgroundContext) {
       if (index !== -1) {
         context.words.splice(index, 1)
       }
+    },
+    getWords() {
+      return context.words
     }
   }
 }

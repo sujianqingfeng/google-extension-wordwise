@@ -32,7 +32,6 @@ export interface BackgroundContext {
 }
 
 export interface QueryUI {
-  isMounted: boolean
   mount: (options: {
     text?: string
     triggerRect?: DOMRect
