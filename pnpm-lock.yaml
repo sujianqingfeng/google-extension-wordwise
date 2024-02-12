@@ -14,6 +14,9 @@ dependencies:
   '@webext-core/proxy-service':
     specifier: ^1.2.0
     version: 1.2.0(@webext-core/messaging@1.4.0)(webextension-polyfill@0.10.0)
+  date-fns:
+    specifier: ^3.3.1
+    version: 3.3.1
   react:
     specifier: ^18.2.0
     version: 18.2.0
@@ -2496,6 +2499,10 @@ packages:
     resolution: {integrity: sha512-0R9ikRb668HB7QDxT1vkpuUBtqc53YyAwMwGeUFKRojY/NWKvdZ+9UYtRfGmhqNbRkTSVpMbmyhXipFFv2cb/A==}
     engines: {node: '>= 12'}
     dev: true
+
+  /date-fns@3.3.1:
+    resolution: {integrity: sha512-y8e109LYGgoQDveiEBD3DYXKba1jWf5BA8YU1FL5Tvm0BTdEfy54WLCwnuYWZNnzzvALy/QQ4Hov+Q9RVRv+Zw==}
+    dev: false
 
   /debounce@1.2.1:
     resolution: {integrity: sha512-XRRe6Glud4rd/ZGQfiV1ruXSfbvfJedlV9Y6zOlP+2K04vBYiJEte6stfFkCP03aMnY5tsipamumUjL14fofug==}

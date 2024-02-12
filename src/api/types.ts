@@ -71,3 +71,12 @@ export type TranslateParams = {
 export type TranslateResp = {
   result: string
 }
+
+export type ICreateReadLater = {
+  source: string
+  title: string
+  desc: string
+  author: string
+  publishedTime: number 
+  content: string
+}

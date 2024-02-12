@@ -1,10 +1,7 @@
 import type { IWordRespItem, LoginReq, LoginResp } from './types'
 
 export const fetchLoginApi = (body: LoginReq) => {
-  return postWithTokenFetcher<LoginResp>({
-    url: '/auth',
-    body
-  })
+  return postWithTokenFetcher<LoginResp>({url: '/auth'},{arg: body})
 }
 
 export const fetchAllWordsApi = (token: string) => {

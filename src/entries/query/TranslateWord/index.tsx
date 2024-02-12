@@ -35,11 +35,11 @@ export default function TranslateWord(props: TranslateWordProps) {
   )
 
   const { trigger: collectWord } = useSWRMutation(
-    { url: '/word', token, body: { word } },
+    { url: '/word', token },
     postWithTokenFetcher
   )
   const { trigger: removeWord } = useSWRMutation(
-    { url: '/word', token, body: { word } },
+    { url: '/word', token },
     deleteWithTokenFetcher
   )
 
@@ -49,7 +49,7 @@ export default function TranslateWord(props: TranslateWordProps) {
       return
     }
 
-    next ? await collectWord() : await removeWord()
+    next ? await collectWord({word}) : await removeWord({word})
 
     // TODO: remove range words
     if (next) {

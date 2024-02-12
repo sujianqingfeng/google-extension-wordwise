@@ -10,9 +10,9 @@ export default function Dashboard(props: DashboardProps) {
   const { user } = props
 
   return (
-    <>
+    <div className='p-2'>
       <User {...user!} />
       <Later />
-    </>
+    </div>
   )
 }
