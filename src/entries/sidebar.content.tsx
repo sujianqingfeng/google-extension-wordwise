@@ -5,7 +5,7 @@ import type {
 import ReactDOM from 'react-dom/client'
 import Sidebar from './sidebar/Sidebar'
 import { onMessage } from '../messaging/content'
-import { SIDEBAR_SHADOW_TAG_NAME } from '@/constants'
+import { SIDEBAR_SHADOW_TAG_NAME, TOKEN } from '@/constants'
 
 import '~/assets/main.css'
 
@@ -15,13 +15,15 @@ function createSidebar(ctx: ContentScriptContext) {
 
   return async function toggle() {
     if (!ui) {
+      const token = await storage.getItem<string>(TOKEN)
+
       ui = await createShadowRootUi(ctx, {
         name: SIDEBAR_SHADOW_TAG_NAME,
         position: 'inline',
         anchor: 'body',
         onMount: (container) => {
           const root = ReactDOM.createRoot(container)
-          root.render(<Sidebar removeSidebar={ui!.remove} />)
+          root.render(<Sidebar removeSidebar={ui!.remove} token={token} />)
           isMounted = true
           return root
         },

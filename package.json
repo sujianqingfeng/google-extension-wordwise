@@ -7,7 +7,7 @@
   "module": "src/main.tsx",
   "scripts": {
     "dev": "wxt",
-    "build": "tsc && vite build",
+    "build": "wxt build",
     "pack": "web-ext build --source-dir dist",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "test": "vitest",

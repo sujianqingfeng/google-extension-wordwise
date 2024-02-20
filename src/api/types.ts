@@ -77,6 +77,6 @@ export type ICreateReadLater = {
   title: string
   desc: string
   author: string
-  publishedTime: number 
+  publishedTime: string
   content: string
 }

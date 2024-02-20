@@ -24,16 +24,8 @@ async function fetchAllWords(token: string) {
   }
 }
 
-export default defineBackground(async () => {
-  console.log('Hello background!', { id: browser.runtime.id })
 
-  const context: BackgroundContext = {
-    user: null,
-    words: []
-  }
-
-  registerBackgroundMessage(context)
-
+async function init(context: BackgroundContext){
   const token = await storage.getItem<string>(TOKEN)
 
   if (token) {
@@ -43,10 +35,24 @@ export default defineBackground(async () => {
     const words = await fetchAllWords(token)
     context.words = words || []
   }
+}
+
+export default defineBackground(() => {
+  console.log('Hello background!', { id: browser.runtime.id })
+
+  const context: BackgroundContext = {
+    user: null,
+    words: []
+  }
+
+  registerBackgroundMessage(context)
+
+  init(context)
 
   browser.action.onClicked.addListener((tab) => {
     if (tab.id) {
       sendContentMessage('toggleSidebar', undefined, tab.id)
     }
   })
+
 })

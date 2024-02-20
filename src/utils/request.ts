@@ -1,14 +1,17 @@
 export const BASE_URL = import.meta.env.VITE_BASE_API_URL
 
 export function createWithTokenFetcher(method: string) {
-  return async <T = Record<string, any>,R = any>(key: {
-    url: string
-    token?: string
-    body?: Record<string,any>
-  }, options: { arg?: R} = {}) => {
-    const { token, url,body } = key
-    const {arg} = options
-    
+  return async <T = Record<string, any>, R = any>(
+    key: {
+      url: string
+      token?: string
+      body?: Record<string, any>
+    },
+    options: { arg?: R } = {}
+  ) => {
+    const { token, url, body } = key
+    const { arg } = options
+
     const headers: HeadersInit = {}
 
     if (token) {
@@ -19,7 +22,11 @@ export function createWithTokenFetcher(method: string) {
     const response = await fetch(mergeUrl, {
       headers,
       method,
-      body: arg ? new URLSearchParams(arg) : body ? new URLSearchParams(body): undefined
+      body: arg
+        ? new URLSearchParams(arg)
+        : body
+        ? new URLSearchParams(body)
+        : undefined
     })
 
     if (!response.ok) {
