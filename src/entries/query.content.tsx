@@ -118,9 +118,13 @@ function createQueryUI(ctx: ContentScriptContext): QueryUI {
   }
 }
 
-function createKeyType(context: QueryContentContext) {
+function createKeyType(
+  context: QueryContentContext,
+  keydown: (e: KeyboardEvent) => void
+) {
   document.addEventListener('keydown', (e) => {
     context.isPressedAlt = e.altKey
+    keydown(e)
   })
 
   document.addEventListener('keyup', (e) => {
@@ -162,7 +166,11 @@ export default defineContentScript({
       queryUI.mount({ text: word, triggerRect: rect, token })
     })
 
-    createKeyType(context)
+    createKeyType(context, (e) => {
+      if (e.altKey) {
+        onSelectionChange(context)
+      }
+    })
 
     createWindowSelection(context).onSelectionChange(
       onSelectionChange.bind(null, context)
