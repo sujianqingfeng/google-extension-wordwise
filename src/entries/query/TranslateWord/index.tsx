@@ -1,7 +1,9 @@
 import type { IDictQueryResultResp, IQueryWordCollectedResp } from '@/api/types'
+import { MdExpandMore } from 'react-icons/md'
 import useSWR from 'swr'
 import useSWRMutation from 'swr/mutation'
 import Collect from './Collect'
+import Expand from './Expand'
 import Phonetic from './Phonetic'
 import Translate from './Translate'
 import WordForm from './WordForm'
@@ -49,7 +51,7 @@ export default function TranslateWord(props: TranslateWordProps) {
       return
     }
 
-    next ? await collectWord({word}) : await removeWord({word})
+    next ? await collectWord({ word }) : await removeWord({ word })
 
     // TODO: remove range words
     if (next) {
@@ -71,31 +73,47 @@ export default function TranslateWord(props: TranslateWordProps) {
 
   return (
     <div>
-      <div className="flex justify-between items-center dark:text-gray-300">
-        <div className="text-[20px] font-bold">{result?.word}</div>
-        <Collect
-          onCollect={onCollect}
-          isCollected={!!collectedResult?.isCollected}
-        />
+      <div className="p-2">
+        <div className="flex justify-between items-center dark:text-gray-300">
+          <div className="text-[20px] font-bold">{result?.word}</div>
+          <Collect
+            onCollect={onCollect}
+            isCollected={!!collectedResult?.isCollected}
+          />
+        </div>
+        <div className="flex justify-start items-center gap-2 mt-1">
+          <Phonetic
+            label="uk"
+            phonetic={result?.ukPhonetic}
+            speech={result?.ukSpeech}
+          />
+          <Phonetic
+            label="us"
+            phonetic={result?.usPhonetic}
+            speech={result?.usSpeech}
+          />
+        </div>
+
+        {result?.examTypes && (
+          <div className="mt-2 text-[10px] flex gap-1 flex-wrap">
+            {result.examTypes.map((type, i) => {
+              return (
+                <span key={i} className="dark:text-gray-400">
+                  {type}
+                </span>
+              )
+            })}
+          </div>
+        )}
+
+        <div className="flex flex-col gap-1 mt-2 dark:text-gray-400">
+          {result?.translations?.map((trs, i) => (
+            <Translate key={i} {...trs} />
+          ))}
+        </div>
       </div>
-      <div className="flex justify-start items-center gap-2 mt-1">
-        <Phonetic
-          label="uk"
-          phonetic={result?.ukPhonetic}
-          speech={result?.ukSpeech}
-        />
-        <Phonetic
-          label="us"
-          phonetic={result?.usPhonetic}
-          speech={result?.usSpeech}
-        />
-      </div>
-      <div className="flex gap-2 mt-2 flex-wrap">
-        {result?.forms?.map((f, i) => <WordForm key={i} {...f} />)}
-      </div>
-      <div className="flex flex-col gap-1 mt-2 dark:text-gray-400">
-        {result?.translations?.map((trs, i) => <Translate key={i} {...trs} />)}
-      </div>
+
+      <Expand forms={result?.forms} />
     </div>
   )
 }

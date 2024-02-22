@@ -138,8 +138,6 @@ export default defineContentScript({
   cssInjectionMode: 'ui',
   runAt: 'document_idle',
   async main(ctx) {
-    console.log('🚀 ~ ctx: query')
-
     const bgs = createBackgroundMessage()
 
     const user = await bgs.getUser()

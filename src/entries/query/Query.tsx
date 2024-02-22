@@ -57,7 +57,7 @@ export default function Query(props: QueryProps) {
         style={{ top: top ?? position.top, left: left ?? position.left }}
         className="fixed flex justify-center items-start bg-base z-9999"
       >
-        <div className="w-[350px] bg-base p-2 rounded-md shadow">
+        <div className="w-[350px] bg-base rounded-md shadow">
           {showSearch && (
             <Search
               onQuery={onQuery}

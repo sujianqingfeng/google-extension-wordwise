@@ -59,6 +59,7 @@ export type IDictionaryQueryResult = {
   usSpeech?: string
   forms: IDictionaryQueryForm[]
   translations: IDictionaryQueryTranslate[]
+  examTypes: string[]
 }
 
 export type IDictQueryResultResp = IDictionaryQueryResult

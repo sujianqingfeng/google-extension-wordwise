@@ -23,7 +23,9 @@ function createSidebar(ctx: ContentScriptContext) {
         anchor: 'body',
         onMount: (container) => {
           const root = ReactDOM.createRoot(container)
-          root.render(<Sidebar removeSidebar={ui!.remove} token={token} />)
+          root.render(
+            <Sidebar removeSidebar={ui!.remove} token={token ?? ''} />
+          )
           isMounted = true
           return root
         },
@@ -44,8 +46,6 @@ export default defineContentScript({
   cssInjectionMode: 'ui',
   runAt: 'document_idle',
   async main(ctx) {
-    console.log('🚀 ~ ctx: sider')
-
     const toggle = createSidebar(ctx)
     onMessage('toggleSidebar', toggle)
   }

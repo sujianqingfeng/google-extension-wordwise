@@ -6,9 +6,7 @@ export default defineContentScript({
   matches: ['<all_urls>'],
   runAt: 'document_idle',
   cssInjectionMode: 'manifest',
-  async main(ctx) {
-    console.log('🚀 ~ ctx: range')
-
+  async main() {
     const bgs = createBackgroundMessage()
     const user = await bgs.getUser()
 
