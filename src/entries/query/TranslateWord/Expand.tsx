@@ -16,7 +16,7 @@ export default function Expand(props: ExpandProps) {
   return (
     <div>
       {isExpand && (
-        <div className="px-2 flex gap-2 mt-2 flex-wrap">
+        <div className="px-2 flex gap-2 mt-2 flex-wrap text-black">
           {forms.map((f, i) => (
             <WordForm key={i} {...f} />
           ))}

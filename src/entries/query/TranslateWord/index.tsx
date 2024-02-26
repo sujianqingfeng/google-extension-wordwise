@@ -74,7 +74,7 @@ export default function TranslateWord(props: TranslateWordProps) {
   return (
     <div>
       <div className="p-2">
-        <div className="flex justify-between items-center dark:text-gray-300">
+        <div className="flex justify-between items-center text-black dark:text-gray-300">
           <div className="text-[20px] font-bold">{result?.word}</div>
           <Collect
             onCollect={onCollect}
@@ -95,18 +95,12 @@ export default function TranslateWord(props: TranslateWordProps) {
         </div>
 
         {result?.examTypes && (
-          <div className="mt-2 text-[10px] flex gap-1 flex-wrap">
-            {result.examTypes.map((type, i) => {
-              return (
-                <span key={i} className="dark:text-gray-400">
-                  {type}
-                </span>
-              )
-            })}
+          <div className="mt-2 text-[10px] flex gap-1 flex-wrap dark:text-gray-400 text-black">
+            {result.examTypes.join('/')}
           </div>
         )}
 
-        <div className="flex flex-col gap-1 mt-2 dark:text-gray-400">
+        <div className="flex flex-col gap-1 mt-2 dark:text-gray-400 text-black">
           {result?.translations?.map((trs, i) => (
             <Translate key={i} {...trs} />
           ))}
