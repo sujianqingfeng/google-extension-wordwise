@@ -1,11 +1,11 @@
-import { test, describe, expect } from 'vitest'
-import { matchWordsIndices } from '../../entries/core/range'
+import { test, describe, expect } from "vitest";
+import { matchWordsIndices } from "../range";
 
-describe('range', () => {
-  test('', () => {
-    const text = 'hello word, hello world, word hello'
-    const words = ['hello', 'word']
-    const indices = matchWordsIndices(text, words)
+describe("range", () => {
+  test("", () => {
+    const text = "hello word, hello world, word hello";
+    const words = ["hello", "word"];
+    const indices = matchWordsIndices(text, words);
     expect(indices).toMatchInlineSnapshot(`
       [
         {
@@ -29,6 +29,6 @@ describe('range', () => {
           "word": "hello",
         },
       ]
-    `)
-  })
-})
+    `);
+  });
+});

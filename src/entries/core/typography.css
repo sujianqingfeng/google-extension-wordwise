@@ -1,22 +1,21 @@
-.word-wise-typography-hover{
-  font-size: 12px;
-  border-radius: 4px;
-  background-color: #fff;
-  color: #de7897;
-  margin-left: 4px;
-  cursor: pointer;
-  font-weight: bold;
-  border: 1px solid gray;
-  position: absolute;
-  display: inline-flex;
-  justify-content: center;
-  align-items: center;
-  width: 26px;
-  height: 26px;
+.word-wise-typography-hover {
+    font-size: 12px;
+    border-radius: 4px;
+    background-color: #fff;
+    color: rgb(225 128 188);
+    margin-left: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    border: 1px solid rgb(236 236 237);
+    position: absolute;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 26px;
+    height: 26px;
 }
 
-
 .word-wise-typography-translation {
-  font-size: 0.6em;
-  filter: grayscale(50%);
+    font-size: 0.9em;
+    filter: grayscale(50%);
 }
