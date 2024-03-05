@@ -3,7 +3,7 @@ import {
   ENABLE_TAG_ELEMENTS,
   EXCLUDE_TAG_ELEMENTS
 } from '../../constants'
-import { MaskClickEventDetail, WrapperElementOptions } from '../../types'
+import type { MaskClickEventDetail, WrapperElementOptions } from '@/types'
 
 function generateWordsPattern(words: string[]) {
   const wordsPattern = words.join('|')

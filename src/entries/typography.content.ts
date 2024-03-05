@@ -43,10 +43,10 @@ async function onTranslateTypography(target: HTMLElement) {
 
   const { result } = await fetchTranslateApi(token, { text });
 
-  const translationEl = document.createElement("div");
-  translationEl.innerHTML = `<div class='word-wise-typography-translation'>${result}</div>`;
-
-  parent.insertBefore(translationEl, target.nextSibling);
+  const cloneEl = target.cloneNode(true) as HTMLElement;
+  cloneEl.classList.add('word-wise-typography-translation')
+  cloneEl.textContent = result;
+  parent.insertBefore(cloneEl, target.nextSibling);
 }
 
 function createTypographyTranslatorElement() {

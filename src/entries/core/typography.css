@@ -17,5 +17,5 @@
 
 .word-wise-typography-translation {
     font-size: 0.9em;
-    filter: grayscale(50%);
+    opacity: 0.5;
 }

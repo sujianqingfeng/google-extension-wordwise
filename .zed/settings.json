@@ -4,6 +4,6 @@
 // see the documentation: https://zed.dev/docs/configuring-zed#folder-specific-settings
 {
   "formatter": "auto",
-  "format_on_save": "on",
+  "format_on_save": "off",
   "code_actions_on_format": { "source.fixAll.eslint": true }
 }
