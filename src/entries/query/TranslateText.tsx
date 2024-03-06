@@ -24,7 +24,7 @@ export default function TranslateText(props: TranslateTextProps) {
   }
 
   return (
-    <div className="p-2 text-sm font-normal dark:text-gray-300">
+    <div className="p-2 text-sm font-normal dark:text-gray-400 text-black">
       <div className="mt-2">{text}</div>
       <div className="mt-2">{translate?.result}</div>
     </div>
