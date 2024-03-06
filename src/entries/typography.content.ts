@@ -44,9 +44,11 @@ async function onTranslateTypography(target: HTMLElement) {
   const { result } = await fetchTranslateApi(token, { text });
 
   const cloneEl = target.cloneNode(true) as HTMLElement;
+  target.classList.add('word-wise-typography-original')
   cloneEl.classList.add('word-wise-typography-translation')
   cloneEl.textContent = result;
   parent.insertBefore(cloneEl, target.nextSibling);
+
 }
 
 function createTypographyTranslatorElement() {
@@ -110,7 +112,7 @@ function onTypographyMove(e: MouseEvent) {
     return;
   }
 
-  if (target.classList.contains("word-wise-typography-translation")) {
+  if (target.classList.contains("word-wise-typography-translation") || target.classList.contains("word-wise-typography-original")) {
     return;
   }
 
