@@ -15,7 +15,6 @@ export default defineContentScript({
     }
 
     const words = await bgs.getWords()
-    console.log('🚀 ~ main ~ words:', words)
     const pureWords = words.map((word) => word.word)
     rangeWords(pureWords)
   }

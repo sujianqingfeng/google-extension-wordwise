@@ -26,7 +26,10 @@ function removeElement(container: HTMLElement, el: HTMLElement) {
 }
 
 async function onTranslateTypography(target: HTMLElement) {
-  const text = target.textContent?.trim();
+  const cloneTargetEl = target.cloneNode(true) as HTMLElement;
+  cloneTargetEl.querySelectorAll('.word-wise-typography-hover').forEach((el) => el.remove());
+
+  const text = cloneTargetEl.textContent?.trim();
   if (!text) {
     return;
   }
@@ -43,11 +46,10 @@ async function onTranslateTypography(target: HTMLElement) {
 
   const { result } = await fetchTranslateApi(token, { text });
 
-  const cloneEl = target.cloneNode(true) as HTMLElement;
   target.classList.add('word-wise-typography-original')
-  cloneEl.classList.add('word-wise-typography-translation')
-  cloneEl.textContent = result;
-  parent.insertBefore(cloneEl, target.nextSibling);
+  cloneTargetEl.classList.add('word-wise-typography-translation')
+  cloneTargetEl.textContent = result;
+  parent.insertBefore(cloneTargetEl, target.nextSibling);
 
 }
 
