@@ -81,3 +81,9 @@ export type ICreateReadLater = {
   publishedTime: string
   content: string
 }
+
+
+// ai
+export type IAnalysisGrammarResp = {
+  result: string
+}
