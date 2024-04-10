@@ -1,5 +1,4 @@
 import { TbVolume } from 'react-icons/tb'
-import { BASE_URL } from '../../../utils/request'
 
 type PhoneticProps = {
   label: string
@@ -26,11 +25,11 @@ export default function Phonetic(props: PhoneticProps) {
   }
 
   return (
-    <div className="flex items-center text-sm gap-1">
+    <div className="flex items-center text-sm gap-1 text-black">
       <span className="dark:text-gray-400">{label}</span>
       <div
         onClick={onPlay}
-        className={`bg-gray-100 dark:bg-slate-400 rounded-full px-1 flex items-center gap-1 ${
+        className={`bg-gray-100 dark:bg-slate-400/10 dark:text-gray-400 rounded-full px-1 flex items-center gap-1 ${
           speech ? 'cursor-pointer' : ''
         }`}
       >

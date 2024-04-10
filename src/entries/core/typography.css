@@ -1,0 +1,21 @@
+.word-wise-typography-hover {
+    font-size: 12px;
+    border-radius: 4px;
+    background-color: #fff !important;
+    color: rgb(225 128 188);
+    margin-left: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    border: 1px solid rgb(236 236 237);
+    position: absolute;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 20px;
+    height: 20px;
+}
+
+.word-wise-typography-translation {
+    font-size: 0.9em;
+    opacity: 0.5;
+}

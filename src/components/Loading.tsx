@@ -5,5 +5,5 @@ type LoadingProps = {
 }
 export default function Loading(props: LoadingProps) {
   const { size = 20 } = props
-  return <ImSpinner2 size={size} className="animate-spin dark:text-gray-300" />
+  return <ImSpinner2 size={size} className="animate-spin dark:text-gray-400 text-black" />
 }

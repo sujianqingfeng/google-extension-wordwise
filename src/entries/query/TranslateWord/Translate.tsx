@@ -1,4 +1,4 @@
-import type { IDictionaryQueryTranslate } from '../../../api/types'
+import type { IDictionaryQueryTranslate } from '@/api/types'
 
 type TranslateProps = IDictionaryQueryTranslate
 

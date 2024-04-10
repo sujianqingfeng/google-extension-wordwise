@@ -1,6 +1,6 @@
 import { createWindowSelection } from './events'
-import Query, { QueryProps } from './Query'
-import { maskWordsInElement, rangeWords } from './range'
+import Query, { QueryProps } from '../entries/query/Query'
+import { maskWordsInElement, rangeWords } from '../entries/core/range'
 import {
   appendChildToBody,
   createRootRender,
@@ -10,7 +10,6 @@ import {
 import { createContentRpc } from './rpc'
 import Side from './Side'
 import '../index.css'
-import { typography } from './typography'
 import { fetchTranslateApi } from '../api'
 import {
   CONTENT_MESSAGE_TYPE,
@@ -19,6 +18,7 @@ import {
   SIDE_ROOT_ID,
   CUSTOM_EVENT_TYPE
 } from '../constants'
+import { typography } from '../entries/core/typography'
 import { Context, MaskClickEventDetail } from '../types'
 import { debounce } from '../utils'
 import { breakChar, isEnglishText } from '../utils/text'
