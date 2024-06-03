@@ -1,138 +1,155 @@
-import { createBackgroundMessage } from "@/messaging/background";
-import "./core/typography.css";
-import { fetchTranslateApi } from "@/api";
-import { TOKEN } from "@/constants";
+import { createBackgroundMessage } from '@/messaging/background'
+import './core/typography.css'
+import { fetchTranslateApi } from '@/api'
+import { TOKEN } from '@/constants'
 
 const TEXT_TAGS = [
-  "p",
-  "div",
-  "h1",
-  "h2",
-  "h3",
-  "h4",
-  "h5",
-  "h6",
-  "main",
-  "article",
-  "section",
-  "figure",
-  "li",
-];
+  'p',
+  'div',
+  'h1',
+  'h2',
+  'h3',
+  'h4',
+  'h5',
+  'h6',
+  'main',
+  'article',
+  'section',
+  'figure',
+  'li'
+]
 
 function removeElement(container: HTMLElement, el: HTMLElement) {
   if (container.contains(el)) {
-    container.removeChild(el);
+    container.removeChild(el)
   }
 }
 
 async function onTranslateTypography(target: HTMLElement) {
-  const cloneTargetEl = target.cloneNode(true) as HTMLElement;
-  cloneTargetEl.querySelectorAll('.word-wise-typography-hover').forEach((el) => el.remove());
+  const cloneTargetEl = target.cloneNode(true) as HTMLElement
+  cloneTargetEl
+    .querySelectorAll('.word-wise-typography-hover')
+    .forEach((el) => el.remove())
 
-  const text = cloneTargetEl.textContent?.trim();
+  const text = cloneTargetEl.textContent?.trim()
   if (!text) {
-    return;
+    return
   }
 
-  const parent = target.parentElement;
+  const parent = target.parentElement
   if (!parent) {
-    return;
+    return
   }
 
-  const token = await storage.getItem<string>(TOKEN);
+  const token = await storage.getItem<string>(TOKEN)
   if (!token) {
-    return;
+    return
   }
 
-  const { result } = await fetchTranslateApi(token, { text });
+  const { result } = await fetchTranslateApi(token, { text })
 
   target.classList.add('word-wise-typography-original')
   cloneTargetEl.classList.add('word-wise-typography-translation')
-  cloneTargetEl.textContent = result;
-  parent.insertBefore(cloneTargetEl, target.nextSibling);
-
+  cloneTargetEl.textContent = result
+  parent.insertBefore(cloneTargetEl, target.nextSibling)
 }
 
-function createTypographyTranslatorElement() {
-  const el = document.createElement("div");
-  el.className = "word-wise-typography-hover";
-  el.appendChild(document.createTextNode("W"));
-  return el;
+let globalTranslatorElement: HTMLDivElement | null = null
+function createTypographyTranslatorElement({
+  left,
+  top
+}: {
+  top: number
+  left: number
+}) {
+  let el = globalTranslatorElement
+  if (!el) {
+    el = globalTranslatorElement = document.createElement('div')
+    el.className = 'word-wise-typography-hover'
+    el.appendChild(document.createTextNode('W'))
+  }
+
+  el.style.top = `${top}px`
+  el.style.left = `${left}px`
+  return el
 }
 
-function showTypographyTranslatorElement(target: HTMLElement) {
-  const typographyTranslatorEl = createTypographyTranslatorElement();
-  target.appendChild(typographyTranslatorEl);
+function showTypographyTranslatorElement(
+  target: HTMLElement,
+  { clientX, clientY }: { clientX: number; clientY: number }
+) {
+  const typographyTranslatorEl = createTypographyTranslatorElement({
+    top: clientY - 10,
+    left: clientX + 10
+  })
+  document.body.appendChild(typographyTranslatorEl)
 
-  typographyTranslatorEl.addEventListener("click", () =>
-    onTranslateTypography(target),
-  );
+  typographyTranslatorEl.addEventListener('click', () =>
+    onTranslateTypography(target)
+  )
 
   const mouseOut = () => {
-    removeElement(target, typographyTranslatorEl);
-    target.removeEventListener("mouseout", debounceMouseOut);
-    target.removeEventListener("mouseover", debounceMouseOut.cancel);
-  };
+    removeElement(document.body, typographyTranslatorEl)
+    target.removeEventListener('mouseout', debounceMouseOut)
+    target.removeEventListener('mouseover', debounceMouseOut.cancel)
+  }
 
-  const debounceMouseOut = debounce(mouseOut, 500);
-  target.addEventListener("mouseout", debounceMouseOut);
-  target.addEventListener("mouseover", debounceMouseOut.cancel);
-
-  typographyTranslatorEl.addEventListener("mouseout", debounceMouseOut);
-  typographyTranslatorEl.addEventListener("mouseover", debounceMouseOut.cancel);
+  const debounceMouseOut = debounce(mouseOut, 500)
+  setTimeout(debounceMouseOut, 3000)
 }
 
 function onTypographyMove(e: MouseEvent) {
-  const { clientX, clientY } = e;
-  const currentEl = document.elementFromPoint(clientX, clientY);
+  const { clientX, clientY } = e
+  const currentEl = document.elementFromPoint(clientX, clientY)
   if (!currentEl) {
-    return;
+    return
   }
 
   if (!TEXT_TAGS.includes(currentEl.tagName.toLowerCase())) {
-    return;
+    return
   }
 
-  const text = currentEl.textContent?.trim();
+  const text = currentEl.textContent?.trim()
   if (!text) {
-    return;
+    return
   }
 
   if (!/\s/.test(text)) {
-    return;
+    return
   }
 
-  const target = currentEl as HTMLElement;
+  const target = currentEl as HTMLElement
   if (target.dataset.wordWise) {
-    return;
+    return
   }
 
-  const isTranslated = target.querySelector(
-    ".word-wise-typography-translation",
-  );
+  const isTranslated = target.querySelector('.word-wise-typography-translation')
   if (isTranslated) {
-    return;
+    return
   }
 
-  if (target.classList.contains("word-wise-typography-translation") || target.classList.contains("word-wise-typography-original")) {
-    return;
+  if (
+    target.classList.contains('word-wise-typography-translation') ||
+    target.classList.contains('word-wise-typography-original')
+  ) {
+    return
   }
 
-  showTypographyTranslatorElement(target);
+  showTypographyTranslatorElement(target, { clientX, clientY })
 }
 
 export default defineContentScript({
-  matches: ["<all_urls>"],
-  runAt: "document_idle",
-  cssInjectionMode: "manifest",
+  matches: ['<all_urls>'],
+  runAt: 'document_idle',
+  cssInjectionMode: 'manifest',
   main: async () => {
-    const bgs = createBackgroundMessage();
-    const user = await bgs.getUser();
+    const bgs = createBackgroundMessage()
+    const user = await bgs.getUser()
 
     if (!user) {
-      return;
+      return
     }
 
-    document.addEventListener("mousemove", debounce(onTypographyMove, 500));
-  },
-});
+    document.addEventListener('mousemove', debounce(onTypographyMove, 500))
+  }
+})
