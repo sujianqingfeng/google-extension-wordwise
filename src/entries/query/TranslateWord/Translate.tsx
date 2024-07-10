@@ -1,13 +1,13 @@
-import type { IDictionaryQueryTranslate } from '@/api/types'
+import type { DictionaryQueryTranslate } from "@/api/types"
 
-type TranslateProps = IDictionaryQueryTranslate
+type TranslateProps = DictionaryQueryTranslate
 
 export default function Translate(props: TranslateProps) {
-  const { translation, partName } = props
-  return (
-    <div className="flex gap-1 text-sm">
-      <div>{partName}</div>
-      <div>{translation}</div>
-    </div>
-  )
+	const { translation, partName } = props
+	return (
+		<div className="flex gap-1 text-sm">
+			<div>{partName}</div>
+			<div>{translation}</div>
+		</div>
+	)
 }

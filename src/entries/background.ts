@@ -1,17 +1,7 @@
 import { registerBackgroundMessage } from "../messaging/background"
 import { sendContentMessage } from "../messaging/content"
-import { fetchAllWordsApi, fetchUserInfoApi } from "@/api"
+import { fetchAllWordsApi } from "@/api"
 import type { BackgroundContext } from "@/types"
-
-async function fetchUser() {
-	const { error, data } = await createSafePromise(fetchUserInfoApi)()
-
-	if (error) {
-		return null
-	}
-
-	return data
-}
 
 async function fetchAllWords() {
 	const { error, data } = await createSafePromise(fetchAllWordsApi)()

@@ -31,38 +31,10 @@ export type IQueryWordCollectedParams = {
 	word: string
 }
 
-export type IQueryWordCollectedResp = {
-	isCollected: boolean
-}
-
 export type IWordRespItem = {
 	id: string
 	word: string
 }
-
-// dictionary
-export type IDictionaryQueryForm = {
-	name: string
-	value: string
-}
-
-export type IDictionaryQueryTranslate = {
-	translation: string
-	partName: string
-}
-
-export type IDictionaryQueryResult = {
-	word: string
-	ukPhonetic?: string
-	usPhonetic?: string
-	ukSpeech?: string
-	usSpeech?: string
-	forms: IDictionaryQueryForm[]
-	translations: IDictionaryQueryTranslate[]
-	examTypes: string[]
-}
-
-export type IDictQueryResultResp = IDictionaryQueryResult
 
 // translation
 export type TranslateParams = {
@@ -73,7 +45,23 @@ export type TranslateResp = {
 	result: string
 }
 
-export type ICreateReadLater = {
+// ai
+export type IAnalysisGrammarResp = {
+	result: string
+}
+
+// token
+export type ExchangeTokenParams = {
+	idToken: string
+}
+
+export type ExchangeTokenResp = {
+	accessToken: string
+	refreshToken: string
+}
+
+// read later
+export type CreateReadLaterParams = {
 	source: string
 	title: string
 	desc: string
@@ -82,17 +70,29 @@ export type ICreateReadLater = {
 	content: string
 }
 
-// ai
-export type IAnalysisGrammarResp = {
-	result: string
+export type DictionaryQueryForm = {
+	name: string
+	value: string
 }
 
-//
-export type ExchangeTokenParams = {
-	idToken: string
+export type DictionaryQueryTranslate = {
+	translation: string
+	partName: string
 }
 
-export type ExchangeTokenResp = {
-	token: string
-	refreshToken: string
+export type DictionaryQueryResp = {
+	word: string
+	ukPhonetic?: string
+	usPhonetic?: string
+	ukSpeech?: string
+	usSpeech?: string
+	forms: DictionaryQueryForm[]
+	translations: DictionaryQueryTranslate[]
+	examTypes: string[]
+}
+
+// word
+
+export type QueryWordCollectedResp = {
+	collected: boolean
 }

@@ -6,7 +6,7 @@
 	"main": "src/main.tsx",
 	"module": "src/main.tsx",
 	"scripts": {
-		"dev": "wxt",
+		"dev": "wxt -p 3002",
 		"build": "wxt build",
 		"pack": "web-ext build --source-dir dist",
 		"test": "vitest",

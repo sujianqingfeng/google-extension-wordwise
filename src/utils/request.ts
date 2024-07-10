@@ -48,7 +48,7 @@ function createRequest({
 			return json.data
 		}
 
-		throw new Error("Request failed")
+		throw new Error(res.statusText)
 	}
 }
 
@@ -62,3 +62,5 @@ const createCommonRequestOptions = (method: Method) => {
 
 export const requestGet = createRequest(createCommonRequestOptions("get"))
 export const requestPost = createRequest(createCommonRequestOptions("post"))
+export const requestPut = createRequest(createCommonRequestOptions("put"))
+export const requestDelete = createRequest(createCommonRequestOptions("delete"))

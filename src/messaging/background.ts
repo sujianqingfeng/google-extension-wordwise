@@ -1,4 +1,10 @@
-import { fetchExchangeTokenApi } from "@/api"
+import {
+	fetchAddWordCollectedApi,
+	fetchDictionQueryApi,
+	fetchExchangeTokenApi,
+	fetchRemoveWordCollectedApi,
+	fetchWordCollectedApi,
+} from "@/api"
 import type { BackgroundContext } from "@/types"
 import { defineProxyService } from "@webext-core/proxy-service"
 
@@ -27,48 +33,82 @@ function getAuthUrl() {
 	return url.href
 }
 
+function getIdTokenFromHash(url: string) {
+	const redirectedUrl = new URL(url)
+	let hash = redirectedUrl.hash
+	if (hash.startsWith("#")) {
+		hash = hash.slice(1)
+	}
+	const params = new URLSearchParams(hash)
+	return params.get("id_token")
+}
+
 function _createBackgroundMessage(context: BackgroundContext) {
+	const addWord = (word: string) => {
+		context.words.push({
+			word,
+			id: "",
+		})
+	}
+
+	const removeWord = (word: string) => {
+		const index = context.words.findIndex((item) => item.word === word)
+		if (index !== -1) {
+			context.words.splice(index, 1)
+		}
+	}
+
+	const fetchAddWordCollected = async (word: string) => {
+		const data = await fetchAddWordCollectedApi(word)
+		addWord(word)
+		return data
+	}
+
+	const fetchRemoveWordCollected = async (word: string) => {
+		const data = await fetchRemoveWordCollectedApi(word)
+		removeWord(word)
+		return data
+	}
+
+	const auth = async () => {
+		const redirectedTo = await browser.identity.launchWebAuthFlow({
+			url: getAuthUrl(),
+			interactive: true,
+		})
+
+		if (chrome.runtime.lastError) {
+			throw new Error("redirectedTo is null")
+		}
+
+		const idToken = getIdTokenFromHash(redirectedTo)
+
+		if (!idToken) {
+			throw new Error("idToken is null")
+		}
+
+		const { accessToken, refreshToken } = await fetchExchangeTokenApi({
+			idToken,
+		})
+		setToken(accessToken)
+		setRefreshToken(refreshToken)
+
+		context.user = await fetchUser()
+
+		return context.user
+	}
+
 	return {
-		async auth() {
-			const redirectedTo = await browser.identity.launchWebAuthFlow({
-				url: getAuthUrl(),
-				interactive: true,
-			})
-
-			if (chrome.runtime.lastError) {
-				throw new Error("redirectedTo is null")
-			}
-
-			const redirectedUrl = new URL(redirectedTo)
-			const params = new URLSearchParams(redirectedUrl.hash)
-			const idToken = params.get("id_token")
-
-			if (!idToken) {
-				throw new Error("idToken is null")
-			}
-
-			const { token, refreshToken } = await fetchExchangeTokenApi({ idToken })
-			setToken(token)
-			setRefreshToken(refreshToken)
-		},
-		async getUser() {
+		auth,
+		getUser() {
 			return context.user
-		},
-		addWord(word: string) {
-			context.words.push({
-				word,
-				id: "",
-			})
-		},
-		removeWord(word: string) {
-			const index = context.words.findIndex((item) => item.word === word)
-			if (index !== -1) {
-				context.words.splice(index, 1)
-			}
 		},
 		getWords() {
 			return context.words
 		},
+		fetchDictionQuery: fetchDictionQueryApi,
+		fetchWordCollected: fetchWordCollectedApi,
+		fetchAddWordCollected,
+		fetchRemoveWordCollected,
 	}
 }
 
