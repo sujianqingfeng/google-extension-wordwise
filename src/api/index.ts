@@ -1,34 +1,19 @@
 import type {
-  IWordRespItem,
-  LoginReq,
-  LoginResp,
-  TranslateParams,
-  TranslateResp,
-} from "./types";
+	ExchangeTokenParams,
+	ExchangeTokenResp,
+	IWordRespItem,
+	LoginResp,
+	TranslateParams,
+	TranslateResp,
+} from "./types"
 
-export const fetchLoginApi = (body: LoginReq) => {
-  return postWithTokenFetcher<LoginResp>({ url: "/auth" }, { arg: body });
-};
-
-export const fetchAllWordsApi = (token: string) => {
-  return withTokenFetcher<IWordRespItem[]>({
-    url: `/word/all`,
-    token,
-  });
-};
-
+//
+export const fetchAllWordsApi = () => requestGet<IWordRespItem[]>("/word/all")
 // user
-export const fetchUserInfoApi = (token: string) => {
-  return withTokenFetcher<LoginResp>({
-    url: "/user",
-    token,
-  });
-};
-
+export const fetchUserInfoApi = () => requestGet<LoginResp>("/user")
 // translation
-export const fetchTranslateApi = (token: string, body: TranslateParams) => {
-  return postWithTokenFetcher<TranslateResp>(
-    { url: "/translator/translate", token },
-    { arg: body },
-  );
-};
+export const fetchTranslateApi = (body: TranslateParams) =>
+	requestGet<TranslateResp>("/translator/translate", body)
+//
+export const fetchExchangeTokenApi = (params: ExchangeTokenParams) =>
+	requestPost<ExchangeTokenResp>("/auth/google/id-token", params)

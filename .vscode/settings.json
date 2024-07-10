@@ -1,25 +1,32 @@
 {
-  "cSpell.words": [
-    "Birpc",
-    "sujian",
-    "tailwindcss",
-    "webext",
-    "wordwise"
-  ],
-  "prettier.enable": false,
-  "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": "explicit"
-  },
-  "eslint.validate": [
-    "javascript",
-    "typescript",
-    "javascriptreact",
-    "typescriptreact",
-    "vue",
-    "json",
-    "jsonc",
-    "json5",
-    "yaml"
-  ],
-  "eslint.experimental.useFlatConfig": true
+	"cSpell.words": [
+		"Birpc",
+		"sujian",
+		"tailwindcss",
+		"tanstack",
+		"webext",
+		"wordwise"
+	],
+	"editor.formatOnSave": true,
+	"[javascript]": {
+		"editor.defaultFormatter": "biomejs.biome"
+	},
+	"[json]": {
+		"editor.defaultFormatter": "biomejs.biome"
+	},
+	"[jsonc]": {
+		"editor.defaultFormatter": "biomejs.biome"
+	},
+	"[typescript]": {
+		"editor.defaultFormatter": "biomejs.biome"
+	},
+	"[javascriptreact]": {
+		"editor.defaultFormatter": "biomejs.biome"
+	},
+	"[typescriptreact]": {
+		"editor.defaultFormatter": "biomejs.biome"
+	},
+	"editor.codeActionsOnSave": {
+		"quickfix.biome": "explicit"
+	}
 }

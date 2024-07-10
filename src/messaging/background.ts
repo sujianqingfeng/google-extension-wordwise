@@ -1,64 +1,76 @@
-import type { BackgroundContext } from '@/types'
-import { defineProxyService } from '@webext-core/proxy-service'
-import { storage } from 'wxt/storage'
-import { fetchLoginApi } from '@/api'
-import { TOKEN } from '@/constants'
+import { fetchExchangeTokenApi } from "@/api"
+import type { BackgroundContext } from "@/types"
+import { defineProxyService } from "@webext-core/proxy-service"
+
+function getAuthUrl() {
+	const manifest = chrome.runtime.getManifest()
+
+	if (!manifest.oauth2) {
+		throw new Error("oauth2 is not defined in manifest")
+	}
+
+	if (!manifest.oauth2.scopes) {
+		throw new Error("scopes is not defined in oauth2")
+	}
+
+	const url = new URL("https://accounts.google.com/o/oauth2/auth")
+
+	url.searchParams.set("client_id", manifest.oauth2.client_id)
+	url.searchParams.set("response_type", "id_token")
+	url.searchParams.set("access_type", "offline")
+	url.searchParams.set(
+		"redirect_uri",
+		`https://${chrome.runtime.id}.chromiumapp.org`,
+	)
+	url.searchParams.set("scope", manifest.oauth2.scopes.join(" "))
+
+	return url.href
+}
 
 function _createBackgroundMessage(context: BackgroundContext) {
-  return {
-    async getUser() {
-      return context.user
-    },
-    async auth(authUrl: string) {
-      const redirectUrl: string | undefined = browser.identity.getRedirectURL()
+	return {
+		async auth() {
+			const redirectedTo = await browser.identity.launchWebAuthFlow({
+				url: getAuthUrl(),
+				interactive: true,
+			})
 
-      authUrl = authUrl.replace(
-        /redirect_uri=.+?&/,
-        `redirect_uri=${redirectUrl}&`
-      )
+			if (chrome.runtime.lastError) {
+				throw new Error("redirectedTo is null")
+			}
 
-      const callbackUrl = await browser.identity.launchWebAuthFlow({
-        url: authUrl,
-        interactive: true
-      })
+			const redirectedUrl = new URL(redirectedTo)
+			const params = new URLSearchParams(redirectedUrl.hash)
+			const idToken = params.get("id_token")
 
-      if (!callbackUrl) {
-        throw new Error('callbackUrl is null')
-      }
+			if (!idToken) {
+				throw new Error("idToken is null")
+			}
 
-      const callbackUrlParams = new URL(callbackUrl)
-      const code = callbackUrlParams.searchParams.get('code')
-      if (!code) {
-        throw new Error('code is null')
-      }
-
-      const data = await fetchLoginApi({
-        code,
-        provider: 'google',
-        redirectUrl
-      })
-
-      const { token } = data
-      storage.setItem(TOKEN, token)
-      return data
-    },
-    addWord(word: string) {
-      context.words.push({
-        word,
-        id: ''
-      })
-    },
-    removeWord(word: string) {
-      const index = context.words.findIndex((item) => item.word === word)
-      if (index !== -1) {
-        context.words.splice(index, 1)
-      }
-    },
-    getWords() {
-      return context.words
-    }
-  }
+			const { token, refreshToken } = await fetchExchangeTokenApi({ idToken })
+			setToken(token)
+			setRefreshToken(refreshToken)
+		},
+		async getUser() {
+			return context.user
+		},
+		addWord(word: string) {
+			context.words.push({
+				word,
+				id: "",
+			})
+		},
+		removeWord(word: string) {
+			const index = context.words.findIndex((item) => item.word === word)
+			if (index !== -1) {
+				context.words.splice(index, 1)
+			}
+		},
+		getWords() {
+			return context.words
+		},
+	}
 }
 
 export const [registerBackgroundMessage, createBackgroundMessage] =
-  defineProxyService('background', _createBackgroundMessage)
+	defineProxyService("background", _createBackgroundMessage)

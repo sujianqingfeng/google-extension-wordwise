@@ -1,48 +1,64 @@
+import { objectToQueryString } from "."
+
 export const BASE_URL = import.meta.env.VITE_BASE_API_URL
 
-export function createWithTokenFetcher(method: string) {
-  return async <T = Record<string, any>, R = any>(
-    key: {
-      url: string
-      token?: string
-      body?: Record<string, any>
-    },
-    options: { arg?: R } = {}
-  ) => {
-    const { token, url, body } = key
-    const { arg } = options
+type Method = "get" | "post" | "put" | "delete"
 
-    const headers: HeadersInit = {}
+function createRequest({
+	method,
+	baseUrl = "",
+}: {
+	method: Method
+	baseUrl?: string
+}) {
+	return async <R = any>(
+		url: string,
+		data?: Record<string, any>,
+		opt?: RequestInit,
+	): Promise<R> => {
+		url = `${baseUrl}${url}`
 
-    if (token) {
-      headers.Authorization = `Bearer ${token}`
-    }
+		if (method === "get" && data && Object.keys(data).length) {
+			url = `${url}?${objectToQueryString(data)}`
+		}
 
-    const mergeUrl = `${BASE_URL}${url}`
-    const response = await fetch(mergeUrl, {
-      headers,
-      method,
-      body: arg
-        ? new URLSearchParams(arg)
-        : body
-        ? new URLSearchParams(body)
-        : undefined
-    })
+		const headers: Record<string, any> = {
+			...opt?.headers,
+		}
 
-    if (!response.ok) {
-      throw new Error('Failed to fetch data')
-    }
+		const token = await getToken()
+		console.log("🚀 ~ token:", token)
+		if (token) {
+			headers.authorization = `Bearer ${token}`
+		}
 
-    const { code, data, msg } = await response.json()
+		const body =
+			method === "get" || !data ? undefined : new URLSearchParams(data)
 
-    if (code !== 0) {
-      throw new Error(msg)
-    }
+		const res = await fetch(url, {
+			...opt,
+			method,
+			headers,
+			body,
+		})
 
-    return data as T
-  }
+		console.log("🚀 ~ res:", res)
+		if (res.status === 200) {
+			const json = await res.json()
+			return json.data
+		}
+
+		throw new Error("Request failed")
+	}
 }
 
-export const withTokenFetcher = createWithTokenFetcher('GET')
-export const postWithTokenFetcher = createWithTokenFetcher('POST')
-export const deleteWithTokenFetcher = createWithTokenFetcher('DELETE')
+const BASE_URL_API_PREFIX = "/api"
+const createCommonRequestOptions = (method: Method) => {
+	return {
+		method,
+		baseUrl: `${BASE_URL}${BASE_URL_API_PREFIX}`,
+	}
+}
+
+export const requestGet = createRequest(createCommonRequestOptions("get"))
+export const requestPost = createRequest(createCommonRequestOptions("post"))
