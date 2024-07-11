@@ -1,8 +1,3 @@
-export type IAuthProvidersRespItem = {
-	authUrl: string
-	provider: string
-}
-
 export type LoginReq = {
 	code: string
 	provider: string
@@ -16,7 +11,7 @@ export type LoginResp = {
 	avatar: string
 }
 
-export type IUser = Omit<LoginResp, "token">
+export type UserResp = Omit<LoginResp, "token">
 
 export type ICreateWordDto = {
 	word: string
@@ -38,15 +33,11 @@ export type IWordRespItem = {
 
 // translation
 export type TranslateParams = {
+	provider: "deepL"
 	text: string
 }
 
 export type TranslateResp = {
-	result: string
-}
-
-// ai
-export type IAnalysisGrammarResp = {
 	result: string
 }
 
@@ -95,4 +86,10 @@ export type DictionaryQueryResp = {
 
 export type QueryWordCollectedResp = {
 	collected: boolean
+}
+
+// ai
+export type AnalyzeGrammarParams = {
+	text: string
+	provider: "deepSeek" | "moonshot"
 }

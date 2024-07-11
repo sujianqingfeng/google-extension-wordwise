@@ -1,8 +1,10 @@
 import {
 	fetchAddWordCollectedApi,
+	fetchAnalyzeGrammarApi,
 	fetchDictionQueryApi,
 	fetchExchangeTokenApi,
 	fetchRemoveWordCollectedApi,
+	fetchTranslateApi,
 	fetchWordCollectedApi,
 } from "@/api"
 import type { BackgroundContext } from "@/types"
@@ -107,6 +109,8 @@ function _createBackgroundMessage(context: BackgroundContext) {
 		},
 		fetchDictionQuery: fetchDictionQueryApi,
 		fetchWordCollected: fetchWordCollectedApi,
+		fetchTranslate: fetchTranslateApi,
+		fetchAnalyzeGrammar: fetchAnalyzeGrammarApi,
 		fetchAddWordCollected,
 		fetchRemoveWordCollected,
 	}

@@ -11,9 +11,9 @@ function createRequest({
 	method: Method
 	baseUrl?: string
 }) {
-	return async <R = any>(
+	return async <R = any, T = Record<string, any>>(
 		url: string,
-		data?: Record<string, any>,
+		data?: T,
 		opt?: RequestInit,
 	): Promise<R> => {
 		url = `${baseUrl}${url}`
@@ -27,7 +27,6 @@ function createRequest({
 		}
 
 		const token = await getToken()
-		console.log("🚀 ~ token:", token)
 		if (token) {
 			headers.authorization = `Bearer ${token}`
 		}
@@ -35,12 +34,14 @@ function createRequest({
 		const body =
 			method === "get" || !data ? undefined : new URLSearchParams(data)
 
-		const res = await fetch(url, {
+		const options = {
 			...opt,
 			method,
 			headers,
 			body,
-		})
+		}
+
+		const res = await fetch(url, options)
 
 		console.log("🚀 ~ res:", res)
 		if (res.status === 200) {

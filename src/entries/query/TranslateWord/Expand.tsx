@@ -6,8 +6,7 @@ import WordForm from "./WordForm"
 type ExpandProps = {
 	forms?: DictionaryQueryForm[]
 }
-export default function Expand(props: ExpandProps) {
-	const { forms = [] } = props
+export default function Expand({ forms = [] }: ExpandProps) {
 	const [isExpand, setIsExpand] = useState(false)
 
 	const toggle = () => {

@@ -62,22 +62,15 @@ export default function TranslateWord({ word: _word }: TranslateWordProps) {
 		<div>
 			<div className="p-2">
 				<div className="flex justify-between items-center text-black dark:text-gray-300">
-					<div className="text-[20px] font-bold">{result?.word}</div>
+					<div className="text-[26px] font-bold flex items-end gap-1">
+						{result?.word}
+						<div className="mb-1">
+							<Phonetic type="uk" {...result} />
+						</div>
+					</div>
 					<Collect
 						onCollect={onCollect}
 						isCollected={!!collectedResult?.collected}
-					/>
-				</div>
-				<div className="flex justify-start items-center gap-2 mt-1">
-					<Phonetic
-						label="uk"
-						phonetic={result?.ukPhonetic}
-						speech={result?.ukSpeech}
-					/>
-					<Phonetic
-						label="us"
-						phonetic={result?.usPhonetic}
-						speech={result?.usSpeech}
 					/>
 				</div>
 
@@ -88,13 +81,14 @@ export default function TranslateWord({ word: _word }: TranslateWordProps) {
 				)}
 
 				<div className="flex flex-col gap-1 mt-2 dark:text-gray-400 text-black">
-					{result?.translations?.map((trs, i) => (
-						<Translate key={i} {...trs} />
+					{result?.translations?.map((t, i) => (
+						// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
+						<Translate key={i} {...t} />
 					))}
 				</div>
 			</div>
 
-			<Expand forms={result?.forms} />
+			{result?.forms?.length && <Expand forms={result.forms} />}
 		</div>
 	)
 }
