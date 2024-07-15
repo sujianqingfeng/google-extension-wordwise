@@ -8,3 +8,16 @@
     @apply bg-white dark:bg-slate-900
   }
 }
+
+
+.word-wise-markdown h3{
+  @apply font-bold leading-7;
+}
+
+.word-wise-markdown ul{
+  @apply pl-4;
+}
+
+.word-wise-markdown ul li{
+  @apply leading-5;
+}

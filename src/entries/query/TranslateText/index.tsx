@@ -3,6 +3,7 @@ import Loading from "@/components/Loading"
 import { RxMagicWand } from "react-icons/rx"
 import { useQuery } from "@tanstack/react-query"
 import { createBackgroundMessage } from "@/messaging/background"
+import Markdown from "react-markdown"
 
 type TranslateTextProps = {
 	text: string
@@ -16,7 +17,11 @@ export default function TranslateText({ text }: TranslateTextProps) {
 		queryFn: () => bgs.fetchTranslate({ text, provider: "deepL" }),
 	})
 
-	const { data: analyzeResult, refetch: fetchAnalyzeGrammar } = useQuery({
+	const {
+		data: analyzeResult,
+		refetch: fetchAnalyzeGrammar,
+		isLoading: analyzeLoading,
+	} = useQuery({
 		queryKey: ["analyze", text],
 		queryFn: () => bgs.fetchAnalyzeGrammar({ text, provider: "deepSeek" }),
 		enabled: false,
@@ -42,14 +47,20 @@ export default function TranslateText({ text }: TranslateTextProps) {
 			</div>
 
 			{analyzeResult && (
-				<div className="dark:text-gray-400 text-black">{analyzeResult}</div>
+				<div className="dark:text-gray-400 text-black p-2 word-wise-markdown">
+					<Markdown>{analyzeResult}</Markdown>
+				</div>
 			)}
 
 			<div className="px-2 py-1 flex justify-end bg-gray-100 dark:bg-slate-400/10">
-				<RxMagicWand
-					className="cursor-pointer dark:text-gray-400 text-black"
-					onClick={onAnalyze}
-				/>
+				{analyzeLoading ? (
+					<Loading size={14} />
+				) : (
+					<RxMagicWand
+						className="cursor-pointer dark:text-gray-400 text-black"
+						onClick={onAnalyze}
+					/>
+				)}
 			</div>
 		</div>
 	)
