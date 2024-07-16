@@ -1,5 +1,6 @@
 import {
 	fetchAddWordCollectedApi,
+	fetchAiTranslateApi,
 	fetchAnalyzeGrammarApi,
 	fetchDictionQueryApi,
 	fetchExchangeTokenApi,
@@ -110,6 +111,7 @@ function _createBackgroundMessage(context: BackgroundContext) {
 		fetchDictionQuery: fetchDictionQueryApi,
 		fetchWordCollected: fetchWordCollectedApi,
 		fetchTranslate: fetchTranslateApi,
+		fetchAiTranslate: fetchAiTranslateApi,
 		fetchAnalyzeGrammar: fetchAnalyzeGrammarApi,
 		fetchAddWordCollected,
 		fetchRemoveWordCollected,

@@ -41,6 +41,9 @@ export const fetchRemoveWordCollectedApi = (word: string) =>
 export const fetchTranslateApi = (params: TranslateParams) =>
 	requestPost<string>(`/translator/${params.provider}/translate`, params)
 
+export const fetchAiTranslateApi = (params: AnalyzeGrammarParams) =>
+	requestPost<string>(`/ai/${params.provider}/translate`, params)
+
 // analyze
 export const fetchAnalyzeGrammarApi = (params: AnalyzeGrammarParams) =>
 	requestPost<string>(`/ai/${params.provider}/analyze-grammar`, params)

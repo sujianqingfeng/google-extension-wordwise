@@ -14,7 +14,7 @@ const bgs = createBackgroundMessage()
 export default function TranslateText({ text }: TranslateTextProps) {
 	const { data: translateResult, isLoading } = useQuery({
 		queryKey: ["translate", text],
-		queryFn: () => bgs.fetchTranslate({ text, provider: "deepL" }),
+		queryFn: () => bgs.fetchAiTranslate({ text, provider: "deepSeek" }),
 	})
 
 	const {

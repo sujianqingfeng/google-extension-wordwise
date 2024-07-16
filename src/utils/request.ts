@@ -3,6 +3,45 @@ import { objectToQueryString } from "."
 export const BASE_URL = import.meta.env.VITE_BASE_API_URL
 
 type Method = "get" | "post" | "put" | "delete"
+type RefreshCallback = (accessToken: string) => void
+
+let isRefreshing = false
+let refreshSubscribers: RefreshCallback[] = []
+
+async function refreshToken(url: string) {
+	const rT = await getRefreshToken()
+	console.log("🚀 ~ refreshToken ~ rT:", rT)
+	const response = await fetch(url, {
+		method: "POST",
+		headers: {
+			"Content-Type": "application/json",
+		},
+		body: JSON.stringify({
+			refreshToken: rT,
+		}),
+	})
+
+	if (!response.ok) {
+		throw new Error("Token refresh failed")
+	}
+	const {
+		data: { accessToken, refreshToken },
+	} = await response.json()
+	setToken(accessToken)
+	setRefreshToken(refreshToken)
+	return accessToken
+}
+
+function subscribeTokenRefresh(callback: RefreshCallback) {
+	refreshSubscribers.push(callback)
+}
+
+function onAccessTokenFetched(newAccessToken: string) {
+	for (const callback of refreshSubscribers) {
+		callback(newAccessToken)
+	}
+	refreshSubscribers = []
+}
 
 function createRequest({
 	method,
@@ -11,7 +50,7 @@ function createRequest({
 	method: Method
 	baseUrl?: string
 }) {
-	return async <R = any, T = Record<string, any>>(
+	const makeFetch = async <R = any, T = Record<string, any>>(
 		url: string,
 		data?: T,
 		opt?: RequestInit,
@@ -26,9 +65,11 @@ function createRequest({
 			...opt?.headers,
 		}
 
-		const token = await getToken()
-		if (token) {
-			headers.authorization = `Bearer ${token}`
+		if (!headers.authorization) {
+			const token = await getToken()
+			if (token) {
+				headers.authorization = `Bearer ${token}`
+			}
 		}
 
 		const body =
@@ -43,14 +84,45 @@ function createRequest({
 
 		const res = await fetch(url, options)
 
+		if (res.status === 401) {
+			if (!isRefreshing) {
+				isRefreshing = true
+
+				try {
+					const newAccessToken = await refreshToken(
+						`${BASE_URL}/api/auth/refresh`,
+					)
+					isRefreshing = false
+					onAccessTokenFetched(newAccessToken)
+				} catch (error) {
+					isRefreshing = false
+					throw error
+				}
+			}
+
+			return new Promise((resolve) => {
+				subscribeTokenRefresh((newAccessToken) => {
+					const options = {
+						headers: {
+							authorization: `Bearer ${newAccessToken}`,
+						},
+					}
+					resolve(makeFetch(url, data, options))
+				})
+			})
+		}
+
 		console.log("🚀 ~ res:", res)
-		if (res.status === 200) {
+
+		if (res.ok) {
 			const json = await res.json()
 			return json.data
 		}
 
 		throw new Error(res.statusText)
 	}
+
+	return makeFetch
 }
 
 const BASE_URL_API_PREFIX = "/api"
