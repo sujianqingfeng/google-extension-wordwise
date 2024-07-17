@@ -1,4 +1,4 @@
-import { useRef } from "react"
+import { Suspense, useRef } from "react"
 import TranslateText from "./TranslateText"
 import TranslateWord from "./TranslateWord"
 import { useClientRect } from "../../hooks/use-client-rect"
@@ -6,6 +6,7 @@ import { useOutsideClick } from "../../hooks/use-element"
 import { usePlacement } from "../../hooks/use-placement"
 import { isText } from "../../utils/text"
 import QueryClientProvider from "@/components/QueryClientProvider"
+import Loading from "@/components/Loading"
 
 export type QueryProps = {
 	top?: number
@@ -45,7 +46,15 @@ export default function Query({
 				className="fixed flex justify-center items-start bg-base z-9999"
 			>
 				<div className="w-[350px] bg-base rounded-md shadow">
-					{text && isTextFlag && <TranslateText text={text} />}
+					<Suspense
+						fallback={
+							<div className="flex justify-center items-center h-10">
+								<Loading />
+							</div>
+						}
+					>
+						{text && isTextFlag && <TranslateText text={text} />}
+					</Suspense>
 					{text && !isTextFlag && <TranslateWord word={text} />}
 				</div>
 			</div>

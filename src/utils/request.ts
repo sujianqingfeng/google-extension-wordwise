@@ -27,8 +27,10 @@ async function refreshToken(url: string) {
 	const {
 		data: { accessToken, refreshToken },
 	} = await response.json()
+
 	setToken(accessToken)
 	setRefreshToken(refreshToken)
+
 	return accessToken
 }
 
@@ -37,6 +39,10 @@ function subscribeTokenRefresh(callback: RefreshCallback) {
 }
 
 function onAccessTokenFetched(newAccessToken: string) {
+	console.log(
+		"🚀 ~ onAccessTokenFetched ~ refreshSubscribers:",
+		refreshSubscribers,
+	)
 	for (const callback of refreshSubscribers) {
 		callback(newAccessToken)
 	}
@@ -88,20 +94,25 @@ function createRequest({
 			if (!isRefreshing) {
 				isRefreshing = true
 
-				try {
-					const newAccessToken = await refreshToken(
-						`${BASE_URL}/api/auth/refresh`,
-					)
-					isRefreshing = false
-					onAccessTokenFetched(newAccessToken)
-				} catch (error) {
-					isRefreshing = false
-					throw error
-				}
+				refreshToken(`${BASE_URL}/api/auth/refresh`)
+					.then((newAccessToken) => {
+						isRefreshing = false
+						onAccessTokenFetched(newAccessToken)
+						console.log("🚀 ~ newAccessToken:", newAccessToken)
+					})
+					.catch((error) => {
+						isRefreshing = false
+						throw error
+					})
 			}
 
 			return new Promise((resolve) => {
 				subscribeTokenRefresh((newAccessToken) => {
+					console.log(
+						"🚀 ~ subscribeTokenRefresh ~ newAccessToken:",
+						newAccessToken,
+					)
+
 					const options = {
 						headers: {
 							authorization: `Bearer ${newAccessToken}`,
