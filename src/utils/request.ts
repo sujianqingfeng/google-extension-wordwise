@@ -10,7 +10,6 @@ let refreshSubscribers: RefreshCallback[] = []
 
 async function refreshToken(url: string) {
 	const rT = await getRefreshToken()
-	console.log("🚀 ~ refreshToken ~ rT:", rT)
 	const response = await fetch(url, {
 		method: "POST",
 		headers: {
@@ -39,10 +38,6 @@ function subscribeTokenRefresh(callback: RefreshCallback) {
 }
 
 function onAccessTokenFetched(newAccessToken: string) {
-	console.log(
-		"🚀 ~ onAccessTokenFetched ~ refreshSubscribers:",
-		refreshSubscribers,
-	)
 	for (const callback of refreshSubscribers) {
 		callback(newAccessToken)
 	}
@@ -61,10 +56,10 @@ function createRequest({
 		data?: T,
 		opt?: RequestInit,
 	): Promise<R> => {
-		url = `${baseUrl}${url}`
+		let finalUrl = `${baseUrl}${url}`
 
 		if (method === "get" && data && Object.keys(data).length) {
-			url = `${url}?${objectToQueryString(data)}`
+			finalUrl = `${finalUrl}?${objectToQueryString(data)}`
 		}
 
 		const headers: Record<string, any> = {
@@ -88,7 +83,7 @@ function createRequest({
 			body,
 		}
 
-		const res = await fetch(url, options)
+		const res = await fetch(finalUrl, options)
 
 		if (res.status === 401) {
 			if (!isRefreshing) {
@@ -98,7 +93,6 @@ function createRequest({
 					.then((newAccessToken) => {
 						isRefreshing = false
 						onAccessTokenFetched(newAccessToken)
-						console.log("🚀 ~ newAccessToken:", newAccessToken)
 					})
 					.catch((error) => {
 						isRefreshing = false
@@ -108,11 +102,6 @@ function createRequest({
 
 			return new Promise((resolve) => {
 				subscribeTokenRefresh((newAccessToken) => {
-					console.log(
-						"🚀 ~ subscribeTokenRefresh ~ newAccessToken:",
-						newAccessToken,
-					)
-
 					const options = {
 						headers: {
 							authorization: `Bearer ${newAccessToken}`,
