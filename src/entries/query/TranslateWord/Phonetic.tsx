@@ -44,9 +44,11 @@ export default function Phonetic({
 				{speech && <TbVolume size={12} />}
 			</div>
 
-			<p onClick={onToggle} className="dark:text-gray-400 cursor-pointer">
-				{currentType}
-			</p>
+			{phonetic && (
+				<p onClick={onToggle} className="dark:text-gray-400 cursor-pointer">
+					{currentType}
+				</p>
+			)}
 		</div>
 	)
 }

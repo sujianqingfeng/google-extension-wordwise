@@ -8,6 +8,14 @@ import { isText } from "../../utils/text"
 import QueryClientProvider from "@/components/QueryClientProvider"
 import Loading from "@/components/Loading"
 
+function Fallback() {
+	return (
+		<div className="flex justify-center items-center h-10">
+			<Loading />
+		</div>
+	)
+}
+
 export type QueryProps = {
 	top?: number
 	left?: number
@@ -46,16 +54,13 @@ export default function Query({
 				className="fixed flex justify-center items-start bg-base z-9999"
 			>
 				<div className="w-[350px] bg-base rounded-md shadow">
-					<Suspense
-						fallback={
-							<div className="flex justify-center items-center h-10">
-								<Loading />
-							</div>
-						}
-					>
+					<Suspense fallback={<Fallback />}>
 						{text && isTextFlag && <TranslateText text={text} />}
 					</Suspense>
-					{text && !isTextFlag && <TranslateWord word={text} />}
+
+					<Suspense fallback={<Fallback />}>
+						{text && !isTextFlag && <TranslateWord word={text} />}
+					</Suspense>
 				</div>
 			</div>
 		</QueryClientProvider>

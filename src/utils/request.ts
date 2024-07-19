@@ -112,8 +112,6 @@ function createRequest({
 			})
 		}
 
-		console.log("🚀 ~ res:", res)
-
 		if (res.ok) {
 			const json = await res.json()
 			return json.data

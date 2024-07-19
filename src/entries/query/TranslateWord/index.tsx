@@ -2,10 +2,9 @@ import Collect from "./Collect"
 import Expand from "./Expand"
 import Phonetic from "./Phonetic"
 import Translate from "./Translate"
-import Loading from "@/components/Loading"
 import { CUSTOM_EVENT_TYPE } from "@/constants"
 import { createBackgroundMessage } from "@/messaging/background"
-import { useMutation, useQuery } from "@tanstack/react-query"
+import { useMutation, useQuery, useSuspenseQuery } from "@tanstack/react-query"
 
 const bgs = createBackgroundMessage()
 
@@ -15,7 +14,7 @@ type TranslateWordProps = {
 export default function TranslateWord({ word: _word }: TranslateWordProps) {
 	const word = _word.toLowerCase()
 
-	const { data: result, isLoading: loading } = useQuery({
+	const { data: result } = useSuspenseQuery({
 		queryKey: ["word", word],
 		queryFn: () => bgs.fetchDictionQuery(word),
 	})
@@ -50,14 +49,6 @@ export default function TranslateWord({ word: _word }: TranslateWordProps) {
 		fetchWordCollected()
 	}
 
-	if (loading) {
-		return (
-			<div className="flex justify-center items-center h-10">
-				<Loading />
-			</div>
-		)
-	}
-
 	return (
 		<div>
 			<div className="p-2">
@@ -88,7 +79,9 @@ export default function TranslateWord({ word: _word }: TranslateWordProps) {
 				</div>
 			</div>
 
-			{result?.forms?.length && <Expand forms={result.forms} />}
+			{result?.forms && result.forms.length > 0 && (
+				<Expand forms={result.forms} />
+			)}
 		</div>
 	)
 }

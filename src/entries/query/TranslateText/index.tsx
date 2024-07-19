@@ -1,5 +1,6 @@
 import type {} from "@/api/types"
 import Loading from "@/components/Loading"
+import { ErrorBoundary, type FallbackProps } from "react-error-boundary"
 import { RxMagicWand } from "react-icons/rx"
 import { useQuery, useSuspenseQuery } from "@tanstack/react-query"
 import { createBackgroundMessage } from "@/messaging/background"
@@ -11,7 +12,7 @@ type TranslateTextProps = {
 
 const bgs = createBackgroundMessage()
 
-export default function TranslateText({ text }: TranslateTextProps) {
+function TranslateText({ text }: TranslateTextProps) {
 	const { data: translateResult } = useSuspenseQuery({
 		queryKey: ["translate", text],
 		queryFn: () => bgs.fetchAiTranslate({ text, provider: "deepSeek" }),
@@ -53,3 +54,22 @@ export default function TranslateText({ text }: TranslateTextProps) {
 		</div>
 	)
 }
+
+function fallbackRender({ error }: FallbackProps) {
+	return (
+		<div className="p-2">
+			<p>Something went wrong:</p>
+			<pre className="text-red">{error.message}</pre>
+		</div>
+	)
+}
+
+function TranslateTextErrorWrapper({ text }: TranslateTextProps) {
+	return (
+		<ErrorBoundary fallbackRender={fallbackRender}>
+			<TranslateText text={text} />
+		</ErrorBoundary>
+	)
+}
+
+export default TranslateTextErrorWrapper
