@@ -1,58 +1,75 @@
-import type { IAnalysisGrammarResp, TranslateResp } from '@/api/types'
-import useSWR from 'swr'
-import Loading from '@/components/Loading'
+import type {} from "@/api/types"
+import Loading from "@/components/Loading"
+import { ErrorBoundary, type FallbackProps } from "react-error-boundary"
 import { RxMagicWand } from "react-icons/rx"
-import useSWRMutation from 'swr/mutation'
-import { useState } from 'react'
+import { useQuery, useSuspenseQuery } from "@tanstack/react-query"
+import { createBackgroundMessage } from "@/messaging/background"
+import Analyze from "./Analyze"
 
 type TranslateTextProps = {
-  text: string
+	text: string
 }
-export default function TranslateText(props: TranslateTextProps) {
-  const { text } = props
-  const { token } = useToken()
-  const [analyseResult, setAnalyseResult] = useState('')
 
-  const { data: translate, isLoading: loading } = useSWR(
-    { url: `/translator/translate`, token, body: { text } },
-    postWithTokenFetcher<TranslateResp>
-  )
+const bgs = createBackgroundMessage()
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-10">
-        <Loading />
-      </div>
-    )
-  }
+function TranslateText({ text }: TranslateTextProps) {
+	const { data: translateResult } = useSuspenseQuery({
+		queryKey: ["translate", text],
+		queryFn: () => bgs.fetchAiTranslate({ text, provider: "deepSeek" }),
+	})
 
-  const { trigger: analyse } = useSWRMutation(
-    { url: '/ai/analysis-grammar', token },
-    postWithTokenFetcher<IAnalysisGrammarResp>
-  )
+	const {
+		data: analyzeResult,
+		refetch: fetchAnalyzeGrammar,
+		isLoading: analyzeLoading,
+	} = useQuery({
+		queryKey: ["analyze", text],
+		queryFn: () => bgs.fetchAnalyzeGrammar({ text, provider: "deepSeek" }),
+		enabled: false,
+	})
 
-  const onAnalyse = async () => {
-    const { result } = await analyse({ text })
-    setAnalyseResult(result)
-  }
+	const onAnalyze = async () => {
+		fetchAnalyzeGrammar()
+	}
 
-  return (
-    <div className="text-sm font-normal dark:text-gray-400 text-black">
+	return (
+		<div className="text-sm font-normal dark:text-gray-400 text-black">
+			<div className="p-2">
+				<div className="mt-2">{text}</div>
+				<div className="mt-2">{translateResult}</div>
+			</div>
 
-      <div className='p-2'>
-        <div className="mt-2">{text}</div>
-        <div className="mt-2">{translate?.result}</div>
-      </div>
+			<Analyze loading={analyzeLoading} result={analyzeResult} />
 
-      {
-        analyseResult && <div className='dark:text-gray-400 text-black'>
-          {analyseResult}
-        </div>
-      }
-
-      <div className="px-2 py-1 flex justify-end bg-gray-100 dark:bg-slate-400/10">
-        <RxMagicWand className="cursor-pointer dark:text-gray-400 text-black" onClick={onAnalyse} />
-      </div>
-    </div>
-  )
+			<div className="px-2 py-1 flex justify-end bg-gray-100 dark:bg-slate-400/10">
+				{analyzeLoading ? (
+					<Loading size={14} />
+				) : (
+					<RxMagicWand
+						className="cursor-pointer dark:text-gray-400 text-black"
+						onClick={onAnalyze}
+					/>
+				)}
+			</div>
+		</div>
+	)
 }
+
+function fallbackRender({ error }: FallbackProps) {
+	return (
+		<div className="p-2">
+			<p>Something went wrong:</p>
+			<pre className="text-red">{error.message}</pre>
+		</div>
+	)
+}
+
+function TranslateTextErrorWrapper({ text }: TranslateTextProps) {
+	return (
+		<ErrorBoundary fallbackRender={fallbackRender}>
+			<TranslateText text={text} />
+		</ErrorBoundary>
+	)
+}
+
+export default TranslateTextErrorWrapper

@@ -1,39 +1,24 @@
-import type { IAuthProvidersRespItem, LoginResp } from '@/api/types'
-import { useState } from 'react'
-import useSWR from 'swr'
-import AuthButton from './AuthButton'
-import { createBackgroundMessage } from '@/messaging/background'
-import { withTokenFetcher } from '@/utils/request'
+import { useState } from "react"
+import AuthButton from "./AuthButton"
+import { createBackgroundMessage } from "@/messaging/background"
 
 interface AuthProps {
-  authSuccess: (user: LoginResp) => void
+	success: () => void
 }
-export default function Auth(props: AuthProps) {
-  const { authSuccess } = props
-  const { data } = useSWR(
-    { url: '/auth/providers' },
-    withTokenFetcher<IAuthProvidersRespItem[]>
-  )
+export default function Auth({ success }: AuthProps) {
+	const [loading, setLoading] = useState(false)
 
-  const [loading, setLoading] = useState(false)
+	const onAuthClick = async () => {
+		setLoading(true)
+		const bgs = createBackgroundMessage()
+		await bgs.auth()
+		setLoading(false)
+		success()
+	}
 
-  const onAuthClick = async (item: IAuthProvidersRespItem) => {
-    setLoading(true)
-    const bgs = createBackgroundMessage()
-    const user = await bgs.auth(item.authUrl)
-    setLoading(false)
-    authSuccess(user)
-  }
-
-  return (
-    <div className="mt-2 flex justify-center items-center">
-      {data?.map((item) => (
-        <AuthButton
-          key={item.provider}
-          loading={loading}
-          onAuthClick={() => onAuthClick(item)}
-        />
-      ))}
-    </div>
-  )
+	return (
+		<div className="mt-2 flex justify-center items-center">
+			<AuthButton loading={loading} onAuthClick={onAuthClick} />
+		</div>
+	)
 }

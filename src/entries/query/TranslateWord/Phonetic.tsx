@@ -1,41 +1,54 @@
-import { TbVolume } from 'react-icons/tb'
+import { useState } from "react"
+import { TbVolume } from "react-icons/tb"
 
 type PhoneticProps = {
-  label: string
-  phonetic?: string
-  speech?: string
+	type: "uk" | "us"
+	ukPhonetic?: string
+	ukSpeech?: string
+	usPhonetic?: string
+	usSpeech?: string
 }
-export default function Phonetic(props: PhoneticProps) {
-  const { phonetic, label, speech } = props
+export default function Phonetic({
+	type,
+	ukPhonetic,
+	ukSpeech,
+	usPhonetic,
+	usSpeech,
+}: PhoneticProps) {
+	const [currentType, setCurrentType] = useState(type)
 
-  if (!phonetic) {
-    return null
-  }
+	const speech = currentType === "uk" ? ukSpeech : usSpeech
+	const phonetic = currentType === "uk" ? ukPhonetic : usPhonetic
 
-  const onPlay = () => {
-    if (!speech) {
-      return
-    }
-    const newSpeech = speech.replace(
-      'https://dict.youdao.com',
-      `${BASE_URL}/yd`
-    )
-    const audio = new Audio(newSpeech)
-    audio.play()
-  }
+	const onPlay = () => {
+		if (!speech) {
+			return
+		}
+		const audio = new Audio(speech)
+		audio.play()
+	}
 
-  return (
-    <div className="flex items-center text-sm gap-1 text-black">
-      <span className="dark:text-gray-400">{label}</span>
-      <div
-        onClick={onPlay}
-        className={`bg-gray-100 dark:bg-slate-400/10 dark:text-gray-400 rounded-full px-1 flex items-center gap-1 ${
-          speech ? 'cursor-pointer' : ''
-        }`}
-      >
-        {phonetic}
-        {speech && <TbVolume size={12} />}
-      </div>
-    </div>
-  )
+	const onToggle = () => {
+		setCurrentType((prev) => (prev === "uk" ? "us" : "uk"))
+	}
+
+	return (
+		<div className="flex items-center text-sm gap-1 text-black font-normal">
+			<div
+				onClick={onPlay}
+				className={`bg-gray-100 dark:bg-slate-400/10 dark:text-gray-400 rounded-full px-1 flex items-center gap-1 ${
+					speech ? "cursor-pointer" : ""
+				}`}
+			>
+				{phonetic}
+				{speech && <TbVolume size={12} />}
+			</div>
+
+			{phonetic && (
+				<p onClick={onToggle} className="dark:text-gray-400 cursor-pointer">
+					{currentType}
+				</p>
+			)}
+		</div>
+	)
 }

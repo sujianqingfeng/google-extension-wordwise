@@ -7,7 +7,7 @@
     cursor: pointer;
     font-weight: bold;
     border: 1px solid rgb(236 236 237);
-    position: absolute;
+    position: fixed;
     display: inline-flex;
     justify-content: center;
     align-items: center;

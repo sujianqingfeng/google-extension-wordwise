@@ -1,34 +1,49 @@
 import type {
-  IWordRespItem,
-  LoginReq,
-  LoginResp,
-  TranslateParams,
-  TranslateResp,
-} from "./types";
+	AnalyzeGrammarParams,
+	CreateReadLaterParams,
+	DictionaryQueryResp,
+	ExchangeTokenParams,
+	ExchangeTokenResp,
+	IWordRespItem,
+	LoginResp,
+	QueryWordCollectedResp,
+	TranslateParams,
+} from "./types"
 
-export const fetchLoginApi = (body: LoginReq) => {
-  return postWithTokenFetcher<LoginResp>({ url: "/auth" }, { arg: body });
-};
-
-export const fetchAllWordsApi = (token: string) => {
-  return withTokenFetcher<IWordRespItem[]>({
-    url: `/word/all`,
-    token,
-  });
-};
-
+//
+export const fetchAllWordsApi = () => requestGet<IWordRespItem[]>("/word/all")
 // user
-export const fetchUserInfoApi = (token: string) => {
-  return withTokenFetcher<LoginResp>({
-    url: "/user",
-    token,
-  });
-};
+export const fetchUserInfoApi = () => requestGet<LoginResp>("/user")
 
-// translation
-export const fetchTranslateApi = (token: string, body: TranslateParams) => {
-  return postWithTokenFetcher<TranslateResp>(
-    { url: "/translator/translate", token },
-    { arg: body },
-  );
-};
+//
+export const fetchExchangeTokenApi = (params: ExchangeTokenParams) =>
+	requestPost<ExchangeTokenResp>("/auth/google/id-token", params)
+
+// read later
+export const fetchReadLaterApi = (params: CreateReadLaterParams) =>
+	requestPost("/read-later", params)
+
+// dictionary
+export const fetchDictionQueryApi = (word: string) =>
+	requestGet<DictionaryQueryResp>("/dictionary/query", { word })
+
+// collected
+export const fetchWordCollectedApi = (word: string) =>
+	requestGet<QueryWordCollectedResp>("/word/collected", { word })
+
+export const fetchAddWordCollectedApi = (word: string) =>
+	requestPut("/word/collect", { word })
+
+export const fetchRemoveWordCollectedApi = (word: string) =>
+	requestDelete("/word/collect", { word })
+
+// translate
+export const fetchTranslateApi = (params: TranslateParams) =>
+	requestPost<string>(`/translator/${params.provider}/translate`, params)
+
+export const fetchAiTranslateApi = (params: AnalyzeGrammarParams) =>
+	requestPost<string>(`/ai/${params.provider}/translate`, params)
+
+// analyze
+export const fetchAnalyzeGrammarApi = (params: AnalyzeGrammarParams) =>
+	requestPost<string>(`/ai/${params.provider}/analyze-grammar`, params)

@@ -1,41 +1,42 @@
 {
-  "name": "google-extension-wordwise",
-  "type": "module",
-  "version": "1.0.0",
-  "private": true,
-  "main": "src/main.tsx",
-  "module": "src/main.tsx",
-  "scripts": {
-    "dev": "wxt",
-    "build": "wxt build",
-    "pack": "web-ext build --source-dir dist",
-    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "test": "vitest",
-    "postinstall": "wxt prepare"
-  },
-  "dependencies": {
-    "@mozilla/readability": "^0.5.0",
-    "@webext-core/messaging": "^1.4.0",
-    "@webext-core/proxy-service": "^1.2.0",
-    "date-fns": "^3.3.1",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-icons": "^4.12.0",
-    "swr": "^2.2.4"
-  },
-  "devDependencies": {
-    "@sujian/eslint-config": "^1.0.2",
-    "@types/node": "^20.9.0",
-    "@types/react": "^18.2.15",
-    "@types/react-dom": "^18.2.7",
-    "@vitejs/plugin-react": "^4.2.1",
-    "autoprefixer": "^10.4.16",
-    "eslint": "^8.53.0",
-    "postcss": "^8.4.31",
-    "tailwindcss": "^3.3.3",
-    "typescript": "^5.0.2",
-    "vitest": "^0.34.6",
-    "web-ext": "^7.10.0",
-    "wxt": "^0.15.2"
-  }
+	"name": "rebuild-google-extension-wordwise",
+	"type": "module",
+	"version": "1.1.0",
+	"private": true,
+	"main": "src/main.tsx",
+	"module": "src/main.tsx",
+	"scripts": {
+		"dev": "wxt -p 3002",
+		"build": "wxt build",
+		"pack": "web-ext build --source-dir dist",
+		"test": "vitest",
+		"postinstall": "wxt prepare"
+	},
+	"dependencies": {
+		"@mozilla/readability": "^0.5.0",
+		"@tanstack/react-query": "^5.50.1",
+		"@webext-core/messaging": "^1.4.0",
+		"@webext-core/proxy-service": "^1.2.0",
+		"date-fns": "^3.6.0",
+		"react": "^18.3.1",
+		"react-dom": "^18.2.0",
+		"react-error-boundary": "^4.0.13",
+		"react-icons": "^5.2.1",
+		"react-markdown": "^9.0.1"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^1.8.3",
+		"@types/chrome": "^0.0.268",
+		"@types/node": "^20.9.0",
+		"@types/react": "^18.3.3",
+		"@types/react-dom": "^18.3.0",
+		"@vitejs/plugin-react": "^4.3.1",
+		"autoprefixer": "^10.4.19",
+		"postcss": "^8.4.39",
+		"tailwindcss": "^3.4.4",
+		"typescript": "^5.5.3",
+		"vitest": "^2.0.1",
+		"web-ext": "^8.2.0",
+		"wxt": "^0.18.14"
+	}
 }

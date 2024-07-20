@@ -1,111 +1,87 @@
-import type { IDictQueryResultResp, IQueryWordCollectedResp } from '@/api/types'
-import useSWR from 'swr'
-import useSWRMutation from 'swr/mutation'
-import Collect from './Collect'
-import Expand from './Expand'
-import Phonetic from './Phonetic'
-import Translate from './Translate'
-import Loading from '@/components/Loading'
-import { CUSTOM_EVENT_TYPE } from '@/constants'
-import { useToken } from '@/hooks/use-token'
-import { createBackgroundMessage } from '@/messaging/background'
+import Collect from "./Collect"
+import Expand from "./Expand"
+import Phonetic from "./Phonetic"
+import Translate from "./Translate"
+import { CUSTOM_EVENT_TYPE } from "@/constants"
+import { createBackgroundMessage } from "@/messaging/background"
+import { useMutation, useQuery, useSuspenseQuery } from "@tanstack/react-query"
 
 const bgs = createBackgroundMessage()
 
 type TranslateWordProps = {
-  autoFetch?: boolean
-  word: string
+	word: string
 }
-export default function TranslateWord(props: TranslateWordProps) {
-  const { word: _word } = props
-  const word = _word.toLowerCase()
+export default function TranslateWord({ word: _word }: TranslateWordProps) {
+	const word = _word.toLowerCase()
 
-  const { token } = useToken()
-  const { data: result, isLoading: loading } = useSWR(
-    { url: `/dictionary/query?word=${word}`, token },
-    withTokenFetcher<IDictQueryResultResp>
-  )
+	const { data: result } = useSuspenseQuery({
+		queryKey: ["word", word],
+		queryFn: () => bgs.fetchDictionQuery(word),
+	})
 
-  const { data: collectedResult, mutate: mutateCollect } = useSWR(
-    {
-      url: `/word/isCollected?word=${word}`,
-      token
-    },
-    withTokenFetcher<IQueryWordCollectedResp>
-  )
+	const { data: collectedResult, refetch: fetchWordCollected } = useQuery({
+		queryKey: ["collected", word],
+		queryFn: () => bgs.fetchWordCollected(word),
+	})
 
-  const { trigger: collectWord } = useSWRMutation(
-    { url: '/word', token },
-    postWithTokenFetcher
-  )
-  const { trigger: removeWord } = useSWRMutation(
-    { url: '/word', token },
-    deleteWithTokenFetcher
-  )
+	const { mutateAsync: collectWord } = useMutation({
+		mutationFn: bgs.fetchAddWordCollected,
+	})
 
-  const onCollect = async (next: boolean) => {
-    // no query result
-    if (!result) {
-      return
-    }
+	const { mutateAsync: removeWord } = useMutation({
+		mutationFn: bgs.fetchRemoveWordCollected,
+	})
 
-    next ? await collectWord({ word }) : await removeWord({ word })
+	const onCollect = async (next: boolean) => {
+		// no query result
+		if (!result) {
+			return
+		}
 
-    // TODO: remove range words
-    if (next) {
-      document.dispatchEvent(
-        new CustomEvent(CUSTOM_EVENT_TYPE.RANGE_WORDS, { detail: [word] })
-      )
-    }
-    next ? bgs.addWord(word) : bgs.removeWord(word)
-    mutateCollect()
-  }
+		next ? await collectWord(word) : await removeWord(word)
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-10">
-        <Loading />
-      </div>
-    )
-  }
+		// TODO: remove range words
+		if (next) {
+			document.dispatchEvent(
+				new CustomEvent(CUSTOM_EVENT_TYPE.RANGE_WORDS, { detail: [word] }),
+			)
+		}
+		fetchWordCollected()
+	}
 
-  return (
-    <div>
-      <div className="p-2">
-        <div className="flex justify-between items-center text-black dark:text-gray-300">
-          <div className="text-[20px] font-bold">{result?.word}</div>
-          <Collect
-            onCollect={onCollect}
-            isCollected={!!collectedResult?.isCollected}
-          />
-        </div>
-        <div className="flex justify-start items-center gap-2 mt-1">
-          <Phonetic
-            label="uk"
-            phonetic={result?.ukPhonetic}
-            speech={result?.ukSpeech}
-          />
-          <Phonetic
-            label="us"
-            phonetic={result?.usPhonetic}
-            speech={result?.usSpeech}
-          />
-        </div>
+	return (
+		<div>
+			<div className="p-2">
+				<div className="flex justify-between items-center text-black dark:text-gray-300">
+					<div className="text-[26px] font-bold flex items-end gap-1">
+						{result?.word}
+						<div className="mb-1">
+							<Phonetic type="uk" {...result} />
+						</div>
+					</div>
+					<Collect
+						onCollect={onCollect}
+						isCollected={!!collectedResult?.collected}
+					/>
+				</div>
 
-        {result?.examTypes && (
-          <div className="mt-2 text-[10px] flex gap-1 flex-wrap dark:text-gray-400 text-black">
-            {result.examTypes.join('/')}
-          </div>
-        )}
+				{result?.examTypes && (
+					<div className="mt-2 text-[10px] flex gap-1 flex-wrap dark:text-gray-400 text-black">
+						{result.examTypes.join("/")}
+					</div>
+				)}
 
-        <div className="flex flex-col gap-1 mt-2 dark:text-gray-400 text-black">
-          {result?.translations?.map((trs, i) => (
-            <Translate key={i} {...trs} />
-          ))}
-        </div>
-      </div>
+				<div className="flex flex-col gap-1 mt-2 dark:text-gray-400 text-black">
+					{result?.translations?.map((t, i) => (
+						// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
+						<Translate key={i} {...t} />
+					))}
+				</div>
+			</div>
 
-      <Expand forms={result?.forms} />
-    </div>
-  )
+			{result?.forms && result.forms.length > 0 && (
+				<Expand forms={result.forms} />
+			)}
+		</div>
+	)
 }

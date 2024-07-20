@@ -1,58 +1,34 @@
-import { storage } from 'wxt/storage'
-import { registerBackgroundMessage } from '../messaging/background'
-import { sendContentMessage } from '../messaging/content'
-import { fetchAllWordsApi, fetchUserInfoApi } from '@/api'
-import { TOKEN } from '@/constants'
-import { BackgroundContext } from '@/types'
+import { registerBackgroundMessage } from "../messaging/background"
+import { sendContentMessage } from "../messaging/content"
+import { fetchAllWordsApi } from "@/api"
+import type { BackgroundContext } from "@/types"
 
-async function fetchUser(token: string) {
-  try {
-    const user = await fetchUserInfoApi(token)
-    return user
-  } catch (e) {
-    console.log('🚀 ~ fetchUser ~ e:', e)
-  }
-  return null
+async function fetchAllWords() {
+	const { error, data } = await createSafePromise(fetchAllWordsApi)()
+	if (error) {
+		return []
+	}
+	return data || []
 }
 
-async function fetchAllWords(token: string) {
-  try {
-    const words = await fetchAllWordsApi(token)
-    return words
-  } catch (e) {
-    console.log('🚀 ~ fetchAllWords ~ e:', e)
-  }
-}
-
-
-async function init(context: BackgroundContext){
-  const token = await storage.getItem<string>(TOKEN)
-
-  if (token) {
-    const user = await fetchUser(token)
-    context.user = user
-
-    const words = await fetchAllWords(token)
-    context.words = words || []
-  }
+async function fetchContext(context: BackgroundContext) {
+	context.user = await fetchUser()
+	context.words = await fetchAllWords()
 }
 
 export default defineBackground(() => {
-  console.log('Hello background!', { id: browser.runtime.id })
+	const context: BackgroundContext = {
+		user: null,
+		words: [],
+	}
 
-  const context: BackgroundContext = {
-    user: null,
-    words: []
-  }
+	registerBackgroundMessage(context)
 
-  registerBackgroundMessage(context)
+	fetchContext(context)
 
-  init(context)
-
-  browser.action.onClicked.addListener((tab) => {
-    if (tab.id) {
-      sendContentMessage('toggleSidebar', undefined, tab.id)
-    }
-  })
-
+	browser.action.onClicked.addListener((tab) => {
+		if (tab.id) {
+			sendContentMessage("toggleSidebar", undefined, tab.id)
+		}
+	})
 })
