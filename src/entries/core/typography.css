@@ -22,6 +22,7 @@
   border: 1px solid rgb(225 128 188);
   position: fixed;
   z-index: 999;
+  pointer-events: none;
 }
 
 .word-wise-typography-translation {
