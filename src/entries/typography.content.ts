@@ -25,9 +25,10 @@ function removeElement(container: HTMLElement, el: HTMLElement) {
 
 async function onTranslateTypography(target: HTMLElement) {
 	const cloneTargetEl = target.cloneNode(true) as HTMLElement
-	cloneTargetEl
-		.querySelectorAll(".word-wise-typography-hover")
-		.forEach((el) => el.remove())
+	const hoverEls = cloneTargetEl.querySelectorAll(".word-wise-typography-hover")
+	for (const el of hoverEls) {
+		el.remove()
+	}
 
 	const text = cloneTargetEl.textContent?.trim()
 	if (!text) {
@@ -68,6 +69,22 @@ function createTypographyTranslatorElement({
 	return el
 }
 
+let globalTranslatorRangeElement: HTMLDivElement | null = null
+function createTypographyTranslatorRangeElement(target: HTMLElement) {
+	let el = globalTranslatorRangeElement
+	if (!el) {
+		el = globalTranslatorRangeElement = document.createElement("div")
+		el.className = "word-wise-typography-range"
+	}
+
+	const { top, left, width, height } = target.getBoundingClientRect()
+	el.style.top = `${top}px`
+	el.style.left = `${left}px`
+	el.style.width = `${width}px`
+	el.style.height = `${height}px`
+	return el
+}
+
 function showTypographyTranslatorElement(
 	target: HTMLElement,
 	{ clientX, clientY }: { clientX: number; clientY: number },
@@ -76,7 +93,11 @@ function showTypographyTranslatorElement(
 		top: clientY - 10,
 		left: clientX + 10,
 	})
+	const typographyTranslatorRangeEl =
+		createTypographyTranslatorRangeElement(target)
+
 	document.body.appendChild(typographyTranslatorEl)
+	document.body.appendChild(typographyTranslatorRangeEl)
 
 	typographyTranslatorEl.addEventListener("click", () =>
 		onTranslateTypography(target),
@@ -84,6 +105,7 @@ function showTypographyTranslatorElement(
 
 	const mouseOut = () => {
 		removeElement(document.body, typographyTranslatorEl)
+		removeElement(document.body, typographyTranslatorRangeEl)
 		target.removeEventListener("mouseout", debounceMouseOut)
 		target.removeEventListener("mouseover", debounceMouseOut.cancel)
 	}
@@ -145,5 +167,9 @@ export default defineContentScript({
 		}
 
 		document.addEventListener("mousemove", debounce(onTypographyMove, 500))
+		document.addEventListener("scroll", () => {
+			globalTranslatorElement?.remove()
+			globalTranslatorRangeElement?.remove()
+		})
 	},
 })

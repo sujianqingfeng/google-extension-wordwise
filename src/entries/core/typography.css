@@ -13,6 +13,15 @@
     align-items: center;
     width: 20px;
     height: 20px;
+    z-index: 1000;
+}
+
+.word-wise-typography-range {
+  border-radius: 4px;
+  background-color: rgba(225, 128, 188,0.1);
+  border: 1px solid rgb(225 128 188);
+  position: fixed;
+  z-index: 999;
 }
 
 .word-wise-typography-translation {
