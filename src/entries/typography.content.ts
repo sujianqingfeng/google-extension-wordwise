@@ -128,6 +128,14 @@ function onTypographyMove(e: MouseEvent) {
 		return
 	}
 
+	const hasExistTypographyChild = Array.from(currentEl.children).some((item) =>
+		TEXT_TAGS.includes(item.tagName.toLowerCase()),
+	)
+
+	if (hasExistTypographyChild) {
+		return
+	}
+
 	const text = currentEl.textContent?.trim()
 	if (!text) {
 		return

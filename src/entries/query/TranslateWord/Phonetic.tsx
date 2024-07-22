@@ -1,5 +1,8 @@
+import { createBackgroundMessage } from "@/messaging/background"
 import { useState } from "react"
 import { TbVolume } from "react-icons/tb"
+
+const bgs = createBackgroundMessage()
 
 type PhoneticProps = {
 	type: "uk" | "us"
@@ -20,12 +23,18 @@ export default function Phonetic({
 	const speech = currentType === "uk" ? ukSpeech : usSpeech
 	const phonetic = currentType === "uk" ? ukPhonetic : usPhonetic
 
-	const onPlay = () => {
+	const onPlay = async () => {
 		if (!speech) {
 			return
 		}
-		const audio = new Audio(speech)
-		audio.play()
+		const base64 = await bgs.fetchAudioBase64FromUrl(speech)
+		const buffer = await fetch(base64).then((res) => res.arrayBuffer())
+		const audioContext = new AudioContext()
+		const audioBuffer = await audioContext.decodeAudioData(buffer)
+		const source = audioContext.createBufferSource()
+		source.buffer = audioBuffer
+		source.connect(audioContext.destination)
+		source.start()
 	}
 
 	const onToggle = () => {

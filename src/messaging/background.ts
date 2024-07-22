@@ -46,6 +46,24 @@ function getIdTokenFromHash(url: string) {
 	return params.get("id_token")
 }
 
+async function fetchAudioBase64FromUrl(url: string) {
+	const data = await fetch(url)
+	if (!data.ok) {
+		throw new Error("Failed to fetch audio")
+	}
+
+	const bold = await data.blob()
+	const base64 = await new Promise<string>((resolve) => {
+		const reader = new FileReader()
+		reader.onload = () => {
+			resolve(reader.result as string)
+		}
+		reader.readAsDataURL(bold)
+	})
+
+	return base64
+}
+
 function _createBackgroundMessage(context: BackgroundContext) {
 	const addWord = (word: string) => {
 		context.words.push({
@@ -115,6 +133,7 @@ function _createBackgroundMessage(context: BackgroundContext) {
 		fetchAnalyzeGrammar: fetchAnalyzeGrammarApi,
 		fetchAddWordCollected,
 		fetchRemoveWordCollected,
+		fetchAudioBase64FromUrl,
 	}
 }
 
