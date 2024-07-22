@@ -57,10 +57,7 @@ const onSelectionChange = async (context: QueryContentContext) => {
 	// no operation when the selection is in the query panel
 	const parentElement = range.commonAncestorContainer.parentElement
 
-	if (
-		context.queryUI.container &&
-		context.queryUI.container.contains(parentElement)
-	) {
+	if (context.queryUI.container?.contains(parentElement)) {
 		return
 	}
 	context.currentQueryTriggerEl = parentElement
@@ -80,6 +77,10 @@ function createQueryUI(ctx: ContentScriptContext): QueryUI {
 		text?: string
 		triggerRect?: DOMRect
 	}) => {
+		if (ui) {
+			remove()
+		}
+
 		ui = await createShadowRootUi(ctx, {
 			name: QUERY_SHADOW_TAG_NAME,
 			position: "inline",

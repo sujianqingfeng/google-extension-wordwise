@@ -90,7 +90,7 @@ function showTypographyTranslatorElement(
 	{ clientX, clientY }: { clientX: number; clientY: number },
 ) {
 	const typographyTranslatorEl = createTypographyTranslatorElement({
-		top: clientY - 10,
+		top: clientY + 10,
 		left: clientX + 10,
 	})
 	const typographyTranslatorRangeEl =
