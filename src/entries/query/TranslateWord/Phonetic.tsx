@@ -1,4 +1,5 @@
 import { createBackgroundMessage } from "@/messaging/background"
+import { useQuery } from "@tanstack/react-query"
 import { useState } from "react"
 import { TbVolume } from "react-icons/tb"
 
@@ -25,12 +26,19 @@ export default function Phonetic({
 	const speech = currentType === "uk" ? ukSpeech : usSpeech
 	const phonetic = currentType === "uk" ? ukPhonetic : usPhonetic
 
+	const { refetch: fetchAudioBase64FromUrl } = useQuery({
+		queryKey: ["pronounce", word, currentType],
+		queryFn: () =>
+			bgs.fetchAudioBase64FromUrl(word, currentType === "uk" ? "1" : "2"),
+		enabled: false,
+	})
+
 	const onPlay = async () => {
-		const base64 = await bgs.fetchAudioBase64FromUrl(
-			word,
-			currentType === "uk" ? "1" : "2",
-		)
-		const buffer = await fetch(base64).then((res) => res.arrayBuffer())
+		const { error, data } = await fetchAudioBase64FromUrl()
+		if (error || !data) {
+			return
+		}
+		const buffer = await fetch(data).then((res) => res.arrayBuffer())
 		const audioContext = new AudioContext()
 		const audioBuffer = await audioContext.decodeAudioData(buffer)
 		const source = audioContext.createBufferSource()
