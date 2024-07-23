@@ -2,6 +2,7 @@ import {
 	fetchAddWordCollectedApi,
 	fetchAiTranslateApi,
 	fetchAnalyzeGrammarApi,
+	fetchDictionPronounceApi,
 	fetchDictionQueryApi,
 	fetchExchangeTokenApi,
 	fetchRemoveWordCollectedApi,
@@ -46,7 +47,8 @@ function getIdTokenFromHash(url: string) {
 	return params.get("id_token")
 }
 
-async function fetchAudioBase64FromUrl(url: string) {
+async function fetchAudioBase64FromUrl(word: string, type: string) {
+	const { url } = await fetchDictionPronounceApi({ word, type })
 	const data = await fetch(url)
 	if (!data.ok) {
 		throw new Error("Failed to fetch audio")

@@ -1,6 +1,7 @@
 import type {
 	AnalyzeGrammarParams,
 	CreateReadLaterParams,
+	DictionaryPronounceResp,
 	DictionaryQueryResp,
 	ExchangeTokenParams,
 	ExchangeTokenResp,
@@ -26,6 +27,11 @@ export const fetchReadLaterApi = (params: CreateReadLaterParams) =>
 // dictionary
 export const fetchDictionQueryApi = (word: string) =>
 	requestGet<DictionaryQueryResp>("/dictionary/query", { word })
+
+export const fetchDictionPronounceApi = (params: {
+	word: string
+	type: string
+}) => requestGet<DictionaryPronounceResp>("/dictionary/pronounce", params)
 
 // collected
 export const fetchWordCollectedApi = (word: string) =>

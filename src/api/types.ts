@@ -82,6 +82,10 @@ export type DictionaryQueryResp = {
 	examTypes: string[]
 }
 
+export type DictionaryPronounceResp = {
+	url: string
+}
+
 // word
 
 export type QueryWordCollectedResp = {

@@ -10,6 +10,7 @@ type PhoneticProps = {
 	ukSpeech?: string
 	usPhonetic?: string
 	usSpeech?: string
+	word: string
 }
 export default function Phonetic({
 	type,
@@ -17,6 +18,7 @@ export default function Phonetic({
 	ukSpeech,
 	usPhonetic,
 	usSpeech,
+	word,
 }: PhoneticProps) {
 	const [currentType, setCurrentType] = useState(type)
 
@@ -24,10 +26,10 @@ export default function Phonetic({
 	const phonetic = currentType === "uk" ? ukPhonetic : usPhonetic
 
 	const onPlay = async () => {
-		if (!speech) {
-			return
-		}
-		const base64 = await bgs.fetchAudioBase64FromUrl(speech)
+		const base64 = await bgs.fetchAudioBase64FromUrl(
+			word,
+			currentType === "uk" ? "1" : "2",
+		)
 		const buffer = await fetch(base64).then((res) => res.arrayBuffer())
 		const audioContext = new AudioContext()
 		const audioBuffer = await audioContext.decodeAudioData(buffer)
@@ -50,7 +52,7 @@ export default function Phonetic({
 				}`}
 			>
 				{phonetic}
-				{speech && <TbVolume size={12} />}
+				<TbVolume size={12} />
 			</div>
 
 			{phonetic && (
