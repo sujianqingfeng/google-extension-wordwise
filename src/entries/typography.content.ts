@@ -100,13 +100,9 @@ function showTypographyTranslatorElement(
 	document.body.appendChild(typographyTranslatorRangeEl)
 
 	const onTranslateTypographyClick = onTranslateTypography.bind(null, target)
-	typographyTranslatorEl.addEventListener("click", onTranslateTypographyClick)
+	typographyTranslatorEl.onclick = onTranslateTypographyClick
 
 	const mouseOut = () => {
-		typographyTranslatorEl.removeEventListener(
-			"click",
-			onTranslateTypographyClick,
-		)
 		removeElement(document.body, typographyTranslatorEl)
 		removeElement(document.body, typographyTranslatorRangeEl)
 		target.removeEventListener("mouseout", debounceMouseOut)
