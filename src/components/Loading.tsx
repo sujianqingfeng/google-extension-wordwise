@@ -1,9 +1,13 @@
-import { ImSpinner2 } from 'react-icons/im'
+import { Loader } from "lucide-react"
 
 type LoadingProps = {
-  size?: number
+	size?: number
 }
-export default function Loading(props: LoadingProps) {
-  const { size = 20 } = props
-  return <ImSpinner2 size={size} className="animate-spin dark:text-gray-400 text-black" />
+export default function Loading({ size }: LoadingProps) {
+	return (
+		<Loader
+			size={size}
+			className="animate-spin dark:text-gray-400 text-black"
+		/>
+	)
 }

@@ -1,6 +1,6 @@
 import type { DictionaryQueryForm } from "@/api/types"
 import { useState } from "react"
-import { MdExpandMore } from "react-icons/md"
+import { ChevronDown } from "lucide-react"
 import WordForm from "./WordForm"
 
 type ExpandProps = {
@@ -17,14 +17,16 @@ export default function Expand({ forms = [] }: ExpandProps) {
 			{isExpand && (
 				<div className="px-2 flex gap-2 mt-2 flex-wrap text-black">
 					{forms.map((f, i) => (
+						// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
 						<WordForm key={i} {...f} />
 					))}
 				</div>
 			)}
 
 			<div className="p-1 flex justify-end bg-gray-100 dark:bg-slate-400/10">
-				<MdExpandMore
-					className="cursor-pointer dark:text-gray-400 text-black"
+				<ChevronDown
+					className={`cursor-pointer dark:text-gray-400 text-black  transition-transform " 
+						${isExpand ? "rotate-180" : ""}`}
 					onClick={toggle}
 				/>
 			</div>

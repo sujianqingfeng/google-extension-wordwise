@@ -1,7 +1,7 @@
 import type {} from "@/api/types"
 import Loading from "@/components/Loading"
 import { ErrorBoundary, type FallbackProps } from "react-error-boundary"
-import { RxMagicWand } from "react-icons/rx"
+import { WandSparkles } from "lucide-react"
 import { useQuery, useSuspenseQuery } from "@tanstack/react-query"
 import { createBackgroundMessage } from "@/messaging/background"
 import Analyze from "./Analyze"
@@ -45,7 +45,7 @@ function TranslateText({ text }: TranslateTextProps) {
 				{analyzeLoading ? (
 					<Loading size={14} />
 				) : (
-					<RxMagicWand
+					<WandSparkles
 						className="cursor-pointer dark:text-gray-400 text-black"
 						onClick={onAnalyze}
 					/>

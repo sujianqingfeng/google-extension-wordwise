@@ -1,7 +1,7 @@
 import { createBackgroundMessage } from "@/messaging/background"
 import { useQuery } from "@tanstack/react-query"
 import { useState } from "react"
-import { TbVolume } from "react-icons/tb"
+import { Volume1 } from "lucide-react"
 
 const bgs = createBackgroundMessage()
 
@@ -60,7 +60,7 @@ export default function Phonetic({
 				}`}
 			>
 				{phonetic}
-				<TbVolume size={12} />
+				<Volume1 size={12} />
 			</div>
 
 			{phonetic && (

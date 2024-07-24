@@ -1,4 +1,3 @@
-import { FcGoogle } from "react-icons/fc"
 import Loading from "../../components/Loading"
 
 type AuthButtonProps = {
@@ -20,7 +19,6 @@ export default function AuthButton(props: AuthButtonProps) {
 			onClick={onClick}
 		>
 			{loading && <Loading />}
-			<FcGoogle />
 			Google Auth
 		</button>
 	)
