@@ -15,7 +15,10 @@ const TEXT_TAGS = [
 	"section",
 	"figure",
 	"li",
+	"figcaption",
 ]
+
+const NOT_TEXT_TAGS = ["img", "picture"]
 
 function removeElement(container: HTMLElement, el: HTMLElement) {
 	if (container.contains(el)) {
@@ -120,7 +123,10 @@ function onTypographyMove(e: MouseEvent) {
 		return
 	}
 
-	if (!TEXT_TAGS.includes(currentEl.tagName.toLowerCase())) {
+	if (
+		!TEXT_TAGS.includes(currentEl.tagName.toLowerCase()) ||
+		NOT_TEXT_TAGS.includes(currentEl.tagName.toLowerCase())
+	) {
 		return
 	}
 
@@ -129,6 +135,14 @@ function onTypographyMove(e: MouseEvent) {
 	)
 
 	if (hasExistTypographyChild) {
+		return
+	}
+
+	const hasExistNotTypographyChild = Array.from(currentEl.children).some(
+		(item) => NOT_TEXT_TAGS.includes(item.tagName.toLowerCase()),
+	)
+
+	if (hasExistNotTypographyChild) {
 		return
 	}
 
