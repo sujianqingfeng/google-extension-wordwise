@@ -6,15 +6,15 @@ import type {
 	ExchangeTokenParams,
 	ExchangeTokenResp,
 	IWordRespItem,
-	LoginResp,
 	QueryWordCollectedResp,
 	TranslateParams,
+	UserResp,
 } from "./types"
 
 //
 export const fetchAllWordsApi = () => requestGet<IWordRespItem[]>("/word/all")
 // user
-export const fetchUserInfoApi = () => requestGet<LoginResp>("/user")
+export const fetchUserInfoApi = () => requestGet<UserResp>("/user")
 
 //
 export const fetchExchangeTokenApi = (params: ExchangeTokenParams) =>

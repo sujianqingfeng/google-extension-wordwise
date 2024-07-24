@@ -3,8 +3,6 @@
 	"type": "module",
 	"version": "1.1.0",
 	"private": true,
-	"main": "src/main.tsx",
-	"module": "src/main.tsx",
 	"scripts": {
 		"dev": "wxt -p 3002",
 		"build": "wxt build",

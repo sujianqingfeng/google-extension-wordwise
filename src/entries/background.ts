@@ -1,6 +1,6 @@
 import { registerBackgroundMessage } from "../messaging/background"
-import { sendContentMessage } from "../messaging/content"
 import { fetchAllWordsApi } from "@/api"
+import { sendContentMessage } from "@/messaging/content"
 import type { BackgroundContext } from "@/types"
 
 async function fetchAllWords() {
@@ -27,7 +27,7 @@ export default defineBackground(() => {
 	fetchContext(context)
 
 	browser.action.onClicked.addListener((tab) => {
-		if (tab.id) {
+		if (tab.id && !tab.url?.includes("//extensions/")) {
 			sendContentMessage("toggleSidebar", undefined, tab.id)
 		}
 	})

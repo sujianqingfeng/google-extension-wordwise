@@ -1,17 +1,9 @@
-export type LoginReq = {
-	code: string
-	provider: string
-	redirectUrl: string
-}
-
-export type LoginResp = {
+export type UserResp = {
 	token: string
 	name: string
 	email: string
 	avatar: string
 }
-
-export type UserResp = Omit<LoginResp, "token">
 
 export type ICreateWordDto = {
 	word: string
