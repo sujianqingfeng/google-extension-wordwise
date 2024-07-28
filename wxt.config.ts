@@ -9,7 +9,7 @@ export default defineConfig({
 		name: "wordwise",
 		permissions: ["identity", "storage", "identity.email"],
 		action: { default_popup: "" },
-		key: "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArKwXmyvny73aFqvO/E7Jfz3utoUcNpOntBLY20LTnw32D+76xn1CSMygi+BXYocad82nFhU8vZ3WiXO6mjGN6tbyaTob6M0ffWBXNF+8SAehsCJEzFOzlYPggnmOVd/yN/E9uHHeiNug1GgdIeQj7YQ29BUu35dQcGde/XtRHs/SKWm2iAWT9MGM36vxJn8kBVY55xG5Skj9zg+vvo/NQMUwr4WQ9KdShlRg6QDHMrPnLRqTQOAuOjpZmVOmFckZvbBhkcZfNEAfWW6EEqkcj/mj3rdpH2/WtAHXdQ6MGEL03g7YGI8IUa4OMezl7/L1k8+ODKVEfx+xTnuyGSVs7QIDAQAB",
+		key: "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEApyPlTYNRy66gAw07db1FNrix+rqO2X2L+y402Lp0UKPDSKRTxCu2bieWs+r/7yISvpXMqBto88CI+L1pHCJIAy00xsHicbtdXMU/BAHDwfBdADsGcREOofSVHLsESM573GB+lJ6ZaJNPyexL1gtwm5M5lFRrhicdOLj8ZKZ01tlBRbb5FMAdMS42fO8pLaXOpd0hOvXhITCqb9a4sxUr4uYuSxOksBoODOhFWwqEIydIKRBwNzd+XxryGJMxL9Z5YopQA4SrVAj4N2pGCuGLOxoTTYDw+0s7UGPnLmCeQBP4Y2KmrO4FYUbHEtNeoSu9SzNcHmxvFzVB/UwF9zDMXQIDAQAB",
 		oauth2: {
 			client_id:
 				"760731858259-16mtvml2m9lqss4138me5cmi0hntj4qe.apps.googleusercontent.com",
