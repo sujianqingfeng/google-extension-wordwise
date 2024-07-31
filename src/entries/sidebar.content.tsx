@@ -20,7 +20,9 @@ function createSidebar(ctx: ContentScriptContext) {
 				position: "inline",
 				anchor: "body",
 				onMount: (container) => {
-					const root = ReactDOM.createRoot(container)
+					const innerContainer = document.createElement("div")
+					container.appendChild(innerContainer)
+					const root = ReactDOM.createRoot(innerContainer)
 					root.render(<Sidebar removeSidebar={remove} />)
 					isMounted = true
 					return root

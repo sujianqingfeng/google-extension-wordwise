@@ -86,7 +86,9 @@ function createQueryUI(ctx: ContentScriptContext): QueryUI {
 			position: "inline",
 			anchor: "body",
 			onMount: (container) => {
-				const root = ReactDOM.createRoot(container)
+				const innerContainer = document.createElement("div")
+				container.appendChild(innerContainer)
+				const root = ReactDOM.createRoot(innerContainer)
 				root.render(<Query removeQueryPanel={remove} {...options} />)
 				return root
 			},
