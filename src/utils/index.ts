@@ -58,6 +58,36 @@ export function debounce<F extends (...args: any[]) => any>(
 	return call
 }
 
+export function throttle<T extends (...args: any[]) => any>(
+	func: T,
+	wait: number,
+): T {
+	let timeout: ReturnType<typeof setTimeout> | null = null
+	let lastArgs: Parameters<T> | null = null
+	let lastThis: ThisParameterType<T> | null = null
+
+	const throttled = function (
+		this: ThisParameterType<T>,
+		...args: Parameters<T>
+	) {
+		lastArgs = args
+		lastThis = this
+
+		if (timeout === null) {
+			timeout = setTimeout(() => {
+				if (lastArgs) {
+					func.apply(lastThis, lastArgs)
+					lastArgs = null
+					lastThis = null
+					timeout = null
+				}
+			}, wait)
+		}
+	}
+
+	return throttled as T
+}
+
 export function objectToQueryString(obj: Record<string, any>) {
 	return Object.keys(obj)
 		.map((key) => `${key}=${obj[key]}`)

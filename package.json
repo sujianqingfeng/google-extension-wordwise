@@ -12,7 +12,7 @@
 	},
 	"dependencies": {
 		"@mozilla/readability": "^0.5.0",
-		"@tanstack/react-query": "^5.50.1",
+		"@tanstack/react-query": "^5.51.15",
 		"@webext-core/messaging": "^1.4.0",
 		"@webext-core/proxy-service": "^1.2.0",
 		"date-fns": "^3.6.0",
@@ -30,11 +30,11 @@
 		"@types/react-dom": "^18.3.0",
 		"@vitejs/plugin-react": "^4.3.1",
 		"autoprefixer": "^10.4.19",
-		"postcss": "^8.4.39",
-		"tailwindcss": "^3.4.6",
+		"postcss": "^8.4.40",
+		"tailwindcss": "^3.4.7",
 		"typescript": "^5.5.4",
 		"vitest": "^2.0.4",
 		"web-ext": "^8.2.0",
-		"wxt": "^0.18.15"
+		"wxt": "^0.19.2"
 	}
 }

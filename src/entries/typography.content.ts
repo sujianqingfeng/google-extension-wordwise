@@ -1,5 +1,6 @@
 import { createBackgroundMessage } from "@/messaging/background"
 import "./core/typography.css"
+import { throttle } from "@/utils"
 
 const TEXT_TAGS = [
 	"p",
@@ -18,10 +19,10 @@ const TEXT_TAGS = [
 	"figcaption",
 ]
 
-const NOT_TEXT_TAGS = ["img", "picture"]
+const NOT_TEXT_TAGS = ["img", "picture", "table"]
 
-function removeElement(container: HTMLElement, el: HTMLElement) {
-	if (container.contains(el)) {
+function removeElement(container: HTMLElement, el: HTMLElement | null) {
+	if (el && container.contains(el)) {
 		container.removeChild(el)
 	}
 }
@@ -175,6 +176,11 @@ function onTypographyMove(e: MouseEvent) {
 	showTypographyTranslatorElement(target, { clientX, clientY })
 }
 
+function scrollToRemoveExtraElement() {
+	removeElement(document.body, globalTranslatorElement)
+	removeElement(document.body, globalTranslatorRangeElement)
+}
+
 export default defineContentScript({
 	matches: ["<all_urls>"],
 	runAt: "document_idle",
@@ -188,9 +194,9 @@ export default defineContentScript({
 		}
 
 		document.addEventListener("mousemove", debounce(onTypographyMove, 500))
-		document.addEventListener("scroll", () => {
-			globalTranslatorElement?.remove()
-			globalTranslatorRangeElement?.remove()
-		})
+		document.addEventListener(
+			"scroll",
+			throttle(scrollToRemoveExtraElement, 500),
+		)
 	},
 })
