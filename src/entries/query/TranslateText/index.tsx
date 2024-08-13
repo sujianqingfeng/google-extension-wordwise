@@ -46,6 +46,7 @@ function TranslateText({ text }: TranslateTextProps) {
 					<Loading size={14} />
 				) : (
 					<WandSparkles
+						size={14}
 						className="cursor-pointer dark:text-gray-400 text-black"
 						onClick={onAnalyze}
 					/>

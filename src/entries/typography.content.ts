@@ -17,6 +17,7 @@ const TEXT_TAGS = [
 	"figure",
 	"li",
 	"figcaption",
+	"span",
 ]
 
 const NOT_TEXT_TAGS = ["img", "picture", "table"]

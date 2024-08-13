@@ -16,7 +16,7 @@ export default function Analyze({ loading, result }: AnalyzeProps) {
 	}
 
 	return (
-		<div className="dark:text-gray-400 text-black p-2 word-wise-markdown max-h-[200px] overflow-y-auto">
+		<div className="dark:text-gray-400 text-black p-2 word-wise-markdown max-h-[400px] overflow-y-auto">
 			<Markdown>{result}</Markdown>
 		</div>
 	)

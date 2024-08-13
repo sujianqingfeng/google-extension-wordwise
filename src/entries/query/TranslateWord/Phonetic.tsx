@@ -55,9 +55,7 @@ export default function Phonetic({
 		<div className="flex items-center text-sm gap-1 text-black font-normal">
 			<div
 				onClick={onPlay}
-				className={`bg-gray-100 dark:bg-slate-400/10 dark:text-gray-400 rounded-full px-1 flex items-center gap-1 ${
-					speech ? "cursor-pointer" : ""
-				}`}
+				className="bg-gray-100 dark:bg-slate-400/10 dark:text-gray-400 rounded-full px-1 flex items-center gap-1 cursor-pointer"
 			>
 				{phonetic}
 				<Volume1 size={12} />

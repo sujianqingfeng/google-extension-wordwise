@@ -15,9 +15,13 @@
 }
 
 .word-wise-markdown ul{
-  @apply pl-4;
+  @apply pl-4 list-disc;
+}
+
+.word-wise-markdown ul ul{
+  @apply list-circle;
 }
 
 .word-wise-markdown ul li{
-  @apply leading-5;
+  @apply leading-6;
 }
