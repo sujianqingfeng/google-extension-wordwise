@@ -20,7 +20,7 @@ const TEXT_TAGS = [
 	"span",
 ]
 
-const NOT_TEXT_TAGS = ["img", "picture", "table"]
+const NOT_TEXT_TAGS = ["img", "picture", "table", "nav", "button"]
 
 function removeElement(container: HTMLElement, el: HTMLElement | null) {
 	if (el && container.contains(el)) {

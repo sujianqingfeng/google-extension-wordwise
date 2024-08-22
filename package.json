@@ -1,22 +1,22 @@
 {
-	"name": "rebuild-google-extension-wordwise",
+	"name": "google-extension-wordwise",
 	"type": "module",
 	"version": "1.1.0",
 	"private": true,
 	"scripts": {
 		"dev": "wxt -p 3002",
 		"build": "wxt build",
-		"pack": "web-ext build --source-dir dist",
+		"pack": "web-ext build --source-dir output/chrome-mv3",
 		"test": "vitest",
 		"postinstall": "wxt prepare"
 	},
 	"dependencies": {
 		"@mozilla/readability": "^0.5.0",
-		"@tanstack/react-query": "^5.51.23",
+		"@tanstack/react-query": "^5.52.0",
 		"@webext-core/messaging": "^1.4.0",
 		"@webext-core/proxy-service": "^1.2.0",
 		"date-fns": "^3.6.0",
-		"lucide-react": "^0.427.0",
+		"lucide-react": "^0.429.0",
 		"react": "^18.3.1",
 		"react-dom": "^18.3.1",
 		"react-error-boundary": "^4.0.13",
@@ -25,16 +25,16 @@
 	"devDependencies": {
 		"@biomejs/biome": "^1.8.3",
 		"@types/chrome": "^0.0.270",
-		"@types/node": "^20.9.0",
-		"@types/react": "^18.3.3",
+		"@types/node": "^22.5.0",
+		"@types/react": "^18.3.4",
 		"@types/react-dom": "^18.3.0",
 		"@vitejs/plugin-react": "^4.3.1",
 		"autoprefixer": "^10.4.20",
 		"postcss": "^8.4.41",
-		"tailwindcss": "^3.4.9",
+		"tailwindcss": "^3.4.10",
 		"typescript": "^5.5.4",
 		"vitest": "^2.0.5",
 		"web-ext": "^8.2.0",
-		"wxt": "^0.19.5"
+		"wxt": "^0.19.7"
 	}
 }

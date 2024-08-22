@@ -11,7 +11,7 @@ import Loading from "@/components/Loading"
 function Fallback() {
 	return (
 		<div className="flex justify-center items-center h-10">
-			<Loading />
+			<Loading size={20} />
 		</div>
 	)
 }
@@ -51,7 +51,7 @@ export default function Query({
 			<div
 				ref={queryRef}
 				style={{ top: top ?? position.top, left: left ?? position.left }}
-				className="fixed flex justify-center items-start bg-base z-9999"
+				className="fixed flex justify-center items-start bg-base z-9999 rounded-sm"
 			>
 				<div className="w-[350px] bg-base rounded-md shadow">
 					<Suspense fallback={<Fallback />}>
