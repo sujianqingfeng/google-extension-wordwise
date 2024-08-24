@@ -2,8 +2,10 @@ import type {} from "@/api/types"
 import Loading from "@/components/Loading"
 import { ErrorBoundary, type FallbackProps } from "react-error-boundary"
 import { WandSparkles } from "lucide-react"
-import { useQuery, useSuspenseQuery } from "@tanstack/react-query"
+import { useSuspenseQuery } from "@tanstack/react-query"
 import { createBackgroundMessage } from "@/messaging/background"
+import { onBackgroundMessage, sendBackgroundMessage } from "@/messaging/content"
+import { useEffect, useState } from "react"
 import Analyze from "./Analyze"
 
 type TranslateTextProps = {
@@ -17,20 +19,23 @@ function TranslateText({ text }: TranslateTextProps) {
 		queryKey: ["translate", text],
 		queryFn: () => bgs.fetchAiTranslate({ text, provider: "deepSeek" }),
 	})
-
-	const {
-		data: analyzeResult,
-		refetch: fetchAnalyzeGrammar,
-		isLoading: analyzeLoading,
-	} = useQuery({
-		queryKey: ["analyze", text],
-		queryFn: () => bgs.fetchAnalyzeGrammar({ text, provider: "deepSeek" }),
-		enabled: false,
-	})
+	const [analyzeResult, setAnalyzeResult] = useState("")
+	const [analyzeLoading, setAnalyzeLoading] = useState(false)
 
 	const onAnalyze = async () => {
-		fetchAnalyzeGrammar()
+		sendBackgroundMessage("analyzeGrammar", text)
+		setAnalyzeLoading(true)
 	}
+
+	useEffect(() => {
+		onBackgroundMessage(
+			"analyzeGrammarResult",
+			({ data: { result, done } }) => {
+				setAnalyzeResult(result)
+				setAnalyzeLoading(!done)
+			},
+		)
+	}, [])
 
 	return (
 		<div className="text-sm font-normal dark:text-gray-400 text-black">
@@ -39,7 +44,7 @@ function TranslateText({ text }: TranslateTextProps) {
 				<div className="mt-2">{translateResult}</div>
 			</div>
 
-			<Analyze loading={analyzeLoading} result={analyzeResult} />
+			<Analyze result={analyzeResult} />
 
 			<div className="px-2 py-1 flex justify-end bg-gray-100 dark:bg-slate-400/10">
 				{analyzeLoading ? (

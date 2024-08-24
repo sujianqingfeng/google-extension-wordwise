@@ -51,9 +51,9 @@ export default function Query({
 			<div
 				ref={queryRef}
 				style={{ top: top ?? position.top, left: left ?? position.left }}
-				className="fixed flex justify-center items-start bg-base z-9999 rounded-sm"
+				className="fixed flex justify-center items-start bg-base z-10000 rounded-sm"
 			>
-				<div className="w-[350px] bg-base rounded-md shadow">
+				<div className="w-[400px] bg-base rounded-md shadow">
 					<Suspense fallback={<Fallback />}>
 						{text && isTextFlag && <TranslateText text={text} />}
 					</Suspense>

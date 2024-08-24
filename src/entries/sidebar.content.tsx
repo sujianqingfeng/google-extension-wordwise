@@ -4,7 +4,7 @@ import type {
 } from "wxt/client"
 import ReactDOM from "react-dom/client"
 import Sidebar from "./sidebar/Sidebar"
-import { onMessage } from "../messaging/content"
+import { onBackgroundMessage } from "../messaging/content"
 import { SIDEBAR_SHADOW_TAG_NAME } from "@/constants"
 
 import "~/assets/main.css"
@@ -49,6 +49,6 @@ export default defineContentScript({
 	runAt: "document_idle",
 	async main(ctx) {
 		const toggle = createSidebar(ctx)
-		onMessage("toggleSidebar", toggle)
+		onBackgroundMessage("toggleSidebar", toggle)
 	},
 })

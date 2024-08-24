@@ -14,8 +14,6 @@ export const EXCLUDE_TAG_ELEMENTS = ["script", "svg", "img", "style"]
 export const QUERY_ROOT_ID = "wordwise-query-crx-root"
 export const SIDE_ROOT_ID = "wordwise-side-crx-root"
 
-export const QUERY_PANEL_WIDTH = 500
-
 export const TOKEN = "local:token"
 export const REFRESH_TOKEN = "local:refresh-token"
 

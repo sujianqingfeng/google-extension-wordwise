@@ -1,6 +1,6 @@
 import { objectToQueryString } from "."
 
-export const BASE_URL = import.meta.env.VITE_BASE_API_URL
+const BASE_API_URL = import.meta.env.VITE_BASE_API_URL
 
 type Method = "get" | "post" | "put" | "delete"
 type RefreshCallback = (accessToken: string) => void
@@ -89,7 +89,7 @@ function createRequest({
 			if (!isRefreshing) {
 				isRefreshing = true
 
-				refreshToken(`${BASE_URL}/api/auth/refresh`)
+				refreshToken(REFRESH_TOKEN_URL)
 					.then((newAccessToken) => {
 						isRefreshing = false
 						onAccessTokenFetched(newAccessToken)
@@ -124,14 +124,18 @@ function createRequest({
 }
 
 const BASE_URL_API_PREFIX = "/api"
+const BASE_URL = `${BASE_API_URL}${BASE_URL_API_PREFIX}`
+const REFRESH_TOKEN_URL = `${BASE_URL}/auth/refresh`
 const createCommonRequestOptions = (method: Method) => {
 	return {
 		method,
-		baseUrl: `${BASE_URL}${BASE_URL_API_PREFIX}`,
+		baseUrl: BASE_URL,
 	}
 }
 
-export const requestGet = createRequest(createCommonRequestOptions("get"))
-export const requestPost = createRequest(createCommonRequestOptions("post"))
-export const requestPut = createRequest(createCommonRequestOptions("put"))
-export const requestDelete = createRequest(createCommonRequestOptions("delete"))
+const requestGet = createRequest(createCommonRequestOptions("get"))
+const requestPost = createRequest(createCommonRequestOptions("post"))
+const requestPut = createRequest(createCommonRequestOptions("put"))
+const requestDelete = createRequest(createCommonRequestOptions("delete"))
+
+export { requestGet, requestPost, requestPut, requestDelete, BASE_URL }
