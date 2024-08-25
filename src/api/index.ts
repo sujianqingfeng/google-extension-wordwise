@@ -53,3 +53,7 @@ export const fetchAiTranslateApi = (params: AnalyzeGrammarParams) =>
 // analyze
 export const fetchAnalyzeGrammarApi = (params: AnalyzeGrammarParams) =>
 	requestPost<string>(`/ai/${params.provider}/analyze-grammar`, params)
+
+// analyze
+export const fetchAnalyzeGrammarSSEApi = (params: AnalyzeGrammarParams) =>
+	requestPost<Response>(`/ai/${params.provider}/analyze-grammar-sse`, params)

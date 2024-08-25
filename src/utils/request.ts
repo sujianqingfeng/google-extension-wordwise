@@ -113,14 +113,80 @@ function createRequest({
 		}
 
 		if (res.ok) {
-			const json = await res.json()
-			return json.data
+			const contentType = res.headers.get("content-type")
+			if (contentType?.includes("application/json")) {
+				const json = await res.json()
+				return json.data
+			}
+
+			return res as unknown as R
 		}
 
 		throw new Error(res.statusText)
 	}
 
 	return makeFetch
+}
+
+async function readResponseStream(
+	response: Response,
+	onChunk: (chunk: string) => void,
+	onDone: () => void,
+) {
+	const reader = response.body?.getReader()
+	if (!reader) {
+		onDone()
+		return
+	}
+
+	const decoder = new TextDecoder()
+	let buffer = ""
+
+	while (true) {
+		const { done, value } = await reader.read()
+		if (done) {
+			if (buffer) {
+				onChunk(buffer)
+			}
+			onDone()
+			return
+		}
+
+		buffer += decoder.decode(value, { stream: true })
+
+		const lines = buffer.split("\n")
+		buffer = lines.pop() || ""
+
+		for (const line of lines) {
+			if (line.trim() !== "") {
+				onChunk(line)
+			}
+		}
+	}
+}
+
+function readResponseSSELine(
+	response: Response,
+	onChunk: (buff: string) => void,
+	onDone: (buff: string) => void,
+) {
+	let buff = ""
+
+	readResponseStream(
+		response,
+		(line) => {
+			line = line.replace("data: ", "")
+			if (line === "") {
+				buff += "\n"
+			} else {
+				buff += line
+			}
+			onChunk(buff)
+		},
+		() => {
+			onDone(buff)
+		},
+	)
 }
 
 const BASE_URL_API_PREFIX = "/api"
@@ -138,4 +204,11 @@ const requestPost = createRequest(createCommonRequestOptions("post"))
 const requestPut = createRequest(createCommonRequestOptions("put"))
 const requestDelete = createRequest(createCommonRequestOptions("delete"))
 
-export { requestGet, requestPost, requestPut, requestDelete, BASE_URL }
+export {
+	requestGet,
+	requestPost,
+	requestPut,
+	requestDelete,
+	readResponseSSELine,
+	BASE_URL,
+}
