@@ -1,7 +1,7 @@
 import { createBackgroundMessage } from "@/messaging/background"
 import { useQuery } from "@tanstack/react-query"
 import { useState } from "react"
-import { Volume1 } from "lucide-react"
+import { Volume2 } from "lucide-react"
 
 const bgs = createBackgroundMessage()
 
@@ -16,14 +16,11 @@ type PhoneticProps = {
 export default function Phonetic({
 	type,
 	ukPhonetic,
-	ukSpeech,
 	usPhonetic,
-	usSpeech,
 	word,
 }: PhoneticProps) {
 	const [currentType, setCurrentType] = useState(type)
 
-	const speech = currentType === "uk" ? ukSpeech : usSpeech
 	const phonetic = currentType === "uk" ? ukPhonetic : usPhonetic
 
 	const { refetch: fetchAudioBase64FromUrl } = useQuery({
@@ -51,21 +48,38 @@ export default function Phonetic({
 		setCurrentType((prev) => (prev === "uk" ? "us" : "uk"))
 	}
 
+	const onSystemTTS = () => {
+		const msg = new SpeechSynthesisUtterance(word)
+		msg.lang = currentType === "uk" ? "en-GB" : "en-US"
+		msg.rate = 0.6
+		window.speechSynthesis.speak(msg)
+	}
+
 	return (
 		<div className="flex items-center text-sm gap-1 text-black font-normal">
-			<div
-				onClick={onPlay}
-				className="bg-gray-100 dark:bg-slate-400/10 dark:text-gray-400 rounded-full px-1 flex items-center gap-1 cursor-pointer"
-			>
-				{phonetic}
-				<Volume1 size={12} />
-			</div>
-
 			{phonetic && (
 				<p onClick={onToggle} className="dark:text-gray-400 cursor-pointer">
 					{currentType}
 				</p>
 			)}
+
+			<div className="bg-gray-100 dark:bg-slate-400/10 dark:text-gray-400 px-2 rounded-full">
+				{phonetic}
+			</div>
+
+			<div
+				onClick={onPlay}
+				className="bg-gray-100 dark:bg-slate-400/10 dark:text-gray-400 rounded-full h-5 w-5 flex justify-center items-center cursor-pointer"
+			>
+				<Volume2 size={12} />
+			</div>
+
+			<div
+				onClick={onSystemTTS}
+				className="bg-gray-100 dark:bg-slate-400/10 dark:text-gray-400 rounded-full h-5 w-5 flex justify-center items-center cursor-pointer"
+			>
+				<Volume2 size={12} />
+			</div>
 		</div>
 	)
 }
