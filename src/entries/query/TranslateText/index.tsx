@@ -5,7 +5,7 @@ import { WandSparkles } from "lucide-react"
 import { useSuspenseQuery } from "@tanstack/react-query"
 import { createBackgroundMessage } from "@/messaging/background"
 import { onBackgroundMessage, sendBackgroundMessage } from "@/messaging/content"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import Analyze from "./Analyze"
 
 type TranslateTextProps = {
@@ -21,21 +21,28 @@ function TranslateText({ text }: TranslateTextProps) {
 	})
 	const [analyzeResult, setAnalyzeResult] = useState("")
 	const [analyzeLoading, setAnalyzeLoading] = useState(false)
+	const removeCallback = useRef<() => void>()
 
 	const onAnalyze = async () => {
-		sendBackgroundMessage("analyzeGrammar", text)
 		setAnalyzeLoading(true)
+		sendBackgroundMessage("analyzeGrammar", text)
 	}
 
 	useEffect(() => {
-		onBackgroundMessage(
-			"analyzeGrammarResult",
-			({ data: { result, done } }) => {
-				setAnalyzeResult(result)
-				setAnalyzeLoading(!done)
-			},
-		)
-	}, [])
+		if (analyzeLoading) {
+			removeCallback.current = onBackgroundMessage(
+				"analyzeGrammarResult",
+				({ data: { result, done } }) => {
+					setAnalyzeResult(result)
+					setAnalyzeLoading(!done)
+				},
+			)
+		}
+
+		return () => {
+			removeCallback.current?.()
+		}
+	}, [analyzeLoading])
 
 	return (
 		<div className="text-sm font-normal dark:text-gray-400 text-black">
