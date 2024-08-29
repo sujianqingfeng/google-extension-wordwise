@@ -1,31 +1,31 @@
 .word-wise-typography-hover {
-    font-size: 12px;
-    border-radius: 4px;
-    background-color: #fff !important;
-    color: rgb(225 128 188);
-    margin-left: 4px;
-    cursor: pointer;
-    font-weight: bold;
-    border: 1px solid rgb(236 236 237);
-    position: fixed;
-    display: inline-flex;
-    justify-content: center;
-    align-items: center;
-    width: 20px;
-    height: 20px;
-    z-index: 1000;
+  font-size: 12px;
+  border-radius: 4px;
+  background-color: #fff !important;
+  color: rgb(225 128 188);
+  margin-left: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  border: 1px solid rgb(236 236 237);
+  position: fixed;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 20px;
+  height: 20px;
+  z-index: 1000;
 }
 
 .word-wise-typography-range {
   border-radius: 4px;
-  background-color: rgba(225, 128, 188,0.1);
-  border: 1px solid rgb(225 128 188);
+  background-color: rgba(225, 128, 188, 0.05);
+  border: 1px solid rgba(225, 128, 188, 0.8);
   position: fixed;
   z-index: 999;
   pointer-events: none;
 }
 
 .word-wise-typography-translation {
-    font-size: 0.9em;
-    opacity: 0.5;
+  font-size: 0.9em;
+  opacity: 0.5;
 }
