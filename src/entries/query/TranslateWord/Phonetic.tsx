@@ -1,6 +1,6 @@
 import { createBackgroundMessage } from "@/messaging/background"
 import { useQuery } from "@tanstack/react-query"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { Volume2 } from "lucide-react"
 
 const bgs = createBackgroundMessage()
@@ -30,7 +30,7 @@ export default function Phonetic({
     enabled: false,
   })
 
-  const onPlay = async () => {
+  const onPlay = useCallback(async () => {
     const { error, data } = await fetchAudioBase64FromUrl()
     if (error || !data) {
       return
@@ -42,7 +42,7 @@ export default function Phonetic({
     source.buffer = audioBuffer
     source.connect(audioContext.destination)
     source.start()
-  }
+  }, [fetchAudioBase64FromUrl])
 
   const onToggle = () => {
     setCurrentType((prev) => (prev === "uk" ? "us" : "uk"))
@@ -66,7 +66,7 @@ export default function Phonetic({
     return () => {
       window.removeEventListener('keydown', onKeyDown)
     }
-  }, [])
+  }, [onPlay])
 
 
 
