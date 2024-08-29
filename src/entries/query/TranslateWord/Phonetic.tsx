@@ -52,6 +52,7 @@ export default function Phonetic({
     const msg = new SpeechSynthesisUtterance(word)
     msg.lang = currentType === "uk" ? "en-GB" : "en-US"
     msg.rate = 0.6
+    msg.volume = 1
     window.speechSynthesis.speak(msg)
   }
 
@@ -71,7 +72,7 @@ export default function Phonetic({
 
 
   return (
-    <div className="flex items-center text-sm gap-1 text-black font-normal">
+    <div className="flex items-center text-[10px] gap-[5px] text-black font-normal">
       {phonetic && (
         <p onClick={onToggle} className="dark:text-gray-400 cursor-pointer">
           {currentType}

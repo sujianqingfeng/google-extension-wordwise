@@ -31,6 +31,7 @@ function TranslateText({ text }: TranslateTextProps) {
     const msg = new SpeechSynthesisUtterance(text)
     msg.lang = "en-GB"
     msg.rate = 0.6
+    msg.volume = 1
     window.speechSynthesis.speak(msg)
   }
 
@@ -51,7 +52,7 @@ function TranslateText({ text }: TranslateTextProps) {
   }, [analyzeLoading])
 
   return (
-    <div className="text-sm font-normal dark:text-gray-400 text-black">
+    <div className="text-[10px] font-normal dark:text-gray-400 text-black">
       <div className="px-2 pb-2">
         <div className="mt-2">{text}</div>
         <div className="mt-2">{translateResult}</div>
@@ -60,7 +61,7 @@ function TranslateText({ text }: TranslateTextProps) {
       <div className="px-2 py-1 flex justify-end bg-gray-100 dark:bg-slate-400/10 gap-2">
         <Volume2
           onClick={onSystemTTS}
-          size={15}
+          size={14}
           className="cursor-pointer dark:text-gray-400 text-black"
         />
 
@@ -68,7 +69,7 @@ function TranslateText({ text }: TranslateTextProps) {
           <Loading size={14} />
         ) : (
           <WandSparkles
-            size={14}
+            size={13}
             className="cursor-pointer dark:text-gray-400 text-black"
             onClick={onAnalyze}
           />
