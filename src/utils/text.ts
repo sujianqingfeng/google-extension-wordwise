@@ -1,14 +1,10 @@
 export function isEnglishText(text: string) {
-  // Regular expression for English text
-  const englishTextRegex = /^[A-Za-z\s.,!?;:'"-=\u2019]*$/
-  // Check if the text matches the regular expression
+  const englishTextRegex = /^[A-Za-z\s.,!?;_:'"-=\u2019]*$/
   return englishTextRegex.test(text)
 }
 
 export function similarPascalCase(str: string): boolean {
   const customPatternRegex = /^[A-Z][a-zA-Z]*[A-Z][a-zA-Z]*$/
-
-  // Test if the string matches the custom pattern
   return customPatternRegex.test(str)
 }
 

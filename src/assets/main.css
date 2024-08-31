@@ -5,23 +5,24 @@
 
 @layer base {
   @import url('https://fonts.googleapis.com/css2?family=Sassy+Frass&display=swap');
+
   .bg-base {
     @apply bg-white dark:bg-slate-900
   }
 }
 
-.word-wise-markdown h3{
-  @apply font-bold leading-7;
+.word-wise-markdown h3 {
+  @apply font-bold leading-[20px];
 }
 
-.word-wise-markdown ul{
+.word-wise-markdown ul {
   @apply pl-4 list-disc;
 }
 
-.word-wise-markdown ul ul{
+.word-wise-markdown ul ul {
   @apply list-circle;
 }
 
-.word-wise-markdown ul li{
-  @apply leading-6;
+.word-wise-markdown ul li {
+  @apply leading-[18px];
 }

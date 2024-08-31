@@ -52,13 +52,13 @@ function TranslateText({ text }: TranslateTextProps) {
   }, [analyzeLoading])
 
   return (
-    <div className="text-[10px] font-normal dark:text-gray-400 text-black">
+    <div className="text-[12px] font-normal dark:text-gray-400 text-black">
       <div className="px-2 pb-2">
         <div className="mt-2">{text}</div>
         <div className="mt-2">{translateResult}</div>
       </div>
       <Analyze result={analyzeResult} />
-      <div className="px-2 py-1 flex justify-end bg-gray-100 dark:bg-slate-400/10 gap-2">
+      <div className="p-2 flex justify-end bg-gray-100 dark:bg-slate-400/10 gap-2">
         <Volume2
           onClick={onSystemTTS}
           size={14}
