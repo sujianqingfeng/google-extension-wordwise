@@ -18,8 +18,8 @@
 
 .word-wise-typography-range {
   border-radius: 4px;
-  background-color: rgba(225, 128, 188, 0.05);
-  border: 1px solid rgba(225, 128, 188, 0.8);
+  background-color: rgba(225, 128, 188, 0.01);
+  border: 1px solid rgba(225, 128, 188, 0.2);
   position: fixed;
   z-index: 999;
   pointer-events: none;
