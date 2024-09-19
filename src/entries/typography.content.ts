@@ -46,7 +46,7 @@ async function onTranslateTypography(target: HTMLElement) {
 	}
 
 	const bgs = createBackgroundMessage()
-	const result = await bgs.fetchTranslate({ text, provider: "deepL" })
+	const result = await bgs.fetchTranslate({ text, provider: "deepLX" })
 
 	target.classList.add("word-wise-typography-original")
 	cloneTargetEl.classList.add("word-wise-typography-translation")

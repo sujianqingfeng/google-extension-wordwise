@@ -25,7 +25,7 @@ export type IWordRespItem = {
 
 // translation
 export type TranslateParams = {
-	provider: "deepL"
+	provider: "deepL" | "deepLX"
 	text: string
 }
 
