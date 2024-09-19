@@ -1,25 +1,24 @@
-import Loading from "../../components/Loading"
+import Loading from "@/components/Loading"
 
 type AuthButtonProps = {
-	onAuthClick: () => void
-	loading?: boolean
+  onAuthClick: () => void
+  loading?: boolean
 }
-export default function AuthButton(props: AuthButtonProps) {
-	const { onAuthClick, loading = false } = props
-	const onClick = () => {
-		if (loading) {
-			return
-		}
-		onAuthClick()
-	}
-	return (
-		<button
-			type="button"
-			className="bg-primary-color rounded-md p-2 text-md flex align-center justify-center items-center gap-2"
-			onClick={onClick}
-		>
-			{loading && <Loading />}
-			Google Auth
-		</button>
-	)
+export default function AuthButton({ onAuthClick, loading = false }: AuthButtonProps) {
+  const onClick = () => {
+    if (loading) {
+      return
+    }
+    onAuthClick()
+  }
+  return (
+    <button
+      type="button"
+      className="bg-primary-color rounded-md py-4 px-2 text-md flex align-center justify-center items-center gap-2 text-white"
+      onClick={onClick}
+    >
+      {loading && <Loading />}
+      Google Auth
+    </button>
+  )
 }
