@@ -44,9 +44,8 @@ function createSidebar(ctx: ContentScriptContext) {
 
 export default defineContentScript({
 	matches: ["<all_urls>"],
-	// matches: ['https://wxt.dev'],
 	cssInjectionMode: "ui",
-	runAt: "document_idle",
+	runAt: "document_end",
 	async main(ctx) {
 		const toggle = createSidebar(ctx)
 		onBackgroundMessage("toggleSidebar", toggle)

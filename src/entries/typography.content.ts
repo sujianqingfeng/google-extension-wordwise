@@ -46,7 +46,7 @@ async function onTranslateTypography(target: HTMLElement) {
 	}
 
 	const bgs = createBackgroundMessage()
-	const result = await bgs.fetchTranslate({ text, provider: "deepLX" })
+	const result = await bgs.fetchTranslate({ text, provider: "deepL" })
 
 	target.classList.add("word-wise-typography-original")
 	cloneTargetEl.classList.add("word-wise-typography-translation")
@@ -184,7 +184,7 @@ function scrollToRemoveExtraElement() {
 
 export default defineContentScript({
 	matches: ["<all_urls>"],
-	runAt: "document_idle",
+	runAt: "document_end",
 	cssInjectionMode: "manifest",
 	main: async () => {
 		const bgs = createBackgroundMessage()
