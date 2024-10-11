@@ -17,7 +17,7 @@ export default function AuthButton({ onAuthClick, loading = false }: AuthButtonP
       className="bg-primary-color rounded-md py-4 px-2 text-md flex align-center justify-center items-center gap-2 text-white"
       onClick={onClick}
     >
-      {loading && <Loading />}
+      {loading && <Loading color="white" />}
       Google Auth
     </button>
   )

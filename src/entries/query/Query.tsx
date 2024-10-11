@@ -4,6 +4,8 @@ import TranslateWord from "./TranslateWord"
 import { isText } from "@/utils/text"
 import QueryClientProvider from "@/components/QueryClientProvider"
 import Loading from "@/components/Loading"
+import { QueryErrorResetBoundary } from "@tanstack/react-query"
+import { ErrorBoundary } from "react-error-boundary"
 
 function Fallback() {
 	return (
@@ -89,9 +91,29 @@ export default function Query({
 						{text && isTextFlag && <TranslateText text={text} />}
 					</Suspense>
 
-					<Suspense fallback={<Fallback />}>
-						{text && !isTextFlag && <TranslateWord word={text} />}
-					</Suspense>
+					<QueryErrorResetBoundary>
+						{({ reset }) => (
+							<ErrorBoundary
+								onReset={reset}
+								fallbackRender={({ resetErrorBoundary }) => (
+									<div className="p-2 flex items-center gap-2">
+										There was an error!
+										<button
+											className="border p-1 rounded-full"
+											type="button"
+											onClick={() => resetErrorBoundary()}
+										>
+											Try again
+										</button>
+									</div>
+								)}
+							>
+								<Suspense fallback={<Fallback />}>
+									{text && !isTextFlag && <TranslateWord word={text} />}
+								</Suspense>
+							</ErrorBoundary>
+						)}
+					</QueryErrorResetBoundary>
 				</div>
 			</div>
 		</QueryClientProvider>

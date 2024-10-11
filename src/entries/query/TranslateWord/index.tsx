@@ -9,79 +9,79 @@ import { useMutation, useQuery, useSuspenseQuery } from "@tanstack/react-query"
 const bgs = createBackgroundMessage()
 
 type TranslateWordProps = {
-  word: string
+	word: string
 }
 export default function TranslateWord({ word: _word }: TranslateWordProps) {
-  const word = _word.toLowerCase()
+	const word = _word.toLowerCase()
 
-  const { data: result } = useSuspenseQuery({
-    queryKey: ["word", word],
-    queryFn: () => bgs.fetchDictionQuery(word),
-  })
+	const { data: result } = useSuspenseQuery({
+		queryKey: ["word", word],
+		queryFn: () => bgs.fetchDictionQuery(word),
+	})
 
-  const { data: collectedResult, refetch: fetchWordCollected } = useQuery({
-    queryKey: ["collected", word],
-    queryFn: () => bgs.fetchWordCollected(word),
-  })
+	const { data: collectedResult, refetch: fetchWordCollected } = useQuery({
+		queryKey: ["collected", word],
+		queryFn: () => bgs.fetchWordCollected(word),
+	})
 
-  const { mutateAsync: collectWord } = useMutation({
-    mutationFn: bgs.fetchAddWordCollected,
-  })
+	const { mutateAsync: collectWord } = useMutation({
+		mutationFn: bgs.fetchAddWordCollected,
+	})
 
-  const { mutateAsync: removeWord } = useMutation({
-    mutationFn: bgs.fetchRemoveWordCollected,
-  })
+	const { mutateAsync: removeWord } = useMutation({
+		mutationFn: bgs.fetchRemoveWordCollected,
+	})
 
-  const onCollect = async (next: boolean) => {
-    // no query result
-    if (!result) {
-      return
-    }
+	const onCollect = async (next: boolean) => {
+		// no query result
+		if (!result) {
+			return
+		}
 
-    next ? await collectWord(word) : await removeWord(word)
+		next ? await collectWord(word) : await removeWord(word)
 
-    // TODO: remove range words
-    if (next) {
-      document.dispatchEvent(
-        new CustomEvent(CUSTOM_EVENT_TYPE.RANGE_WORDS, { detail: [word] }),
-      )
-    }
-    fetchWordCollected()
-  }
+		// TODO: remove range words
+		if (next) {
+			document.dispatchEvent(
+				new CustomEvent(CUSTOM_EVENT_TYPE.RANGE_WORDS, { detail: [word] }),
+			)
+		}
+		fetchWordCollected()
+	}
 
-  return (
-    <div>
-      <div className="px-2 pb-2">
-        <div className="flex justify-between items-center text-black dark:text-gray-300">
-          <div className="text-[26px] font-bold flex items-end gap-1">
-            {result?.word}
-            <div className="mb-1">
-              <Phonetic type="uk" {...result} />
-            </div>
-          </div>
-          <Collect
-            onCollect={onCollect}
-            isCollected={!!collectedResult?.collected}
-          />
-        </div>
+	return (
+		<div>
+			<div className="px-2 pb-2">
+				<div className="flex justify-between items-center text-black dark:text-gray-300">
+					<div className="text-[26px] font-bold flex items-end gap-1">
+						{result?.word}
+						<div className="mb-1">
+							<Phonetic type="uk" {...result} />
+						</div>
+					</div>
+					<Collect
+						onCollect={onCollect}
+						isCollected={!!collectedResult?.collected}
+					/>
+				</div>
 
-        {result?.examTypes && (
-          <div className="mt-2 text-[10px] flex gap-1 flex-wrap dark:text-gray-400 text-black">
-            {result.examTypes.join("/")}
-          </div>
-        )}
+				{result?.examTypes && (
+					<div className="mt-2 text-[10px] flex gap-1 flex-wrap dark:text-gray-400 text-black">
+						{result.examTypes.join("/")}
+					</div>
+				)}
 
-        <div className="flex flex-col gap-1 mt-2 dark:text-gray-400 text-black">
-          {result?.translations?.map((t, i) => (
-            // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
-            <Translate key={i} {...t} />
-          ))}
-        </div>
-      </div>
+				<div className="flex flex-col gap-1 mt-2 dark:text-gray-400 text-black">
+					{result?.translations?.map((t, i) => (
+						// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
+						<Translate key={i} {...t} />
+					))}
+				</div>
+			</div>
 
-      {result?.forms && result.forms.length > 0 && (
-        <Expand forms={result.forms} />
-      )}
-    </div>
-  )
+			{result?.forms && result.forms.length > 0 && (
+				<Expand forms={result.forms} />
+			)}
+		</div>
+	)
 }

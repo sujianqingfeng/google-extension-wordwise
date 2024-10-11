@@ -84,6 +84,7 @@ function createRequest({
 		}
 
 		const res = await fetch(finalUrl, options)
+		console.log("🚀 ~ res:", res)
 
 		if (res.status === 401) {
 			if (!isRefreshing) {

@@ -2,10 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-
 @layer base {
-  @import url('https://fonts.googleapis.com/css2?family=Sassy+Frass&display=swap');
-
   .bg-base {
     @apply bg-white dark:bg-slate-900
   }
