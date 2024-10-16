@@ -11,7 +11,6 @@ import ReactDOM from "react-dom/client"
 import Query from "./query/Query"
 import { CUSTOM_EVENT_TYPE, QUERY_SHADOW_TAG_NAME } from "@/constants"
 import { createBackgroundMessage } from "@/messaging/background"
-
 import "~/assets/main.css"
 
 function createWindowSelection(context: QueryContentContext) {

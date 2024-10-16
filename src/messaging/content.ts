@@ -1,8 +1,9 @@
 import { defineExtensionMessaging } from "@webext-core/messaging"
 
-interface SendContentMessage {
+export interface SendContentMessage {
 	toggleSidebar: () => void
 	analyzeGrammarResult: (options: { result: string; done: boolean }) => void
+	analyzeWordResult: (options: { result: string; done: boolean }) => void
 }
 
 export const {
@@ -12,6 +13,7 @@ export const {
 
 interface SendBackgroundMessage {
 	analyzeGrammar: (text: string) => void
+	analyzeWord: (text: string) => void
 }
 
 export const {

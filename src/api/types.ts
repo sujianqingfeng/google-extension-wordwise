@@ -79,7 +79,6 @@ export type DictionaryPronounceResp = {
 }
 
 // word
-
 export type QueryWordCollectedResp = {
 	collected: boolean
 }
@@ -87,5 +86,10 @@ export type QueryWordCollectedResp = {
 // ai
 export type AnalyzeGrammarParams = {
 	text: string
+	provider: "deepSeek" | "moonshot"
+}
+
+export type AnalyzeWordParams = {
+	word: string
 	provider: "deepSeek" | "moonshot"
 }

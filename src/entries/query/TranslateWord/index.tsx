@@ -79,9 +79,7 @@ export default function TranslateWord({ word: _word }: TranslateWordProps) {
 				</div>
 			</div>
 
-			{result?.forms && result.forms.length > 0 && (
-				<Expand forms={result.forms} />
-			)}
+			<Expand forms={result.forms} word={word} />
 		</div>
 	)
 }

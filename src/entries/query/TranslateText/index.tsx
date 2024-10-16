@@ -5,14 +5,13 @@ import { useSuspenseQuery } from "@tanstack/react-query"
 import { createBackgroundMessage } from "@/messaging/background"
 import { onBackgroundMessage, sendBackgroundMessage } from "@/messaging/content"
 import { useEffect, useRef, useState } from "react"
-import Analyze from "./Analyze"
+import Analyze from "@/components/Analyze"
+
+const bgs = createBackgroundMessage()
 
 type TranslateTextProps = {
 	text: string
 }
-
-const bgs = createBackgroundMessage()
-
 function TranslateText({ text }: TranslateTextProps) {
 	const { data: translateResult } = useSuspenseQuery({
 		queryKey: ["translate", text],

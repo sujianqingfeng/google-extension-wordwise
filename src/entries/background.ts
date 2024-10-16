@@ -1,25 +1,23 @@
 import { registerBackgroundMessage } from "../messaging/background"
-import { fetchAllWordsApi, fetchAnalyzeGrammarSSEApi } from "@/api"
-import { onContentMessage, sendContentMessage } from "@/messaging/content"
+import {
+	fetchAllWordsApi,
+	fetchAnalyzeGrammarSSEApi,
+	fetchAnalyzeWordApi,
+} from "@/api"
+import {
+	onContentMessage,
+	type SendContentMessage,
+	sendContentMessage,
+} from "@/messaging/content"
 import type { BackgroundContext } from "@/types"
 
-async function fetchAllWords() {
-	const { error, data } = await createSafePromise(fetchAllWordsApi)()
-	if (error) {
-		return []
-	}
-	return data || []
-}
-
-async function analyzeGrammar(text: string, tabId: number | undefined) {
-	const response = await fetchAnalyzeGrammarSSEApi({
-		provider: "deepSeek",
-		text,
-	})
-
-	const sendAnalyzeGrammarResult = (done: boolean, result: string) => {
+function createSyncSSEMessage(
+	type: keyof SendContentMessage,
+	tabId: number | undefined,
+) {
+	const sync = (done: boolean, result: string) => {
 		sendContentMessage(
-			"analyzeGrammarResult",
+			type,
 			{
 				result,
 				done,
@@ -28,11 +26,17 @@ async function analyzeGrammar(text: string, tabId: number | undefined) {
 		)
 	}
 
-	readResponseSSELine(
-		response,
-		sendAnalyzeGrammarResult.bind(null, false),
-		sendAnalyzeGrammarResult.bind(null, true),
-	)
+	return (response: Response) => {
+		readResponseSSELine(response, sync.bind(null, false), sync.bind(null, true))
+	}
+}
+
+async function fetchAllWords() {
+	const { error, data } = await createSafePromise(fetchAllWordsApi)()
+	if (error) {
+		return []
+	}
+	return data || []
 }
 
 async function fetchContext(context: BackgroundContext) {
@@ -56,8 +60,25 @@ export default defineBackground(() => {
 		}
 	})
 
-	onContentMessage("analyzeGrammar", ({ data, sender }) => {
+	onContentMessage("analyzeGrammar", async ({ data, sender }) => {
 		const tabId = sender.tab?.id
-		analyzeGrammar(data, tabId)
+
+		const response = await fetchAnalyzeGrammarSSEApi({
+			provider: "deepSeek",
+			text: data,
+		})
+
+		createSyncSSEMessage("analyzeGrammarResult", tabId)(response)
+	})
+
+	onContentMessage("analyzeWord", async ({ data, sender }) => {
+		const tabId = sender.tab?.id
+
+		const response = await fetchAnalyzeWordApi({
+			provider: "deepSeek",
+			word: data,
+		})
+
+		createSyncSSEMessage("analyzeWordResult", tabId)(response)
 	})
 })
