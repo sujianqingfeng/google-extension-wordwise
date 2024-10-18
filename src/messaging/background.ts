@@ -10,6 +10,7 @@ import {
 	fetchWordCollectedApi,
 } from "@/api"
 import type { BackgroundContext } from "@/types"
+import { blobToBase64 } from "@/utils/blob"
 import { defineProxyService } from "@webext-core/proxy-service"
 
 function getAuthUrl() {
@@ -54,15 +55,8 @@ async function fetchAudioBase64FromUrl(word: string, type: string) {
 		throw new Error("Failed to fetch audio")
 	}
 
-	const bold = await data.blob()
-	const base64 = await new Promise<string>((resolve) => {
-		const reader = new FileReader()
-		reader.onload = () => {
-			resolve(reader.result as string)
-		}
-		reader.readAsDataURL(bold)
-	})
-
+	const blob = await data.blob()
+	const base64 = await blobToBase64(blob)
 	return base64
 }
 
