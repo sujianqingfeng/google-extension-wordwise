@@ -4,6 +4,7 @@ import {
 	fetchAnalyzeGrammarApi,
 	fetchDictionPronounceApi,
 	fetchDictionQueryApi,
+	fetchEdgeTTSApi,
 	fetchExchangeTokenApi,
 	fetchRemoveWordCollectedApi,
 	fetchTranslateApi,
@@ -49,15 +50,26 @@ function getIdTokenFromHash(url: string) {
 	return params.get("id_token")
 }
 
-async function fetchAudioBase64FromUrl(word: string, type: string) {
-	const { url } = await fetchDictionPronounceApi({ word, type })
+async function covertUrlToBase64(url: string) {
 	const data = await fetch(url)
 	if (!data.ok) {
-		throw new Error("Failed to fetch audio")
+		throw new Error("fail to fetch url")
 	}
-
 	const blob = await data.blob()
 	const base64 = await blobToBase64(blob)
+	return base64
+}
+
+async function fetchAudioBase64FromDictionUrl(word: string, type: string) {
+	const { url } = await fetchDictionPronounceApi({ word, type })
+	const base64 = await covertUrlToBase64(url)
+	return base64
+}
+
+async function fetchAudioBase64FromEdgeTTS(text: string) {
+	const { base64 } = await fetchEdgeTTSApi({
+		text,
+	})
 	return base64
 }
 
@@ -93,25 +105,21 @@ function _createBackgroundMessage(context: BackgroundContext) {
 			url: getAuthUrl(),
 			interactive: true,
 		})
-
 		if (chrome.runtime.lastError) {
 			throw new Error("redirectedTo is null")
 		}
 
 		const idToken = getIdTokenFromHash(redirectedTo)
-
 		if (!idToken) {
 			throw new Error("idToken is null")
 		}
-
 		const { accessToken, refreshToken } = await fetchExchangeTokenApi({
 			idToken,
 		})
+
 		tokenStorage.set(accessToken)
 		refreshTokenStorage.set(refreshToken)
-
 		context.user = await fetchUser()
-
 		return context.user
 	}
 
@@ -130,7 +138,8 @@ function _createBackgroundMessage(context: BackgroundContext) {
 		fetchAnalyzeGrammar: fetchAnalyzeGrammarApi,
 		fetchAddWordCollected,
 		fetchRemoveWordCollected,
-		fetchAudioBase64FromUrl,
+		fetchAudioBase64FromDictionUrl,
+		fetchAudioBase64FromEdgeTTS,
 	}
 }
 

@@ -4,6 +4,7 @@ import type {
 	CreateReadLaterParams,
 	DictionaryPronounceResp,
 	DictionaryQueryResp,
+	EdgeTTSResp,
 	ExchangeTokenParams,
 	ExchangeTokenResp,
 	IWordRespItem,
@@ -62,3 +63,8 @@ export const fetchAnalyzeGrammarSSEApi = (params: AnalyzeGrammarParams) =>
 // analyze word
 export const fetchAnalyzeWordApi = (params: AnalyzeWordParams) =>
 	requestPost<Response>(`/ai/${params.provider}/analyze-word`, params)
+
+// tts
+export const fetchEdgeTTSApi = (params: {
+	text: string
+}) => requestPost<EdgeTTSResp>("/tts/edge-tts", params)

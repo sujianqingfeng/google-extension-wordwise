@@ -1,10 +1,10 @@
 import Loading from "@/components/Loading"
 import { ErrorBoundary, type FallbackProps } from "react-error-boundary"
 import { WandSparkles, Volume2, Copy } from "lucide-react"
-import { useSuspenseQuery } from "@tanstack/react-query"
+import { useQuery, useSuspenseQuery } from "@tanstack/react-query"
 import { createBackgroundMessage } from "@/messaging/background"
 import { onBackgroundMessage, sendBackgroundMessage } from "@/messaging/content"
-import { useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import Analyze from "@/components/Analyze"
 
 const bgs = createBackgroundMessage()
@@ -25,6 +25,20 @@ function TranslateText({ text }: TranslateTextProps) {
 		setAnalyzeLoading(true)
 		sendBackgroundMessage("analyzeGrammar", text)
 	}
+
+	const { refetch: fetchAudioBase64FromEdgeTTS } = useQuery({
+		queryKey: ["edge-tts", text],
+		queryFn: () => bgs.fetchAudioBase64FromEdgeTTS(text),
+		enabled: false,
+	})
+
+	const onEdgeTTSPlay = useCallback(async () => {
+		const { error, data } = await fetchAudioBase64FromEdgeTTS()
+		if (error || !data) {
+			return
+		}
+		playAudioByUrl(data)
+	}, [fetchAudioBase64FromEdgeTTS])
 
 	const onSystemTTS = () => {
 		const msg = new SpeechSynthesisUtterance(text)
@@ -68,7 +82,7 @@ function TranslateText({ text }: TranslateTextProps) {
 					className="cursor-pointer dark:text-gray-400 text-black"
 				/>
 				<Volume2
-					onClick={onSystemTTS}
+					onClick={onEdgeTTSPlay}
 					size={14}
 					className="cursor-pointer dark:text-gray-400 text-black"
 				/>

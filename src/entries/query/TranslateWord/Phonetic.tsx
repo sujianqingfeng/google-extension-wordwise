@@ -24,31 +24,40 @@ export default function Phonetic({
 
 	const phonetic = currentType === "uk" ? ukPhonetic : usPhonetic
 
-	const { refetch: fetchAudioBase64FromUrl } = useQuery({
+	const { refetch: fetchAudioBase64FromDictionUrl } = useQuery({
 		queryKey: ["pronounce", word, currentType],
 		queryFn: () =>
-			bgs.fetchAudioBase64FromUrl(word, currentType === "uk" ? "1" : "2"),
+			bgs.fetchAudioBase64FromDictionUrl(
+				word,
+				currentType === "uk" ? "1" : "2",
+			),
+		enabled: false,
+	})
+
+	const { refetch: fetchAudioBase64FromEdgeTTS } = useQuery({
+		queryKey: ["edge-tts", word],
+		queryFn: () => bgs.fetchAudioBase64FromEdgeTTS(word),
 		enabled: false,
 	})
 
 	const onPlay = useCallback(async () => {
-		const { error, data } = await fetchAudioBase64FromUrl()
+		const { error, data } = await fetchAudioBase64FromDictionUrl()
 		if (error || !data) {
 			return
 		}
 		playAudioByUrl(data)
-	}, [fetchAudioBase64FromUrl])
+	}, [fetchAudioBase64FromDictionUrl])
+
+	const onEdgeTTSPlay = useCallback(async () => {
+		const { error, data } = await fetchAudioBase64FromEdgeTTS()
+		if (error || !data) {
+			return
+		}
+		playAudioByUrl(data)
+	}, [fetchAudioBase64FromEdgeTTS])
 
 	const onToggle = () => {
 		setCurrentType((prev) => (prev === "uk" ? "us" : "uk"))
-	}
-
-	const onSystemTTS = () => {
-		const msg = new SpeechSynthesisUtterance(word)
-		msg.lang = currentType === "uk" ? "en-GB" : "en-US"
-		msg.rate = 0.6
-		msg.volume = 1
-		window.speechSynthesis.speak(msg)
 	}
 
 	useEffect(() => {
@@ -84,7 +93,7 @@ export default function Phonetic({
 			</div>
 
 			<div
-				onClick={onSystemTTS}
+				onClick={onEdgeTTSPlay}
 				className="bg-gray-100 dark:bg-slate-400/10 dark:text-gray-400 rounded-full h-5 w-5 flex justify-center items-center cursor-pointer"
 			>
 				<Volume2 size={12} />

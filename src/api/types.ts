@@ -93,3 +93,6 @@ export type AnalyzeWordParams = {
 	word: string
 	provider: "deepSeek" | "moonshot"
 }
+
+// tts
+export type EdgeTTSResp = { base64: string }
