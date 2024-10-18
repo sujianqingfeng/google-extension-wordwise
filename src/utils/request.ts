@@ -1,4 +1,5 @@
 import { objectToQueryString } from "."
+import { refreshTokenStorage, tokenStorage } from "./storage"
 
 const BASE_API_URL = import.meta.env.VITE_BASE_API_URL
 
@@ -9,7 +10,7 @@ let isRefreshing = false
 let refreshSubscribers: RefreshCallback[] = []
 
 async function refreshToken(url: string) {
-	const rT = await getRefreshToken()
+	const rT = await refreshTokenStorage.get()
 	const response = await fetch(url, {
 		method: "POST",
 		headers: {
@@ -27,8 +28,8 @@ async function refreshToken(url: string) {
 		data: { accessToken, refreshToken },
 	} = await response.json()
 
-	setToken(accessToken)
-	setRefreshToken(refreshToken)
+	tokenStorage.set(accessToken)
+	refreshTokenStorage.set(refreshToken)
 
 	return accessToken
 }
@@ -67,7 +68,7 @@ function createRequest({
 		}
 
 		if (!headers.authorization) {
-			const token = await getToken()
+			const token = await tokenStorage.get()
 			if (token) {
 				headers.authorization = `Bearer ${token}`
 			}

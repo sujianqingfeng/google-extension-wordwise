@@ -1,18 +1,16 @@
-import { storage } from "wxt/storage"
+import { storage, type StorageItemKey } from "wxt/storage"
 import { REFRESH_TOKEN, TOKEN } from "@/constants"
 
-export function setToken(token: string) {
-	return storage.setItem(TOKEN, token)
+function createStorage<T = any>(key: StorageItemKey) {
+	return {
+		set(value: T) {
+			return storage.setItem(key, value)
+		},
+		get() {
+			return storage.getItem<T>(key)
+		},
+	}
 }
 
-export function getToken() {
-	return storage.getItem<string>(TOKEN)
-}
-
-export function setRefreshToken(refreshToken: string) {
-	return storage.setItem(REFRESH_TOKEN, refreshToken)
-}
-
-export function getRefreshToken() {
-	return storage.getItem<string>(REFRESH_TOKEN)
-}
+export const tokenStorage = createStorage<string>(TOKEN)
+export const refreshTokenStorage = createStorage<string>(REFRESH_TOKEN)

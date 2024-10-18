@@ -1,5 +1,5 @@
 export function isEnglishText(text: string) {
-	const englishTextRegex = /^[A-Za-z0-9\s.,!?;_:'"“”’\-=\>\u2019()]*$/
+	const englishTextRegex = /^[A-Za-z0-9\s.,!?;_:'"“”’~\-=\>\u2019()]*$/
 	return englishTextRegex.test(text)
 }
 

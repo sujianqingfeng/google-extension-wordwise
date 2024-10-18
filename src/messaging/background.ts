@@ -11,6 +11,7 @@ import {
 } from "@/api"
 import type { BackgroundContext } from "@/types"
 import { blobToBase64 } from "@/utils/blob"
+import { refreshTokenStorage, tokenStorage } from "@/utils/storage"
 import { defineProxyService } from "@webext-core/proxy-service"
 
 function getAuthUrl() {
@@ -106,8 +107,8 @@ function _createBackgroundMessage(context: BackgroundContext) {
 		const { accessToken, refreshToken } = await fetchExchangeTokenApi({
 			idToken,
 		})
-		setToken(accessToken)
-		setRefreshToken(refreshToken)
+		tokenStorage.set(accessToken)
+		refreshTokenStorage.set(refreshToken)
 
 		context.user = await fetchUser()
 
