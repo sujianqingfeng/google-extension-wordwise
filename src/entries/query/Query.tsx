@@ -80,13 +80,13 @@ export default function Query({
 					left: `${position.left}px`,
 					width: `${isTextFlag ? 550 : 400}px`,
 				}}
-				className="fixed flex flex-col justify-center items-start bg-base z-10000 rounded-sm shadow"
+				className="fixed flex flex-col justify-center items-start bg-base z-10000 rounded-lg shadow-lg transform hover:shadow-xl border border-gray-200/10"
 			>
 				<div
-					className="w-full h-4 cursor-move rounded-t-md absolute top-0 left-0"
+					className="w-full h-4 cursor-move rounded-t-lg absolute top-0 left-0 bg-gradient-to-r from-gray-100/5 to-gray-200/5 hover:from-gray-100/10 hover:to-gray-200/10 transition-colors duration-200"
 					onMouseDown={onDragStart}
 				/>
-				<div className="w-full bg-base rounded-md">
+				<div className="w-full bg-base rounded-lg overflow-hidden">
 					<Suspense fallback={<Fallback />}>
 						{text && isTextFlag && <TranslateText text={text} />}
 					</Suspense>
@@ -96,14 +96,14 @@ export default function Query({
 							<ErrorBoundary
 								onReset={reset}
 								fallbackRender={({ resetErrorBoundary }) => (
-									<div className="p-2 flex items-center gap-2">
-										There was an error!
+									<div className="p-4 flex items-center gap-3 text-red-500">
+										<span>出错了！</span>
 										<button
-											className="border p-1 rounded-full"
+											className="px-3 py-1 rounded-full border border-red-500 hover:bg-red-500/10 transition-colors duration-200"
 											type="button"
 											onClick={() => resetErrorBoundary()}
 										>
-											Try again
+											重试
 										</button>
 									</div>
 								)}

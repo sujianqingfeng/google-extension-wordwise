@@ -69,29 +69,31 @@ function TranslateText({ text }: TranslateTextProps) {
 	}, [analyzeLoading])
 
 	return (
-		<div className="text-[12px] font-normal dark:text-gray-400 text-black">
-			<div className="px-2 pb-2">
-				<div className="mt-2">{text}</div>
-				<div className="mt-2">{translateResult}</div>
+		<div className="text-[13px] font-normal dark:text-gray-300 text-gray-700">
+			<div className="px-4 py-3 space-y-3">
+				<div className="leading-relaxed">{text}</div>
+				<div className="leading-relaxed text-gray-600 dark:text-gray-400">
+					{translateResult}
+				</div>
 			</div>
 			<Analyze result={analyzeResult} />
-			<div className="p-2 flex justify-end bg-gray-100 dark:bg-slate-400/10 gap-[10px]">
+			<div className="px-4 py-2.5 flex justify-end bg-gray-50 dark:bg-slate-800/40 gap-3 border-t border-gray-100 dark:border-gray-700/50">
 				<Copy
 					onClick={onCopy}
-					size={14}
-					className="cursor-pointer dark:text-gray-400 text-black"
+					size={15}
+					className="cursor-pointer text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
 				/>
 				<Volume2
 					onClick={onEdgeTTSPlay}
-					size={14}
-					className="cursor-pointer dark:text-gray-400 text-black"
+					size={15}
+					className="cursor-pointer text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
 				/>
 				{analyzeLoading ? (
-					<Loading size={14} />
+					<Loading size={15} />
 				) : (
 					<WandSparkles
-						size={13}
-						className="cursor-pointer dark:text-gray-400 text-black"
+						size={15}
+						className="cursor-pointer text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
 						onClick={onAnalyze}
 					/>
 				)}

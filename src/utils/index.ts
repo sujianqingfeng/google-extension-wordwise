@@ -90,6 +90,6 @@ export function throttle<T extends (...args: any[]) => any>(
 
 export function objectToQueryString(obj: Record<string, any>) {
 	return Object.keys(obj)
-		.map((key) => `${key}=${obj[key]}`)
+		.map((key) => `${key}=${encodeURIComponent(obj[key])}`)
 		.join("&")
 }

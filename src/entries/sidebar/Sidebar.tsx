@@ -11,11 +11,15 @@ type SideProps = {
 export default function Sidebar({ removeSidebar }: SideProps) {
 	return (
 		<QueryClientProvider>
-			<div className="fixed top-0 right-0 bottom-0 z-9999 w-[300px] bg-base shadow-sm">
-				<SideHeader onClose={removeSidebar} />
-				<Suspense fallback={<Loading />}>
-					<IfAuth />
-				</Suspense>
+			<div className="fixed top-0 right-0 bottom-0 z-9999 w-[320px] bg-base shadow-lg transition-all duration-300 ease-in-out">
+				<div className="flex flex-col h-full">
+					<SideHeader onClose={removeSidebar} />
+					<div className="flex-1 overflow-y-auto">
+						<Suspense fallback={<Loading />}>
+							<IfAuth />
+						</Suspense>
+					</div>
+				</div>
 			</div>
 		</QueryClientProvider>
 	)

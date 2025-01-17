@@ -74,30 +74,38 @@ export default function Phonetic({
 	}, [onPlay])
 
 	return (
-		<div className="flex items-center text-[10px] gap-[5px] text-black font-normal">
+		<div className="flex items-center gap-2 text-sm">
 			{phonetic && (
-				<p onClick={onToggle} className="dark:text-gray-400 cursor-pointer">
+				<button
+					type="button"
+					onClick={onToggle}
+					className="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+				>
 					{currentType}
-				</p>
+				</button>
 			)}
 
-			<div className="bg-gray-100 dark:bg-slate-400/10 dark:text-gray-400 px-2 rounded-full">
-				{phonetic}
-			</div>
+			{phonetic && (
+				<span className="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 rounded-full text-gray-600 dark:text-gray-300">
+					{phonetic}
+				</span>
+			)}
 
-			<div
+			<button
+				type="button"
 				onClick={onPlay}
-				className="bg-gray-100 dark:bg-slate-400/10 dark:text-gray-400 rounded-full h-5 w-5 flex justify-center items-center cursor-pointer"
+				className="p-1.5 rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-400 transition-colors"
 			>
-				<Volume2 size={12} />
-			</div>
+				<Volume2 size={14} />
+			</button>
 
-			<div
+			<button
+				type="button"
 				onClick={onEdgeTTSPlay}
-				className="bg-gray-100 dark:bg-slate-400/10 dark:text-gray-400 rounded-full h-5 w-5 flex justify-center items-center cursor-pointer"
+				className="p-1.5 rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-400 transition-colors"
 			>
-				<Volume2 size={12} />
-			</div>
+				<Volume2 size={14} />
+			</button>
 		</div>
 	)
 }

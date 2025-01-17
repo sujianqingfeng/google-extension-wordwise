@@ -45,9 +45,9 @@ export default function Expand({ forms = [], word }: ExpandProps) {
 	}, [analyzeLoading])
 
 	return (
-		<div>
+		<div className="border-t border-gray-100 dark:border-gray-700/50">
 			{isExpand && (
-				<div className="p-2 flex gap-2 flex-wrap text-black">
+				<div className="p-4 flex flex-wrap gap-2">
 					{forms.map((f, i) => (
 						// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
 						<WordForm key={i} {...f} />
@@ -55,28 +55,39 @@ export default function Expand({ forms = [], word }: ExpandProps) {
 				</div>
 			)}
 
-			<div className="px-2 pb-2 text-[12px]">
+			<div className="px-4 pb-2">
 				<Analyze result={analyzeResult} />
 			</div>
 
-			<div className="p-1 flex justify-end items-center gap-[10px] bg-gray-100 dark:bg-slate-400/10">
+			<div className="px-4 py-2 flex justify-end items-center gap-3 bg-gradient-to-b from-transparent to-gray-50 dark:to-gray-800/30">
 				{analyzeLoading ? (
-					<Loading size={14} />
+					<Loading size={16} />
 				) : (
-					<WandSparkles
-						size={13}
-						className="cursor-pointer dark:text-gray-400 text-black"
+					<button
+						type="button"
 						onClick={onAnalyze}
-					/>
+						className="p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-all group"
+					>
+						<WandSparkles
+							size={14}
+							className="text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-200 transition-colors transform group-hover:scale-110"
+						/>
+					</button>
 				)}
 
 				{forms.length > 0 && (
-					<ChevronDown
-						size={14}
-						className={`cursor-pointer dark:text-gray-400 text-black  transition-transform " 
-						${isExpand ? "rotate-180" : ""}`}
+					<button
+						type="button"
 						onClick={toggle}
-					/>
+						className="p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-all group"
+					>
+						<ChevronDown
+							size={14}
+							className={`text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-200 transition-all transform group-hover:scale-110 ${
+								isExpand ? "rotate-180" : ""
+							}`}
+						/>
+					</button>
 				)}
 			</div>
 		</div>
