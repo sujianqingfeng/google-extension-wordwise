@@ -3,10 +3,7 @@ import type {
 	QueryContentContext,
 	QueryUI,
 } from "@/types"
-import type {
-	ContentScriptContext,
-	ShadowRootContentScriptUi,
-} from "wxt/client"
+import type { ContentScriptContext, ShadowRootContentScriptUi } from "#imports"
 import ReactDOM from "react-dom/client"
 import Query from "./query/Query"
 import { CUSTOM_EVENT_TYPE, QUERY_SHADOW_TAG_NAME } from "@/constants"
@@ -129,14 +126,14 @@ function createKeyType(
 export default defineContentScript({
 	matches: ["<all_urls>"],
 	cssInjectionMode: "ui",
-	runAt: "document_start",
+	runAt: "document_idle",
 	async main(ctx) {
 		// Wait for DOM to be ready
-		if (document.readyState === "loading") {
-			await new Promise((resolve) =>
-				document.addEventListener("DOMContentLoaded", resolve, { once: true }),
-			)
-		}
+		// if (document.readyState === "loading") { // No longer strictly necessary with document_idle, but harmless to keep
+		// 	await new Promise((resolve) =>
+		// 		document.addEventListener("DOMContentLoaded", resolve, { once: true }),
+		// 	)
+		// } // You might decide to remove this block later if runAt: "document_idle" proves reliable.
 
 		console.log("wordwise: DOM is ready")
 

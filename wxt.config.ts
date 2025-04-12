@@ -17,9 +17,9 @@ export default defineConfig({
 			scopes: ["openid", "email", "profile"],
 		},
 	},
-	runner: {
-		disabled: true,
-	},
+	// runner: {
+	// 	disabled: true,
+	// },
 	vite: () => ({
 		plugins: [react()],
 	}),

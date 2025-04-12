@@ -1,4 +1,4 @@
-import { storage, type StorageItemKey } from "wxt/storage"
+import { storage, type StorageItemKey } from "#imports"
 import { REFRESH_TOKEN, TOKEN } from "@/constants"
 
 function createStorage<T = any>(key: StorageItemKey) {
