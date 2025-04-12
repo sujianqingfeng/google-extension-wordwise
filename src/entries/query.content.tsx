@@ -129,8 +129,17 @@ function createKeyType(
 export default defineContentScript({
 	matches: ["<all_urls>"],
 	cssInjectionMode: "ui",
-	runAt: "document_end",
+	runAt: "document_start",
 	async main(ctx) {
+		// Wait for DOM to be ready
+		if (document.readyState === "loading") {
+			await new Promise((resolve) =>
+				document.addEventListener("DOMContentLoaded", resolve, { once: true }),
+			)
+		}
+
+		console.log("wordwise: DOM is ready")
+
 		const bgs = createBackgroundMessage()
 
 		const user = await bgs.getUser()

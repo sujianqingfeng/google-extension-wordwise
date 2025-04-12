@@ -4,16 +4,20 @@
 
 @layer base {
   .bg-base {
-    @apply bg-white dark:bg-slate-900
+    @apply bg-white dark:bg-slate-900;
   }
 }
 
+.word-wise-markdown {
+  @apply whitespace-pre-wrap break-words leading-tight;
+}
+
 .word-wise-markdown h3 {
-  @apply font-bold leading-[20px];
+  @apply font-bold leading-tight text-sm mt-1 mb-0.5 block;
 }
 
 .word-wise-markdown ul {
-  @apply pl-4 list-disc;
+  @apply pl-4 list-disc my-0.5;
 }
 
 .word-wise-markdown ul ul {
@@ -21,5 +25,21 @@
 }
 
 .word-wise-markdown ul li {
-  @apply leading-[18px];
+  @apply leading-tight mb-0.5;
+}
+
+.word-wise-markdown p {
+  @apply mb-0.5 block;
+}
+
+.word-wise-markdown strong {
+  @apply font-semibold;
+}
+
+.word-wise-markdown code {
+  @apply px-1 bg-gray-100 dark:bg-gray-800 rounded;
+}
+
+.markdown-content {
+  @apply whitespace-pre-wrap break-words;
 }

@@ -33,6 +33,7 @@ export default function Expand({ forms = [], word }: ExpandProps) {
 			removeCallback.current = onBackgroundMessage(
 				"analyzeWordResult",
 				({ data: { result, done } }) => {
+					console.log("🚀 ~ useEffect ~ result:", result)
 					setAnalyzeResult(result)
 					setAnalyzeLoading(!done)
 				},
@@ -45,31 +46,30 @@ export default function Expand({ forms = [], word }: ExpandProps) {
 	}, [analyzeLoading])
 
 	return (
-		<div className="border-t border-gray-100 dark:border-gray-700/50">
-			{isExpand && (
-				<div className="p-4 flex flex-wrap gap-2">
-					{forms.map((f, i) => (
-						// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
-						<WordForm key={i} {...f} />
-					))}
+		<div>
+			{isExpand && forms.length > 0 && (
+				<div className="px-3 py-2 border-t border-gray-100 dark:border-gray-700/50">
+					<div className="flex gap-1.5 flex-wrap">
+						{forms.map((form) => (
+							<WordForm key={form.name} {...form} />
+						))}
+					</div>
 				</div>
 			)}
 
-			<div className="px-4 pb-2">
-				<Analyze result={analyzeResult} />
-			</div>
+			<Analyze result={analyzeResult} />
 
-			<div className="px-4 py-2 flex justify-end items-center gap-3 bg-gradient-to-b from-transparent to-gray-50 dark:to-gray-800/30">
+			<div className="px-3 py-1.5 flex justify-end items-center gap-2 bg-gradient-to-b from-transparent to-gray-50 dark:to-gray-800/30">
 				{analyzeLoading ? (
-					<Loading size={16} />
+					<Loading size={14} />
 				) : (
 					<button
 						type="button"
 						onClick={onAnalyze}
-						className="p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-all group"
+						className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-all group"
 					>
 						<WandSparkles
-							size={14}
+							size={12}
 							className="text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-200 transition-colors transform group-hover:scale-110"
 						/>
 					</button>
@@ -79,10 +79,10 @@ export default function Expand({ forms = [], word }: ExpandProps) {
 					<button
 						type="button"
 						onClick={toggle}
-						className="p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-all group"
+						className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-all group"
 					>
 						<ChevronDown
-							size={14}
+							size={12}
 							className={`text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-200 transition-all transform group-hover:scale-110 ${
 								isExpand ? "rotate-180" : ""
 							}`}

@@ -69,30 +69,30 @@ function TranslateText({ text }: TranslateTextProps) {
 	}, [analyzeLoading])
 
 	return (
-		<div className="text-[13px] font-normal dark:text-gray-300 text-gray-700">
-			<div className="px-4 py-3 space-y-3">
+		<div className="text-[12px] font-normal dark:text-gray-300 text-gray-700">
+			<div className="px-3 py-2.5 space-y-2">
 				<div className="leading-relaxed">{text}</div>
 				<div className="leading-relaxed text-gray-600 dark:text-gray-400">
 					{translateResult}
 				</div>
 			</div>
 			<Analyze result={analyzeResult} />
-			<div className="px-4 py-2.5 flex justify-end bg-gray-50 dark:bg-slate-800/40 gap-3 border-t border-gray-100 dark:border-gray-700/50">
+			<div className="px-3 py-2 flex justify-end bg-gray-50 dark:bg-slate-800/40 gap-2.5 border-t border-gray-100 dark:border-gray-700/50">
 				<Copy
 					onClick={onCopy}
-					size={15}
+					size={14}
 					className="cursor-pointer text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
 				/>
 				<Volume2
 					onClick={onEdgeTTSPlay}
-					size={15}
+					size={14}
 					className="cursor-pointer text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
 				/>
 				{analyzeLoading ? (
-					<Loading size={15} />
+					<Loading size={14} />
 				) : (
 					<WandSparkles
-						size={15}
+						size={14}
 						className="cursor-pointer text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
 						onClick={onAnalyze}
 					/>

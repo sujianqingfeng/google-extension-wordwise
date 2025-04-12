@@ -50,11 +50,11 @@ export default function TranslateWord({ word: _word }: TranslateWordProps) {
 	}
 
 	return (
-		<div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg ring-1 ring-gray-200 dark:ring-gray-700">
-			<div className="p-4">
+		<div className="bg-white dark:bg-gray-800 rounded-xl shadow-md ring-1 ring-gray-200 dark:ring-gray-700">
+			<div className="p-3">
 				<div className="flex justify-between items-center">
-					<div className="flex items-end gap-2">
-						<h1 className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-gray-100 dark:to-gray-300 bg-clip-text text-transparent">
+					<div className="flex items-end gap-1.5">
+						<h1 className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-gray-100 dark:to-gray-300 bg-clip-text text-transparent">
 							{result?.word}
 						</h1>
 						<div>
@@ -68,11 +68,11 @@ export default function TranslateWord({ word: _word }: TranslateWordProps) {
 				</div>
 
 				{result?.examTypes && (
-					<div className="mt-2 flex gap-1.5 flex-wrap">
+					<div className="mt-1.5 flex gap-1 flex-wrap">
 						{result.examTypes.map((type) => (
 							<span
 								key={type}
-								className="px-2 py-0.5 text-xs font-medium bg-gray-50 dark:bg-gray-700/50 text-gray-600 dark:text-gray-400 rounded-full ring-1 ring-gray-200/50 dark:ring-gray-600/50"
+								className="px-1.5 py-0.5 text-xs font-medium bg-gray-50 dark:bg-gray-700/50 text-gray-600 dark:text-gray-400 rounded-full ring-1 ring-gray-200/50 dark:ring-gray-600/50"
 							>
 								{type}
 							</span>
@@ -80,7 +80,7 @@ export default function TranslateWord({ word: _word }: TranslateWordProps) {
 					</div>
 				)}
 
-				<div className="mt-3 space-y-1.5">
+				<div className="mt-2 space-y-1">
 					{result?.translations?.map((t, i) => (
 						// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
 						<Translate key={i} {...t} />

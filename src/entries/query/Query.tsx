@@ -9,8 +9,8 @@ import { ErrorBoundary } from "react-error-boundary"
 
 function Fallback() {
 	return (
-		<div className="flex justify-center items-center h-10">
-			<Loading size={20} />
+		<div className="flex justify-center items-center h-8">
+			<Loading size={16} />
 		</div>
 	)
 }
@@ -78,12 +78,12 @@ export default function Query({
 				style={{
 					top: `${position.top}px`,
 					left: `${position.left}px`,
-					width: `${isTextFlag ? 550 : 400}px`,
+					width: `${isTextFlag ? 500 : 360}px`,
 				}}
-				className="fixed flex flex-col justify-center items-start bg-base z-10000 rounded-lg shadow-lg transform hover:shadow-xl border border-gray-200/10"
+				className="fixed flex flex-col justify-center items-start bg-base z-10000 rounded-lg shadow-md transform hover:shadow-lg border border-gray-200/10 transition-shadow duration-200"
 			>
 				<div
-					className="w-full h-4 cursor-move rounded-t-lg absolute top-0 left-0 bg-gradient-to-r from-gray-100/5 to-gray-200/5 hover:from-gray-100/10 hover:to-gray-200/10 transition-colors duration-200"
+					className="w-full h-3 cursor-move rounded-t-lg absolute top-0 left-0 bg-gradient-to-r from-gray-100/5 to-gray-200/5 hover:from-gray-100/10 hover:to-gray-200/10 transition-colors duration-200"
 					onMouseDown={onDragStart}
 				/>
 				<div className="w-full bg-base rounded-lg overflow-hidden">
@@ -96,10 +96,10 @@ export default function Query({
 							<ErrorBoundary
 								onReset={reset}
 								fallbackRender={({ resetErrorBoundary }) => (
-									<div className="p-4 flex items-center gap-3 text-red-500">
+									<div className="p-3 flex items-center gap-2 text-red-500 text-sm">
 										<span>出错了！</span>
 										<button
-											className="px-3 py-1 rounded-full border border-red-500 hover:bg-red-500/10 transition-colors duration-200"
+											className="px-2 py-0.5 rounded-full border border-red-500 hover:bg-red-500/10 transition-colors duration-200 text-sm"
 											type="button"
 											onClick={() => resetErrorBoundary()}
 										>
