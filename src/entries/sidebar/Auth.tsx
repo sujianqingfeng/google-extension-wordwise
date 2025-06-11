@@ -5,6 +5,7 @@ import { createBackgroundMessage } from "@/messaging/background"
 interface AuthProps {
 	success: () => void
 }
+
 export default function Auth({ success }: AuthProps) {
 	const [loading, setLoading] = useState(false)
 
@@ -17,7 +18,7 @@ export default function Auth({ success }: AuthProps) {
 	}
 
 	return (
-		<div className="mt-2 flex justify-center items-center">
+		<div className="animate-slide-in-up">
 			<AuthButton loading={loading} onAuthClick={onAuthClick} />
 		</div>
 	)

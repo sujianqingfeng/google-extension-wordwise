@@ -4,9 +4,10 @@ import User from "./User"
 interface DashboardProps {
 	user: UserResp
 }
+
 export default function Dashboard({ user }: DashboardProps) {
 	return (
-		<div className="p-2">
+		<div className="animate-fade-in">
 			<User {...user} />
 		</div>
 	)

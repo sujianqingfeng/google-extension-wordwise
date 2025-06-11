@@ -1,7 +1,7 @@
 import { createBackgroundMessage } from "@/messaging/background"
 import { useQuery } from "@tanstack/react-query"
 import { useEffect, useState, useCallback } from "react"
-import { Volume2 } from "lucide-react"
+import { Volume2, RotateCcw } from "lucide-react"
 import { playAudioByUrl } from "@/utils/audio"
 
 const bgs = createBackgroundMessage()
@@ -14,6 +14,7 @@ type PhoneticProps = {
 	usSpeech?: string
 	word: string
 }
+
 export default function Phonetic({
 	type,
 	ukPhonetic,
@@ -74,37 +75,34 @@ export default function Phonetic({
 	}, [onPlay])
 
 	return (
-		<div className="flex items-center gap-2 text-sm">
+		<div className="flex items-center gap-1">
+			{/* 音标和切换按钮组合 */}
 			{phonetic && (
-				<button
-					type="button"
-					onClick={onToggle}
-					className="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
-				>
-					{currentType}
-				</button>
+				<div className="flex items-center gap-1">
+					<button
+						type="button"
+						onClick={onToggle}
+						className="px-1.5 py-0.5 bg-gradient-to-r from-amber-50 to-amber-100 dark:from-amber-900/20 dark:to-amber-800/20 rounded border border-amber-200/50 dark:border-amber-700/50 hover:bg-amber-100 dark:hover:bg-amber-800/30 transition-colors flex items-center gap-1"
+					>
+						<span className="text-xs text-amber-800 dark:text-amber-300 font-mono">
+							/{phonetic}/
+						</span>
+						<RotateCcw
+							size={10}
+							className="text-amber-600 dark:text-amber-400"
+						/>
+					</button>
+				</div>
 			)}
 
-			{phonetic && (
-				<span className="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 rounded-full text-gray-600 dark:text-gray-300">
-					{phonetic}
-				</span>
-			)}
-
+			{/* 播放按钮 */}
 			<button
 				type="button"
 				onClick={onPlay}
-				className="p-1.5 rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-400 transition-colors"
+				className="w-5 h-5 bg-blue-100 hover:bg-blue-200 dark:bg-blue-900/30 dark:hover:bg-blue-800/50 rounded transition-colors flex items-center justify-center"
+				aria-label="播放发音"
 			>
-				<Volume2 size={14} />
-			</button>
-
-			<button
-				type="button"
-				onClick={onEdgeTTSPlay}
-				className="p-1.5 rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-400 transition-colors"
-			>
-				<Volume2 size={14} />
+				<Volume2 size={10} className="text-blue-600 dark:text-blue-400" />
 			</button>
 		</div>
 	)

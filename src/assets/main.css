@@ -1,45 +1,143 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
+  body {
+    @apply font-sans antialiased;
+  }
+
   .bg-base {
-    @apply bg-white dark:bg-slate-900;
+    @apply bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm;
+  }
+
+  .glass-effect {
+    @apply bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-white/20 dark:border-slate-700/20;
+  }
+
+  .gradient-bg {
+    @apply bg-gradient-to-br from-primary-50 via-white to-primary-50/50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-primary-500 hover:bg-primary-600 text-white font-medium px-4 py-2 rounded-lg transition-all duration-200 shadow-soft hover:shadow-medium active:scale-95;
+  }
+
+  .btn-secondary {
+    @apply bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium px-4 py-2 rounded-lg transition-all duration-200;
+  }
+
+  .card {
+    @apply bg-white dark:bg-slate-800 rounded-xl shadow-soft border border-gray-200/50 dark:border-slate-700/50 p-6;
+  }
+
+  .input-field {
+    @apply w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200;
   }
 }
 
 .word-wise-markdown {
-  @apply whitespace-pre-wrap break-words leading-tight;
+  @apply whitespace-pre-wrap break-words leading-relaxed text-gray-800 dark:text-gray-200;
+}
+
+.word-wise-markdown h1 {
+  @apply font-bold text-xl mt-4 mb-2 text-gray-900 dark:text-gray-100;
+}
+
+.word-wise-markdown h2 {
+  @apply font-bold text-lg mt-3 mb-2 text-gray-900 dark:text-gray-100;
 }
 
 .word-wise-markdown h3 {
-  @apply font-bold leading-tight text-sm mt-1 mb-0.5 block;
+  @apply font-semibold text-base mt-2 mb-1 text-gray-900 dark:text-gray-100;
 }
 
 .word-wise-markdown ul {
-  @apply pl-4 list-disc my-0.5;
+  @apply pl-5 list-disc my-2 space-y-1;
 }
 
 .word-wise-markdown ul ul {
-  @apply list-circle;
+  @apply list-circle pl-4 mt-1;
 }
 
 .word-wise-markdown ul li {
-  @apply leading-tight mb-0.5;
+  @apply leading-relaxed text-gray-700 dark:text-gray-300;
+}
+
+.word-wise-markdown ol {
+  @apply pl-5 list-decimal my-2 space-y-1;
+}
+
+.word-wise-markdown ol li {
+  @apply leading-relaxed text-gray-700 dark:text-gray-300;
 }
 
 .word-wise-markdown p {
-  @apply mb-0.5 block;
+  @apply mb-2 leading-relaxed text-gray-700 dark:text-gray-300;
 }
 
 .word-wise-markdown strong {
-  @apply font-semibold;
+  @apply font-semibold text-gray-900 dark:text-gray-100;
+}
+
+.word-wise-markdown em {
+  @apply italic text-gray-800 dark:text-gray-200;
 }
 
 .word-wise-markdown code {
-  @apply px-1 bg-gray-100 dark:bg-gray-800 rounded;
+  @apply px-2 py-1 bg-gray-100 dark:bg-gray-800 text-primary-600 dark:text-primary-400 rounded-md font-mono text-sm;
+}
+
+.word-wise-markdown pre {
+  @apply bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto my-3;
+}
+
+.word-wise-markdown pre code {
+  @apply bg-transparent p-0 text-gray-800 dark:text-gray-200;
+}
+
+.word-wise-markdown blockquote {
+  @apply border-l-4 border-primary-300 pl-4 py-2 my-3 bg-primary-50/50 dark:bg-primary-900/20 italic text-gray-700 dark:text-gray-300;
 }
 
 .markdown-content {
-  @apply whitespace-pre-wrap break-words;
+  @apply whitespace-pre-wrap break-words leading-relaxed;
+}
+
+/* 滚动条样式 */
+.custom-scrollbar::-webkit-scrollbar {
+  @apply w-2;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  @apply bg-gray-100 dark:bg-gray-800 rounded-full;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  @apply bg-gray-300 dark:bg-gray-600 rounded-full hover:bg-gray-400 dark:hover:bg-gray-500;
+}
+
+/* 动画效果 */
+.animate-in {
+  @apply animate-fade-in;
+}
+
+.slide-in-right {
+  @apply animate-slide-in-right;
+}
+
+.slide-in-up {
+  @apply animate-slide-in-up;
+}
+
+/* 悬浮效果 */
+.hover-lift {
+  @apply transition-transform duration-200 hover:-translate-y-1;
+}
+
+.hover-glow {
+  @apply transition-shadow duration-300 hover:shadow-glow;
 }
