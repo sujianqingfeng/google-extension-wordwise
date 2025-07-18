@@ -6,7 +6,7 @@ import QueryClientProvider from "@/components/QueryClientProvider"
 import Loading from "@/components/Loading"
 import { QueryErrorResetBoundary } from "@tanstack/react-query"
 import { ErrorBoundary } from "react-error-boundary"
-import { GripHorizontal, RefreshCw, AlertCircle } from "lucide-react"
+import { GripHorizontal, RefreshCw, AlertCircle, X } from "lucide-react"
 
 function Fallback() {
 	return (
@@ -97,7 +97,7 @@ export default function Query({
 					{/* 拖拽手柄 */}
 					<div
 						className={`
-							w-full h-8 flex items-center justify-center
+							w-full h-8 flex items-center justify-center relative
 							bg-gradient-to-r from-gray-50/80 to-gray-100/80 dark:from-gray-800/80 dark:to-gray-700/80
 							border-b border-gray-200/30 dark:border-gray-700/30
 							cursor-grab active:cursor-grabbing
@@ -114,6 +114,23 @@ export default function Query({
 								${isDragging ? "text-primary-500" : "hover:text-gray-600 dark:hover:text-gray-300"}
 							`}
 						/>
+
+						{/* 关闭按钮 */}
+						<button
+							type="button"
+							className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-gray-200/80 dark:hover:bg-gray-600/80 transition-colors duration-200 group"
+							onClick={(e) => {
+								e.stopPropagation()
+								removeQueryPanel()
+							}}
+							onMouseDown={(e) => e.stopPropagation()}
+							title="关闭面板"
+						>
+							<X
+								size={14}
+								className="text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors duration-200"
+							/>
+						</button>
 					</div>
 
 					{/* 内容区域 */}
