@@ -86,12 +86,12 @@ export type QueryWordCollectedResp = {
 // ai
 export type AnalyzeGrammarParams = {
 	text: string
-	provider: "deepSeek" | "moonshot"
+	provider: "deepSeek" | "moonshot" | "openai"
 }
 
 export type AnalyzeWordParams = {
 	word: string
-	provider: "deepSeek" | "moonshot"
+	provider: "deepSeek" | "moonshot" | "openai"
 }
 
 // tts

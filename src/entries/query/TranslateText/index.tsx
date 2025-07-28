@@ -24,7 +24,7 @@ type TranslateTextProps = {
 function TranslateText({ text }: TranslateTextProps) {
 	const { data: translateResult } = useSuspenseQuery({
 		queryKey: ["translate", text],
-		queryFn: () => bgs.fetchAiTranslate({ text, provider: "deepSeek" }),
+		queryFn: () => bgs.fetchAiTranslate({ text, provider: "openai" }),
 	})
 	const [analyzeResult, setAnalyzeResult] = useState("")
 	const [analyzeLoading, setAnalyzeLoading] = useState(false)
