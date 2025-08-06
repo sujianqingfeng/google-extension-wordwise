@@ -6,6 +6,8 @@ import { CUSTOM_EVENT_TYPE } from "@/constants"
 import { createBackgroundMessage } from "@/messaging/background"
 import { useMutation, useQuery, useSuspenseQuery } from "@tanstack/react-query"
 import { BookOpen } from "lucide-react"
+import { useEffect } from "react"
+import { playAudioByUrl } from "@/utils/audio"
 
 const bgs = createBackgroundMessage()
 
@@ -33,6 +35,28 @@ export default function TranslateWord({ word: _word }: TranslateWordProps) {
 	const { mutateAsync: removeWord } = useMutation({
 		mutationFn: bgs.fetchRemoveWordCollected,
 	})
+
+	// 自动播放发音
+	useEffect(() => {
+		if (result) {
+			// 使用与Phonetic组件相同的方法来避免CORS问题
+			const playAutoPronunciation = async () => {
+				try {
+					// 优先使用英式发音，如果没有则使用美式发音
+					const type = result.ukSpeech ? "1" : "2" // 1=英式, 2=美式
+					const audioBase64 = await bgs.fetchAudioBase64FromDictionUrl(
+						word,
+						type,
+					)
+					playAudioByUrl(audioBase64)
+				} catch (error) {
+					console.warn("自动发音失败:", error)
+				}
+			}
+
+			playAutoPronunciation()
+		}
+	}, [result, word])
 
 	const onCollect = async (next: boolean) => {
 		// no query result
