@@ -2,25 +2,53 @@ import { createBackgroundMessage } from "@/messaging/background"
 import "./core/typography.css"
 import { throttle } from "@/utils"
 
-const TEXT_TAGS = [
-	"p",
-	"div",
-	"h1",
-	"h2",
-	"h3",
-	"h4",
-	"h5",
-	"h6",
-	"main",
-	"article",
-	"section",
-	"figure",
-	"li",
-	"figcaption",
-	"span",
+const EXCLUDE_TAGS = [
+	"img",
+	"picture",
+	"table",
+	"nav",
+	"button",
+	"svg",
+	"canvas",
+	"video",
+	"audio",
+	"iframe",
+	"input",
+	"textarea",
+	"select",
+	"option",
+	"pre",
+	"script",
+	"style",
+	"noscript",
+	"template",
 ]
 
-const NOT_TEXT_TAGS = ["img", "picture", "table", "nav", "button"]
+function isInlineElement(el: Element) {
+	// computed display catches styled spans / custom elements a tag list would miss
+	return window.getComputedStyle(el).display.startsWith("inline")
+}
+
+// elementFromPoint returns the deepest element — often an inline span/a/code
+// wrapping only part of a paragraph. Climb to the closest block ancestor so the
+// whole paragraph is targeted.
+function getParagraphTarget(el: HTMLElement): HTMLElement | null {
+	let current: HTMLElement | null = el
+	while (current && current !== document.body) {
+		if (EXCLUDE_TAGS.includes(current.tagName.toLowerCase())) {
+			return null
+		}
+		if (!isInlineElement(current)) {
+			// a block containing other blocks is a section, not a paragraph
+			const hasBlockChild = Array.from(current.children).some(
+				(child) => !isInlineElement(child),
+			)
+			return hasBlockChild ? null : current
+		}
+		current = current.parentElement
+	}
+	return null
+}
 
 function removeElement(container: HTMLElement, el: HTMLElement | null) {
 	if (el && container.contains(el)) {
@@ -125,40 +153,17 @@ function onTypographyMove(e: MouseEvent) {
 		return
 	}
 
-	if (
-		!TEXT_TAGS.includes(currentEl.tagName.toLowerCase()) ||
-		NOT_TEXT_TAGS.includes(currentEl.tagName.toLowerCase())
-	) {
+	const target = getParagraphTarget(currentEl as HTMLElement)
+	if (!target) {
 		return
 	}
 
-	const hasExistTypographyChild = Array.from(currentEl.children).some((item) =>
-		TEXT_TAGS.includes(item.tagName.toLowerCase()),
-	)
-
-	if (hasExistTypographyChild) {
-		return
-	}
-
-	const hasExistNotTypographyChild = Array.from(currentEl.children).some(
-		(item) => NOT_TEXT_TAGS.includes(item.tagName.toLowerCase()),
-	)
-
-	if (hasExistNotTypographyChild) {
-		return
-	}
-
-	const text = currentEl.textContent?.trim()
+	const text = target.textContent?.trim()
 	if (!text) {
 		return
 	}
 
 	if (!/\s/.test(text)) {
-		return
-	}
-
-	const target = currentEl as HTMLElement
-	if (target.dataset.wordWise) {
 		return
 	}
 

@@ -52,7 +52,10 @@ export default defineBackground(() => {
 
 	registerBackgroundMessage(context)
 
-	fetchContext(context)
+	// Content scripts waking this service worker read context.user/words via
+	// getUser/getWords — keep the loading promise around so those calls can
+	// wait for it instead of racing with a half-initialized context.
+	context.ready = fetchContext(context)
 
 	browser.action.onClicked.addListener((tab) => {
 		if (tab.id && !tab.url?.includes("//extensions/")) {

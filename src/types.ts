@@ -27,6 +27,8 @@ export type Context = {
 export interface BackgroundContext {
 	user: UserResp | null
 	words: IWordRespItem[]
+	/** Resolves once user/words are fetched; getUser/getWords wait on it */
+	ready?: Promise<void>
 }
 
 export interface QueryUI {

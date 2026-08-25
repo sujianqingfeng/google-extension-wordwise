@@ -77,6 +77,18 @@ async function fetchAudioBase64FromEdgeTTS(text: string) {
 	return base64
 }
 
+// getUser/getWords must not answer before the initial fetch finished, but a
+// hung request (e.g. no token → refresh fails) should not stall callers forever.
+const READY_TIMEOUT_MS = 5000
+
+function waitContextReady(context: BackgroundContext) {
+	const ready = context.ready ?? Promise.resolve()
+	return Promise.race([
+		ready,
+		new Promise<void>((resolve) => setTimeout(resolve, READY_TIMEOUT_MS)),
+	])
+}
+
 function _createBackgroundMessage(context: BackgroundContext) {
 	const addWord = (word: string) => {
 		context.words.push({
@@ -129,10 +141,12 @@ function _createBackgroundMessage(context: BackgroundContext) {
 
 	return {
 		auth,
-		getUser() {
+		async getUser() {
+			await waitContextReady(context)
 			return context.user
 		},
-		getWords() {
+		async getWords() {
+			await waitContextReady(context)
 			return context.words
 		},
 		fetchDictionQuery: fetchDictionQueryApi,
