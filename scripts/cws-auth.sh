@@ -17,7 +17,7 @@ CLIENT_SECRET="${2:?缺少 CLIENT_SECRET}"
 
 REDIRECT_PORT=47191
 REDIRECT_URI="http://127.0.0.1:${REDIRECT_PORT}"
-SCOPE="https://www.googleapis.com/auth/chrome.webstore.publish"
+SCOPE="https://www.googleapis.com/auth/chrome.webstore"
 
 ENV_FILE="$(cd "$(dirname "$0")/.." && pwd)/.env"
 
