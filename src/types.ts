@@ -19,8 +19,6 @@ export type BackgroundFunctions = {
 	removeWord: (word: string) => void
 }
 
-export type ContentFunctions = {}
-
 export type Context = {
 	isSelecting: boolean
 	isPressedAlt: boolean
@@ -32,10 +30,7 @@ export interface BackgroundContext {
 }
 
 export interface QueryUI {
-	mount: (options: {
-		text?: string
-		triggerRect?: DOMRect
-	}) => void
+	mount: (options: { text?: string; triggerRect?: DOMRect }) => void
 	remove: () => void
 	container: HTMLElement | undefined
 }

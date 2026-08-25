@@ -1,6 +1,6 @@
 import { useState } from "react"
-import AuthButton from "./AuthButton"
 import { createBackgroundMessage } from "@/messaging/background"
+import AuthButton from "./AuthButton"
 
 interface AuthProps {
 	success: () => void

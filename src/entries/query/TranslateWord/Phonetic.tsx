@@ -1,7 +1,7 @@
-import { createBackgroundMessage } from "@/messaging/background"
 import { useQuery } from "@tanstack/react-query"
-import { useEffect, useState, useCallback } from "react"
-import { Volume2, RotateCcw } from "lucide-react"
+import { RotateCcw, Volume2 } from "lucide-react"
+import { useCallback, useEffect, useState } from "react"
+import { createBackgroundMessage } from "@/messaging/background"
 import { playAudioByUrl } from "@/utils/audio"
 
 const bgs = createBackgroundMessage()

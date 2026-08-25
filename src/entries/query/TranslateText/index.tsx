@@ -1,18 +1,18 @@
-import { ErrorBoundary, type FallbackProps } from "react-error-boundary"
+import { useQuery, useSuspenseQuery } from "@tanstack/react-query"
 import {
-	WandSparkles,
-	Volume2,
+	AlertCircle,
 	Copy,
 	Languages,
 	MessageSquare,
-	AlertCircle,
+	Volume2,
+	WandSparkles,
 } from "lucide-react"
-import { useQuery, useSuspenseQuery } from "@tanstack/react-query"
-import { createBackgroundMessage } from "@/messaging/background"
-import { onBackgroundMessage, sendBackgroundMessage } from "@/messaging/content"
 import { useCallback, useEffect, useRef, useState } from "react"
+import { ErrorBoundary, type FallbackProps } from "react-error-boundary"
 import Analyze from "@/components/Analyze"
 import Button from "@/components/Button"
+import { createBackgroundMessage } from "@/messaging/background"
+import { onBackgroundMessage, sendBackgroundMessage } from "@/messaging/content"
 import { playAudioByUrl } from "@/utils/audio"
 
 const bgs = createBackgroundMessage()
@@ -29,7 +29,7 @@ function TranslateText({ text }: TranslateTextProps) {
 	const [analyzeResult, setAnalyzeResult] = useState("")
 	const [analyzeLoading, setAnalyzeLoading] = useState(false)
 	const [copySuccess, setCopySuccess] = useState(false)
-	const removeCallback = useRef<() => void>()
+	const removeCallback = useRef<(() => void) | undefined>(undefined)
 
 	const onAnalyze = async () => {
 		setAnalyzeLoading(true)
@@ -199,7 +199,7 @@ function fallbackRender({ error }: FallbackProps) {
 					<div>
 						<p className="font-medium">翻译出错了</p>
 						<p className="text-sm text-red-500 dark:text-red-400 mt-1">
-							{error.message}
+							{error instanceof Error ? error.message : String(error)}
 						</p>
 					</div>
 				</div>

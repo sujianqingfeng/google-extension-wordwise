@@ -1,5 +1,5 @@
-import type { DictionaryQueryForm } from "@/api/types"
 import { ArrowRight } from "lucide-react"
+import type { DictionaryQueryForm } from "@/api/types"
 
 type WordFormProps = DictionaryQueryForm
 

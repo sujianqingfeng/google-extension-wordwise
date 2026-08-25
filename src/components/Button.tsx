@@ -1,5 +1,5 @@
-import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from "react"
 import { LoaderCircle } from "lucide-react"
+import { type ButtonHTMLAttributes, forwardRef, type ReactNode } from "react"
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 	variant?: "primary" | "secondary" | "outline" | "ghost" | "danger"

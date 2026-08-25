@@ -1,12 +1,9 @@
-import type { DictionaryQueryForm } from "@/api/types"
+import { BookOpenCheck, ChevronDown, WandSparkles } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
-import { ChevronDown, WandSparkles, BookOpenCheck } from "lucide-react"
-import WordForm from "./WordForm"
-import { createBackgroundMessage } from "@/messaging/background"
-import { onBackgroundMessage, sendBackgroundMessage } from "@/messaging/content"
+import type { DictionaryQueryForm } from "@/api/types"
 import Analyze from "@/components/Analyze"
-
-const bgs = createBackgroundMessage()
+import { onBackgroundMessage, sendBackgroundMessage } from "@/messaging/content"
+import WordForm from "./WordForm"
 
 type ExpandProps = {
 	forms?: DictionaryQueryForm[]
@@ -16,7 +13,7 @@ type ExpandProps = {
 export default function Expand({ forms = [], word }: ExpandProps) {
 	const [isExpand, setIsExpand] = useState(false)
 	const [analyzeLoading, setAnalyzeLoading] = useState(false)
-	const removeCallback = useRef<() => void>()
+	const removeCallback = useRef<(() => void) | undefined>(undefined)
 	const [analyzeResult, setAnalyzeResult] = useState("")
 
 	const toggle = () => {

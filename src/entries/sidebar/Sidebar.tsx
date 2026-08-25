@@ -1,8 +1,8 @@
 import { Suspense } from "react"
-import SideHeader from "./SideHeader"
 import Loading from "@/components/Loading"
-import IfAuth from "./IfAuth"
 import QueryClientProvider from "@/components/QueryClientProvider"
+import IfAuth from "./IfAuth"
+import SideHeader from "./SideHeader"
 
 type SideProps = {
 	removeSidebar: () => void

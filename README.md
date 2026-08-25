@@ -1,5 +1,1 @@
 # Google-Extension-Wordwise
-
-
-
-

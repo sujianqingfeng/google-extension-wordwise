@@ -1,5 +1,5 @@
-import { rangeWords } from "./core/range"
 import { createBackgroundMessage } from "@/messaging/background"
+import { rangeWords } from "./core/range"
 import "./core/range.css"
 
 export default defineContentScript({

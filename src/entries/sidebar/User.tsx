@@ -1,4 +1,4 @@
-import { User as UserIcon, Mail, Crown } from "lucide-react"
+import { Crown, Mail, User as UserIcon } from "lucide-react"
 import Card from "@/components/Card"
 
 type UserProps = {

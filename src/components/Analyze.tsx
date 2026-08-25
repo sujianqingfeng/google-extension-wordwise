@@ -16,10 +16,8 @@ export default function Analyze({ result }: AnalyzeProps) {
 		.replace(/\d+\. /g, "$&") // 不添加额外换行
 
 	return (
-		<div className="dark:text-gray-400 text-black px-3 py-1.5 word-wise-markdown overflow-y-auto text-xs">
-			<Markdown remarkPlugins={[remarkBreaks]} className="whitespace-pre-wrap">
-				{formattedResult}
-			</Markdown>
+		<div className="dark:text-gray-400 text-black px-3 py-1.5 word-wise-markdown overflow-y-auto whitespace-pre-wrap text-xs">
+			<Markdown remarkPlugins={[remarkBreaks]}>{formattedResult}</Markdown>
 		</div>
 	)
 }

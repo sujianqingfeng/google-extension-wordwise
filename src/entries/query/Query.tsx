@@ -1,12 +1,12 @@
-import { Suspense, useEffect, useRef, useState, type RefObject } from "react"
+import { QueryErrorResetBoundary } from "@tanstack/react-query"
+import { AlertCircle, GripHorizontal, RefreshCw, X } from "lucide-react"
+import { type RefObject, Suspense, useEffect, useRef, useState } from "react"
+import { ErrorBoundary } from "react-error-boundary"
+import Loading from "@/components/Loading"
+import QueryClientProvider from "@/components/QueryClientProvider"
+import { isText } from "@/utils/text"
 import TranslateText from "./TranslateText"
 import TranslateWord from "./TranslateWord"
-import { isText } from "@/utils/text"
-import QueryClientProvider from "@/components/QueryClientProvider"
-import Loading from "@/components/Loading"
-import { QueryErrorResetBoundary } from "@tanstack/react-query"
-import { ErrorBoundary } from "react-error-boundary"
-import { GripHorizontal, RefreshCw, AlertCircle, X } from "lucide-react"
 
 function Fallback() {
 	return (

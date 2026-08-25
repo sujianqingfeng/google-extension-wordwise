@@ -1,7 +1,7 @@
-import { createBackgroundMessage } from "@/messaging/background"
 import { useSuspenseQuery } from "@tanstack/react-query"
-import Dashboard from "./Dashboard"
+import { createBackgroundMessage } from "@/messaging/background"
 import Auth from "./Auth"
+import Dashboard from "./Dashboard"
 
 export default function IfAuth() {
 	const { data, refetch } = useSuspenseQuery({

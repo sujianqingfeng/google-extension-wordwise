@@ -1,13 +1,13 @@
+import { useMutation, useQuery, useSuspenseQuery } from "@tanstack/react-query"
+import { BookOpen } from "lucide-react"
+import { useEffect } from "react"
+import { CUSTOM_EVENT_TYPE } from "@/constants"
+import { createBackgroundMessage } from "@/messaging/background"
+import { playAudioByUrl } from "@/utils/audio"
 import Collect from "./Collect"
 import Expand from "./Expand"
 import Phonetic from "./Phonetic"
 import Translate from "./Translate"
-import { CUSTOM_EVENT_TYPE } from "@/constants"
-import { createBackgroundMessage } from "@/messaging/background"
-import { useMutation, useQuery, useSuspenseQuery } from "@tanstack/react-query"
-import { BookOpen } from "lucide-react"
-import { useEffect } from "react"
-import { playAudioByUrl } from "@/utils/audio"
 
 const bgs = createBackgroundMessage()
 
@@ -125,7 +125,7 @@ export default function TranslateWord({ word: _word }: TranslateWordProps) {
 			<div className="px-3 py-2">
 				<div className="space-y-1">
 					{result?.translations?.map((t, i) => (
-						// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
+						// biome-ignore lint/suspicious/noArrayIndexKey: 翻译条目没有稳定 id，按顺序渲染即可
 						<Translate key={i} {...t} />
 					))}
 				</div>

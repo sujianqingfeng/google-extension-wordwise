@@ -1,11 +1,9 @@
-import type {
-	ContentScriptContext,
-	ShadowRootContentScriptUi,
-} from "wxt/client"
 import ReactDOM from "react-dom/client"
-import Sidebar from "./sidebar/Sidebar"
-import { onBackgroundMessage } from "../messaging/content"
+import type { ContentScriptContext } from "wxt/utils/content-script-context"
+import type { ShadowRootContentScriptUi } from "wxt/utils/content-script-ui/shadow-root"
 import { SIDEBAR_SHADOW_TAG_NAME } from "@/constants"
+import { onBackgroundMessage } from "../messaging/content"
+import Sidebar from "./sidebar/Sidebar"
 
 import "~/assets/main.css"
 

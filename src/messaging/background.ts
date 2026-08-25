@@ -1,4 +1,9 @@
 import {
+	createProxyService,
+	type ProxyService,
+	registerService,
+} from "@webext-core/proxy-service"
+import {
 	fetchAddWordCollectedApi,
 	fetchAiTranslateApi,
 	fetchAnalyzeGrammarApi,
@@ -13,7 +18,6 @@ import {
 import type { BackgroundContext } from "@/types"
 import { blobToBase64 } from "@/utils/blob"
 import { refreshTokenStorage, tokenStorage } from "@/utils/storage"
-import { defineProxyService } from "@webext-core/proxy-service"
 
 function getAuthUrl() {
 	const manifest = chrome.runtime.getManifest()
@@ -105,7 +109,7 @@ function _createBackgroundMessage(context: BackgroundContext) {
 			url: getAuthUrl(),
 			interactive: true,
 		})
-		if (chrome.runtime.lastError) {
+		if (!redirectedTo || chrome.runtime.lastError) {
 			throw new Error("redirectedTo is null")
 		}
 
@@ -143,5 +147,14 @@ function _createBackgroundMessage(context: BackgroundContext) {
 	}
 }
 
-export const [registerBackgroundMessage, createBackgroundMessage] =
-	defineProxyService("background", _createBackgroundMessage)
+export type BackgroundMessages = ReturnType<typeof _createBackgroundMessage>
+
+export type BackgroundClient = ProxyService<BackgroundMessages>
+
+export function registerBackgroundMessage(context: BackgroundContext) {
+	return registerService("background", _createBackgroundMessage(context))
+}
+
+export function createBackgroundMessage(): BackgroundClient {
+	return createProxyService<BackgroundMessages>("background")
+}

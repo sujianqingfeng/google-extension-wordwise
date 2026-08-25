@@ -206,10 +206,10 @@ const requestPut = createRequest(createCommonRequestOptions("put"))
 const requestDelete = createRequest(createCommonRequestOptions("delete"))
 
 export {
+	BASE_URL,
+	readResponseSSELine,
+	requestDelete,
 	requestGet,
 	requestPost,
 	requestPut,
-	requestDelete,
-	readResponseSSELine,
-	BASE_URL,
 }

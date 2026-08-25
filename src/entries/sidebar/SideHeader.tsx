@@ -1,4 +1,4 @@
-import { X, Sparkles } from "lucide-react"
+import { Sparkles, X } from "lucide-react"
 
 type SideHeaderProps = {
 	onClose: () => void

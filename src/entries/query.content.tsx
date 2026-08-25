@@ -1,13 +1,13 @@
+import ReactDOM from "react-dom/client"
+import type { ContentScriptContext, ShadowRootContentScriptUi } from "#imports"
+import { CUSTOM_EVENT_TYPE, QUERY_SHADOW_TAG_NAME } from "@/constants"
+import { createBackgroundMessage } from "@/messaging/background"
 import type {
 	MaskClickEventDetail,
 	QueryContentContext,
 	QueryUI,
 } from "@/types"
-import type { ContentScriptContext, ShadowRootContentScriptUi } from "#imports"
-import ReactDOM from "react-dom/client"
 import Query from "./query/Query"
-import { CUSTOM_EVENT_TYPE, QUERY_SHADOW_TAG_NAME } from "@/constants"
-import { createBackgroundMessage } from "@/messaging/background"
 import "~/assets/main.css"
 
 function createWindowSelection(context: QueryContentContext) {
@@ -69,10 +69,7 @@ const onSelectionChange = async (context: QueryContentContext) => {
 function createQueryUI(ctx: ContentScriptContext): QueryUI {
 	let ui: ShadowRootContentScriptUi<ReactDOM.Root> | null = null
 
-	const mount = async (options: {
-		text?: string
-		triggerRect?: DOMRect
-	}) => {
+	const mount = async (options: { text?: string; triggerRect?: DOMRect }) => {
 		if (ui) {
 			remove()
 		}

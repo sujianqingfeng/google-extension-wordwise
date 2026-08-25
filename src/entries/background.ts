@@ -1,4 +1,3 @@
-import { registerBackgroundMessage } from "../messaging/background"
 import {
 	fetchAllWordsApi,
 	fetchAnalyzeGrammarSSEApi,
@@ -10,6 +9,7 @@ import {
 	sendContentMessage,
 } from "@/messaging/content"
 import type { BackgroundContext } from "@/types"
+import { registerBackgroundMessage } from "../messaging/background"
 
 function createSyncSSEMessage(
 	type: keyof SendContentMessage,

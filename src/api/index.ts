@@ -65,6 +65,5 @@ export const fetchAnalyzeWordApi = (params: AnalyzeWordParams) =>
 	requestPost<Response>(`/ai/${params.provider}/analyze-word`, params)
 
 // tts
-export const fetchEdgeTTSApi = (params: {
-	text: string
-}) => requestPost<EdgeTTSResp>("/tts/edge-tts", params)
+export const fetchEdgeTTSApi = (params: { text: string }) =>
+	requestPost<EdgeTTSResp>("/tts/edge-tts", params)
