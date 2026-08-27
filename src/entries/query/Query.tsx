@@ -36,12 +36,22 @@ export default function Query({
 	triggerRect = null,
 }: QueryProps) {
 	const isTextFlag = isText(text)
+	// matches the rendered width below so placement works before measurement
+	const panelWidth = isTextFlag ? 520 : 380
 
 	const queryRef = useRef<HTMLDivElement>(null)
 	const [queryRect] = useClientRect(queryRef)
-	const [position, setPosition] = useState({ top: top ?? 0, left: left ?? 0 })
+	const initialPosition = usePlacement({
+		triggerRect,
+		contentRect: queryRect,
+		fallbackWidth: panelWidth,
+	})
+	// lazily derived from the trigger rect — first paint lands in place already
+	const [position, setPosition] = useState(() => ({
+		top: top ?? initialPosition.top,
+		left: left ?? initialPosition.left,
+	}))
 	const [isDragging, setIsDragging] = useState(false)
-	const initialPosition = usePlacement({ triggerRect, contentRect: queryRect })
 
 	useOutsideClick({
 		ref: queryRef as RefObject<Element>,
@@ -85,7 +95,7 @@ export default function Query({
 				style={{
 					top: `${position.top}px`,
 					left: `${position.left}px`,
-					width: `${isTextFlag ? 520 : 380}px`,
+					width: `${panelWidth}px`,
 				}}
 				className={`
 					fixed z-10000 animate-slide-in-up

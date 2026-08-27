@@ -207,18 +207,22 @@ function range(filterWords: string[]) {
 		entries: IntersectionObserverEntry[],
 	) => {
 		for (const entry of entries) {
-			if (entry.isIntersecting) {
-				const target = entry.target
-				const text = target.textContent
-				if (!text) {
-					return
-				}
-				const words = filterWordsFromText(filterWords, text)
-				if (!words.length) {
-					return
-				}
-				maskWordsInElement(target, words)
+			if (!entry.isIntersecting) {
+				continue
 			}
+			// one pass per target — nothing will change for it afterwards
+			const target = entry.target
+			intersectionObserver.unobserve(target)
+
+			const text = target.textContent
+			if (!text) {
+				continue
+			}
+			const words = filterWordsFromText(filterWords, text)
+			if (!words.length) {
+				continue
+			}
+			maskWordsInElement(target, words)
 		}
 	}
 

@@ -9,7 +9,29 @@ export const CUSTOM_EVENT_TYPE = {
 }
 
 export const ENABLE_TAG_ELEMENTS = ["div", "section"]
-export const EXCLUDE_TAG_ELEMENTS = ["script", "svg", "img", "style"]
+// shared by range masking + typography hover; kept lowercase
+export const EXCLUDE_TAG_ELEMENTS = [
+	"script",
+	"style",
+	"noscript",
+	"template",
+	"svg",
+	"img",
+	"picture",
+	"canvas",
+	"video",
+	"audio",
+	"iframe",
+	"input",
+	"textarea",
+	"datalist",
+	"select",
+	"option",
+	"button",
+	"nav",
+	"table",
+	"pre",
+]
 
 export const QUERY_ROOT_ID = "wordwise-query-crx-root"
 export const SIDE_ROOT_ID = "wordwise-side-crx-root"

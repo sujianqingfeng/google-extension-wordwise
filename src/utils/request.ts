@@ -4,10 +4,15 @@ import { refreshTokenStorage, tokenStorage } from "./storage"
 const BASE_API_URL = import.meta.env.VITE_BASE_API_URL
 
 type Method = "get" | "post" | "put" | "delete"
-type RefreshCallback = (accessToken: string) => void
+type PendingRetry = {
+	retry: (accessToken: string) => void
+	fail: (error: unknown) => void
+}
 
 let isRefreshing = false
-let refreshSubscribers: RefreshCallback[] = []
+// Requests that hit a 401 while a refresh is in flight wait here and are
+// retried (or rejected) together once the refresh settles.
+let pendingRetries: PendingRetry[] = []
 
 async function refreshToken(url: string) {
 	const rT = await refreshTokenStorage.get()
@@ -34,15 +39,20 @@ async function refreshToken(url: string) {
 	return accessToken
 }
 
-function subscribeTokenRefresh(callback: RefreshCallback) {
-	refreshSubscribers.push(callback)
+function flushPendingRetries(newAccessToken: string) {
+	const subscribers = pendingRetries
+	pendingRetries = []
+	for (const { retry } of subscribers) {
+		retry(newAccessToken)
+	}
 }
 
-function onAccessTokenFetched(newAccessToken: string) {
-	for (const callback of refreshSubscribers) {
-		callback(newAccessToken)
+function rejectPendingRetries(error: unknown) {
+	const subscribers = pendingRetries
+	pendingRetries = []
+	for (const { fail } of subscribers) {
+		fail(error)
 	}
-	refreshSubscribers = []
 }
 
 function createRequest({
@@ -56,6 +66,7 @@ function createRequest({
 		url: string,
 		data?: T,
 		opt?: RequestInit,
+		isRetry = false,
 	): Promise<R> => {
 		let finalUrl = `${baseUrl}${url}`
 
@@ -87,28 +98,44 @@ function createRequest({
 		const res = await fetch(finalUrl, options)
 
 		if (res.status === 401) {
+			// the retried request 401'd too — the token is genuinely bad, stop
+			// instead of looping refresh → retry
+			if (isRetry) {
+				throw new Error("Unauthorized after token refresh")
+			}
+
 			if (!isRefreshing) {
 				isRefreshing = true
 
 				refreshToken(REFRESH_TOKEN_URL)
 					.then((newAccessToken) => {
 						isRefreshing = false
-						onAccessTokenFetched(newAccessToken)
+						flushPendingRetries(newAccessToken)
 					})
 					.catch((error) => {
 						isRefreshing = false
-						throw error
+						// reject everyone waiting on the refresh so nothing hangs forever
+						rejectPendingRetries(error)
 					})
 			}
 
-			return new Promise((resolve) => {
-				subscribeTokenRefresh((newAccessToken) => {
-					const options = {
-						headers: {
-							authorization: `Bearer ${newAccessToken}`,
-						},
-					}
-					resolve(makeFetch(url, data, options))
+			return new Promise<R>((resolve, reject) => {
+				pendingRetries.push({
+					retry: (newAccessToken) => {
+						resolve(
+							makeFetch(
+								url,
+								data,
+								{
+									headers: {
+										authorization: `Bearer ${newAccessToken}`,
+									},
+								},
+								true,
+							),
+						)
+					},
+					fail: reject,
 				})
 			})
 		}
@@ -158,22 +185,22 @@ async function readResponseStream(
 		const lines = buffer.split("\n")
 		buffer = lines.pop() || ""
 
+		// empty lines matter downstream: in SSE they separate events, and
+		// readResponseSSELine turns them into paragraph breaks — don't filter here
 		for (const line of lines) {
-			if (line.trim() !== "") {
-				onChunk(line)
-			}
+			onChunk(line)
 		}
 	}
 }
 
-function readResponseSSELine(
+async function readResponseSSELine(
 	response: Response,
 	onChunk: (buff: string) => void,
 	onDone: (buff: string) => void,
 ) {
 	let buff = ""
 
-	readResponseStream(
+	await readResponseStream(
 		response,
 		(line) => {
 			line = line.replace("data: ", "")

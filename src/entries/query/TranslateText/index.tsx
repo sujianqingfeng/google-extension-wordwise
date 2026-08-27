@@ -33,7 +33,14 @@ function TranslateText({ text }: TranslateTextProps) {
 
 	const onAnalyze = async () => {
 		setAnalyzeLoading(true)
-		sendBackgroundMessage("analyzeGrammar", text)
+		try {
+			await sendBackgroundMessage("analyzeGrammar", text)
+		} catch (error) {
+			// background unreachable / tab shutting down — don't leave the button spinning
+			console.error("语法分析失败:", error)
+			setAnalyzeResult("分析失败，请稍后重试。")
+			setAnalyzeLoading(false)
+		}
 	}
 
 	const { refetch: fetchAudioBase64FromEdgeTTS } = useQuery({

@@ -1,28 +1,7 @@
+import { EXCLUDE_TAG_ELEMENTS } from "@/constants"
 import { createBackgroundMessage } from "@/messaging/background"
 import "./core/typography.css"
 import { throttle } from "@/utils"
-
-const EXCLUDE_TAGS = [
-	"img",
-	"picture",
-	"table",
-	"nav",
-	"button",
-	"svg",
-	"canvas",
-	"video",
-	"audio",
-	"iframe",
-	"input",
-	"textarea",
-	"select",
-	"option",
-	"pre",
-	"script",
-	"style",
-	"noscript",
-	"template",
-]
 
 function isInlineElement(el: Element) {
 	// computed display catches styled spans / custom elements a tag list would miss
@@ -35,7 +14,7 @@ function isInlineElement(el: Element) {
 function getParagraphTarget(el: HTMLElement): HTMLElement | null {
 	let current: HTMLElement | null = el
 	while (current && current !== document.body) {
-		if (EXCLUDE_TAGS.includes(current.tagName.toLowerCase())) {
+		if (EXCLUDE_TAG_ELEMENTS.includes(current.tagName.toLowerCase())) {
 			return null
 		}
 		if (!isInlineElement(current)) {
@@ -118,10 +97,17 @@ function createTypographyTranslatorRangeElement(target: HTMLElement) {
 	return el
 }
 
+// Only one hover session is alive at a time. Teardown removes elements,
+// cancels timers and unbinds the mouseout listener atomically, so rapid moves
+// can't stack stale listeners/timers on old targets (and no leaked references).
+let endActiveHoverSession: (() => void) | null = null
+
 function showTypographyTranslatorElement(
 	target: HTMLElement,
 	{ clientX, clientY }: { clientX: number; clientY: number },
 ) {
+	endActiveHoverSession?.()
+
 	const typographyTranslatorEl = createTypographyTranslatorElement({
 		top: clientY + 10,
 		left: clientX + 10,
@@ -132,18 +118,35 @@ function showTypographyTranslatorElement(
 	document.body.appendChild(typographyTranslatorEl)
 	document.body.appendChild(typographyTranslatorRangeEl)
 
-	const onTranslateTypographyClick = onTranslateTypography.bind(null, target)
-	typographyTranslatorEl.onclick = onTranslateTypographyClick
-
-	const mouseOut = () => {
-		removeElement(document.body, typographyTranslatorEl)
-		removeElement(document.body, typographyTranslatorRangeEl)
-		target.removeEventListener("mouseout", debounceMouseOut)
-		target.removeEventListener("mouseover", debounceMouseOut.cancel)
+	typographyTranslatorEl.onclick = () => {
+		onTranslateTypography(target)
 	}
 
-	const debounceMouseOut = debounce(mouseOut, 500)
-	setTimeout(debounceMouseOut, 3000)
+	let ended = false
+	const hide = debounce(() => {
+		ended = true
+		removeElement(document.body, typographyTranslatorEl)
+		removeElement(document.body, typographyTranslatorRangeEl)
+		target.removeEventListener("mouseout", onMouseOut)
+		endActiveHoverSession = null
+	}, 500)
+
+	const onMouseOut = () => hide()
+	target.addEventListener("mouseout", onMouseOut)
+
+	const autoHideTimer = setTimeout(hide, 3000)
+
+	endActiveHoverSession = () => {
+		if (ended) {
+			return
+		}
+		clearTimeout(autoHideTimer)
+		hide.cancel()
+		ended = true
+		removeElement(document.body, typographyTranslatorEl)
+		removeElement(document.body, typographyTranslatorRangeEl)
+		target.removeEventListener("mouseout", onMouseOut)
+	}
 }
 
 function onTypographyMove(e: MouseEvent) {
@@ -183,8 +186,7 @@ function onTypographyMove(e: MouseEvent) {
 }
 
 function scrollToRemoveExtraElement() {
-	removeElement(document.body, globalTranslatorElement)
-	removeElement(document.body, globalTranslatorRangeElement)
+	endActiveHoverSession?.()
 }
 
 export default defineContentScript({

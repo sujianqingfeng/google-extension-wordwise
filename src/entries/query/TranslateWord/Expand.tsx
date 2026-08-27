@@ -22,7 +22,14 @@ export default function Expand({ forms = [], word }: ExpandProps) {
 
 	const onAnalyze = async () => {
 		setAnalyzeLoading(true)
-		sendBackgroundMessage("analyzeWord", word)
+		try {
+			await sendBackgroundMessage("analyzeWord", word)
+		} catch (error) {
+			// background unreachable / tab shutting down — don't leave the button spinning
+			console.error("词汇分析失败:", error)
+			setAnalyzeResult("分析失败，请稍后重试。")
+			setAnalyzeLoading(false)
+		}
 	}
 
 	useEffect(() => {
@@ -30,7 +37,6 @@ export default function Expand({ forms = [], word }: ExpandProps) {
 			removeCallback.current = onBackgroundMessage(
 				"analyzeWordResult",
 				({ data: { result, done } }) => {
-					console.log("🚀 ~ useEffect ~ result:", result)
 					setAnalyzeResult(result)
 					setAnalyzeLoading(!done)
 				},

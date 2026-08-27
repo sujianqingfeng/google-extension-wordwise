@@ -11,6 +11,8 @@ import {
 import type { BackgroundContext } from "@/types"
 import { registerBackgroundMessage } from "../messaging/background"
 
+const ANALYZE_FAILED_MESSAGE = "分析失败，请稍后重试。"
+
 function createSyncSSEMessage(
 	type: keyof SendContentMessage,
 	tabId: number | undefined,
@@ -26,8 +28,17 @@ function createSyncSSEMessage(
 		)
 	}
 
-	return (response: Response) => {
-		readResponseSSELine(response, sync.bind(null, false), sync.bind(null, true))
+	return async (response: Response) => {
+		try {
+			await readResponseSSELine(
+				response,
+				sync.bind(null, false),
+				sync.bind(null, true),
+			)
+		} catch (error) {
+			console.error("wordwise: SSE stream failed", error)
+			sync(true, ANALYZE_FAILED_MESSAGE)
+		}
 	}
 }
 
@@ -66,22 +77,40 @@ export default defineBackground(() => {
 	onContentMessage("analyzeGrammar", async ({ data, sender }) => {
 		const tabId = sender.tab?.id
 
-		const response = await fetchAnalyzeGrammarSSEApi({
-			provider: "deepSeek",
-			text: data,
-		})
+		try {
+			const response = await fetchAnalyzeGrammarSSEApi({
+				provider: "deepSeek",
+				text: data,
+			})
 
-		createSyncSSEMessage("analyzeGrammarResult", tabId)(response)
+			await createSyncSSEMessage("analyzeGrammarResult", tabId)(response)
+		} catch (error) {
+			console.error("wordwise: analyzeGrammar failed", error)
+			sendContentMessage(
+				"analyzeGrammarResult",
+				{ result: ANALYZE_FAILED_MESSAGE, done: true },
+				tabId,
+			)
+		}
 	})
 
 	onContentMessage("analyzeWord", async ({ data, sender }) => {
 		const tabId = sender.tab?.id
 
-		const response = await fetchAnalyzeWordApi({
-			provider: "deepSeek",
-			word: data,
-		})
+		try {
+			const response = await fetchAnalyzeWordApi({
+				provider: "deepSeek",
+				word: data,
+			})
 
-		createSyncSSEMessage("analyzeWordResult", tabId)(response)
+			await createSyncSSEMessage("analyzeWordResult", tabId)(response)
+		} catch (error) {
+			console.error("wordwise: analyzeWord failed", error)
+			sendContentMessage(
+				"analyzeWordResult",
+				{ result: ANALYZE_FAILED_MESSAGE, done: true },
+				tabId,
+			)
+		}
 	})
 })
