@@ -1,6 +1,6 @@
 {
 	"name": "google-extension-wordwise",
-	"version": "1.1.5",
+	"version": "1.1.6",
 	"private": true,
 	"type": "module",
 	"packageManager": "pnpm@10.33.0",
