@@ -59,6 +59,16 @@ export default function Query({
 	})
 
 	useEffect(() => {
+		const onKeyDown = (e: KeyboardEvent) => {
+			if (e.key === "Escape") {
+				removeQueryPanel()
+			}
+		}
+		document.addEventListener("keydown", onKeyDown)
+		return () => document.removeEventListener("keydown", onKeyDown)
+	}, [removeQueryPanel])
+
+	useEffect(() => {
 		setPosition({
 			top: top ?? initialPosition.top,
 			left: left ?? initialPosition.left,
