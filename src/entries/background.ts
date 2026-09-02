@@ -9,6 +9,7 @@ import {
 	sendContentMessage,
 } from "@/messaging/content"
 import type { BackgroundContext } from "@/types"
+import type { IWordRespItem, UserResp } from "@/api/types"
 import { registerBackgroundMessage } from "../messaging/background"
 
 const ANALYZE_FAILED_MESSAGE = "分析失败，请稍后重试。"
@@ -50,9 +51,31 @@ async function fetchAllWords() {
 	return data || []
 }
 
+// builds made with WORDWISE_DEV_MOCK set fall back to a mock account when
+// there is no real login, so content scripts and the e2e suite run without
+// auth; the constant is statically false otherwise and production builds
+// eliminate the branch entirely
+const DEV_MOCK_USER: UserResp = {
+	token: "dev-mock",
+	name: "dev-tester",
+	email: "dev@localhost",
+	avatar: "",
+}
+const DEV_MOCK_WORDS: IWordRespItem[] = [
+	"panda",
+	"river",
+	"mountain",
+	"ancient",
+	"discover",
+].map((word, index) => ({ id: `mock-${index}`, word }))
+
 async function fetchContext(context: BackgroundContext) {
 	context.user = await fetchUser()
 	context.words = await fetchAllWords()
+	if (__WORDWISE_DEV_MOCK__ && !context.user) {
+		context.user = DEV_MOCK_USER
+		context.words = DEV_MOCK_WORDS
+	}
 }
 
 export default defineBackground(() => {

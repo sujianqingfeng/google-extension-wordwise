@@ -8,7 +8,7 @@ export default defineConfig({
 	manifest: {
 		name: "wordwise",
 		permissions: ["identity", "storage", "identity.email"],
-		action: { default_popup: "" },
+		action: {},
 		key: "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEApyPlTYNRy66gAw07db1FNrix+rqO2X2L+y402Lp0UKPDSKRTxCu2bieWs+r/7yISvpXMqBto88CI+L1pHCJIAy00xsHicbtdXMU/BAHDwfBdADsGcREOofSVHLsESM573GB+lJ6ZaJNPyexL1gtwm5M5lFRrhicdOLj8ZKZ01tlBRbb5FMAdMS42fO8pLaXOpd0hOvXhITCqb9a4sxUr4uYuSxOksBoODOhFWwqEIydIKRBwNzd+XxryGJMxL9Z5YopQA4SrVAj4N2pGCuGLOxoTTYDw+0s7UGPnLmCeQBP4Y2KmrO4FYUbHEtNeoSu9SzNcHmxvFzVB/UwF9zDMXQIDAQAB",
 		oauth2: {
 			client_id:
@@ -21,5 +21,13 @@ export default defineConfig({
 	// },
 	vite: () => ({
 		plugins: [react()],
+		// build with WORDWISE_DEV_MOCK set to compile the mock account in
+		// (used by `pnpm dev` and the e2e suite); the constant is statically
+		// false otherwise, so production builds eliminate the mock entirely
+		define: {
+			__WORDWISE_DEV_MOCK__: JSON.stringify(
+				Boolean(process.env.WORDWISE_DEV_MOCK),
+			),
+		},
 	}),
 })

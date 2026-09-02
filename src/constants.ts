@@ -8,7 +8,7 @@ export const CUSTOM_EVENT_TYPE = {
 	TYPOGRAPHY_HOVER: "typography_hover",
 }
 
-export const ENABLE_TAG_ELEMENTS = ["div", "section"]
+export const ENABLE_TAG_ELEMENTS = ["div", "section", "main", "article"]
 // shared by range masking + typography hover; kept lowercase
 export const EXCLUDE_TAG_ELEMENTS = [
 	"script",

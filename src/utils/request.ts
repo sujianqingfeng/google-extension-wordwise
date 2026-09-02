@@ -127,7 +127,9 @@ function createRequest({
 								url,
 								data,
 								{
+									...opt,
 									headers: {
+										...opt?.headers,
 										authorization: `Bearer ${newAccessToken}`,
 									},
 								},

@@ -10,6 +10,7 @@
 		"build:firefox": "wxt build -b firefox",
 		"pack": "web-ext build --source-dir output/chrome-mv3",
 		"test": "vitest",
+		"test:e2e": "node e2e/run.mjs",
 		"lint": "oxlint",
 		"format": "oxfmt",
 		"format:check": "oxfmt --check",

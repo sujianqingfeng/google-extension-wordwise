@@ -68,13 +68,21 @@ const onSelectionChange = async (context: QueryContentContext) => {
 
 function createQueryUI(ctx: ContentScriptContext): QueryUI {
 	let ui: ShadowRootContentScriptUi<ReactDOM.Root> | null = null
+	// mask clicks and alt-selections can mount faster than
+	// createShadowRootUi resolves; only the newest mount may win, an older
+	// one landing late is torn down instead of leaking an orphan panel
+	let mountSeq = 0
+
+	const remove = () => {
+		ui?.remove()
+		ui = null
+	}
 
 	const mount = async (options: { text?: string; triggerRect?: DOMRect }) => {
-		if (ui) {
-			remove()
-		}
+		const seq = ++mountSeq
+		remove()
 
-		ui = await createShadowRootUi(ctx, {
+		const next = await createShadowRootUi(ctx, {
 			name: QUERY_SHADOW_TAG_NAME,
 			position: "inline",
 			anchor: "body",
@@ -90,11 +98,13 @@ function createQueryUI(ctx: ContentScriptContext): QueryUI {
 			},
 		})
 
-		ui.mount()
-	}
+		if (seq !== mountSeq) {
+			next.remove()
+			return
+		}
 
-	const remove = () => {
-		ui?.remove()
+		ui = next
+		ui.mount()
 	}
 
 	return {
@@ -125,20 +135,10 @@ export default defineContentScript({
 	cssInjectionMode: "ui",
 	runAt: "document_idle",
 	async main(ctx) {
-		// Wait for DOM to be ready
-		// if (document.readyState === "loading") { // No longer strictly necessary with document_idle, but harmless to keep
-		// 	await new Promise((resolve) =>
-		// 		document.addEventListener("DOMContentLoaded", resolve, { once: true }),
-		// 	)
-		// } // You might decide to remove this block later if runAt: "document_idle" proves reliable.
-
-		console.log("wordwise: DOM is ready")
-
 		const bgs = createBackgroundMessage()
 
 		const user = await bgs.getUser()
 		if (!user) {
-			console.log("wise: User not found, exiting content script")
 			return
 		}
 

@@ -1,31 +1,44 @@
 import type { MaskClickEventDetail, WrapperElementOptions } from "@/types"
+import { debounce } from "@/utils"
 import {
 	CUSTOM_EVENT_TYPE,
 	ENABLE_TAG_ELEMENTS,
 	EXCLUDE_TAG_ELEMENTS,
+	QUERY_ROOT_ID,
+	SIDE_ROOT_ID,
 } from "../../constants"
 
-function generateWordsPattern(words: string[]) {
-	const wordsPattern = words.join("|")
-	return new RegExp(`\\b(${wordsPattern})\\b`, "gi")
+// words are user input; regex metacharacters ("c++", "c#") must not break or
+// distort the pattern
+function wordToPattern(word: string) {
+	const escaped = word.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+	// \b only works against word characters — "c++" has a non-word tail, a
+	// blanket \b wrapper would make it unmatchable
+	const prefix = /^\w/.test(word) ? "\\b" : ""
+	const suffix = /\w$/.test(word) ? "\\b" : ""
+	return `${prefix}${escaped}${suffix}`
 }
 
-function filterWordsFromText(words: string[], text: string) {
-	const matches: string[] = []
+function buildWordsRegex(words: string[]) {
+	const valid = words.filter((word) => word.trim())
+	return new RegExp(
+		valid.length ? valid.map(wordToPattern).join("|") : "(?!)",
+		"gi",
+	)
+}
 
-	if (words.length === 0 || !text.trim()) {
-		return matches
+// compiling is memoized on the array reference; activeWords keeps one
+// reference between rangeWords calls, so the regex is built once per change
+let cachedWordsRef: string[] | null = null
+let cachedWordsRegex: RegExp | null = null
+function getWordsRegex(words: string[]) {
+	if (words !== cachedWordsRef || !cachedWordsRegex) {
+		cachedWordsRef = words
+		cachedWordsRegex = buildWordsRegex(words)
 	}
-	const re = generateWordsPattern(words)
-	let match: RegExpExecArray | null = re.exec(text)
-	while (match !== null) {
-		const word = match[0]
-		if (word && !matches.find((item) => item === word)) {
-			matches.push(word)
-		}
-		match = re.exec(text)
-	}
-	return matches
+	// the shared /g regex is stateful (lastIndex); every scan starts fresh
+	cachedWordsRegex.lastIndex = 0
+	return cachedWordsRegex
 }
 
 type MatchWord = {
@@ -33,37 +46,19 @@ type MatchWord = {
 	start: number
 }
 export function matchWordsIndices(text: string, words: string[]) {
-	const re = generateWordsPattern(words)
+	const re = getWordsRegex(words)
 	const indices: MatchWord[] = []
 
 	let match: RegExpExecArray | null = re.exec(text)
 	while (match !== null) {
-		const word = match[0]
-		const index = match.index
 		indices.push({
-			word,
-			start: index,
+			word: match[0],
+			start: match.index,
 		})
 		match = re.exec(text)
 	}
 
 	return indices
-}
-
-export function matchWordsIndex(text: string, words: string[]) {
-	const re = generateWordsPattern(words)
-	let match: RegExpExecArray | null = re.exec(text)
-
-	while (match !== null) {
-		const word = match[0]
-		const index = match.index
-		match = re.exec(text)
-		return {
-			word,
-			start: index,
-		}
-	}
-	return null
 }
 
 function getEnableElement(elements: Element[], { tags }: { tags: string[] }) {
@@ -90,9 +85,11 @@ function traverseElements(
 		}
 		const children = Array.from(element.children)
 		const clientHeigh = element.clientHeight
-		if (thresholdHeight >= clientHeigh) {
+		// childless blocks taller than the viewport must still be traversed —
+		// recursing is impossible and skipping them would drop the whole block
+		if (thresholdHeight >= clientHeigh || children.length === 0) {
 			traverse(element)
-		} else if (children.length) {
+		} else {
 			traverseElements(children, options)
 		}
 	}
@@ -103,69 +100,70 @@ function isExcludeElement(tagName: string) {
 }
 
 export function maskWordsInElement(ele: Element, words: string[]) {
-	// console.log('🚀 ~ file: range.ts:85 ~ maskWordsInElement ~ words:', words)
+	if (words.length === 0) {
+		return
+	}
+
+	// single walk: collect matching text nodes first, then wrap each one —
+	// wrapping mutates the tree, so it must not interleave with the walk
+	const matchingNodes: Text[] = []
 	const treeWalker = document.createTreeWalker(
 		ele,
 		NodeFilter.SHOW_TEXT,
 		(node) => {
-			// no text content
-			if (!node.textContent) {
-				return NodeFilter.FILTER_REJECT
-			}
-
 			const parentElement = node.parentElement
-			// exclude some elements
-			if (parentElement && isExcludeElement(parentElement.tagName)) {
+			// exclude some elements and already masked word wise elements
+			if (
+				parentElement &&
+				(isExcludeElement(parentElement.tagName) ||
+					parentElement.dataset.wordWise)
+			) {
 				return NodeFilter.FILTER_REJECT
 			}
 
-			// not mask word wise element
-			const hasWordWise = parentElement?.dataset.wordWise
-			if (hasWordWise) {
-				return NodeFilter.FILTER_REJECT
-			}
-
-			const matchedWords = filterWordsFromText(words, node.textContent)
-			if (!matchedWords.length) {
+			const text = node.textContent
+			if (!text || !getWordsRegex(words).test(text)) {
 				return NodeFilter.FILTER_REJECT
 			}
 
 			return NodeFilter.FILTER_ACCEPT
 		},
 	)
+	while (treeWalker.nextNode()) {
+		matchingNodes.push(treeWalker.currentNode as Text)
+	}
 
-	const currentNode = treeWalker.nextNode()
-	if (!currentNode) {
+	for (const node of matchingNodes) {
+		wrapMatchesInTextNode(node, words)
+	}
+}
+
+// replaces the text node once with [text, wrapper, text, ...] fragments,
+// covering all of its matches — the old per-match recursion re-walked the
+// whole subtree for every single word
+function wrapMatchesInTextNode(node: Text, words: string[]) {
+	const text = node.textContent ?? ""
+	const matches = matchWordsIndices(text, words)
+	if (matches.length === 0) {
 		return
 	}
 
-	const t = currentNode.textContent
-	if (!t) {
-		return
+	const fragment = document.createDocumentFragment()
+	let cursor = 0
+	for (const { word, start } of matches) {
+		if (start > cursor) {
+			fragment.appendChild(document.createTextNode(text.slice(cursor, start)))
+		}
+		const wrapper = createWrapperElement({ word, onClick: maskWordClickEvent })
+		wrapper.appendChild(document.createTextNode(word))
+		fragment.appendChild(wrapper)
+		cursor = start + word.length
+	}
+	if (cursor < text.length) {
+		fragment.appendChild(document.createTextNode(text.slice(cursor)))
 	}
 
-	const matchedWords = filterWordsFromText(words, t)
-	if (!matchedWords.length) {
-		return
-	}
-
-	const index = matchWordsIndex(t, matchedWords)
-	if (!index) {
-		return
-	}
-
-	const { word, start } = index
-	const range = new Range()
-	range.setStart(currentNode, start)
-	range.setEnd(currentNode, start + word.length)
-
-	const wrapper = createWrapperElement({
-		word,
-		onClick: maskWordClickEvent,
-	})
-
-	range.surroundContents(wrapper)
-	maskWordsInElement(ele, words)
+	node.replaceWith(fragment)
 }
 
 function createWrapperElement({ word, onClick }: WrapperElementOptions) {
@@ -194,62 +192,214 @@ function maskWordClickEvent(e: MouseEvent) {
 	)
 }
 
-function range(filterWords: string[]) {
-	const body = document.querySelector("body")
-	if (!body) {
+// ---------------------------------------------------------------------------
+// incremental masking
+//
+// SPA pages swap views without reloading: frameworks destroy the text nodes we
+// wrapped and insert fresh ones, so a one-shot pass at document_end loses its
+// marks on every route/layout change. The observers below keep feeding new
+// content into the same lazy masking pipeline (traverse -> IntersectionObserver
+// -> maskWordsInElement).
+// ---------------------------------------------------------------------------
+
+// wordwise-injected elements must never become mask candidates, otherwise the
+// observer would feed on its own wrappers and on the query/sidebar/typography UI
+// ([data-word-wise] covers every .word-wise-mask wrapper)
+const OWN_CONTENT_SELECTOR = [
+	"[data-word-wise]",
+	".word-wise-typography-hover",
+	".word-wise-typography-range",
+	".word-wise-typography-translation",
+	".word-wise-typography-original",
+	`#${QUERY_ROOT_ID}`,
+	`#${SIDE_ROOT_ID}`,
+].join(",")
+
+const NODE_ELEMENT_NODE = 1
+const NODE_TEXT_NODE = 3
+
+export function isOwnNode(node: Node) {
+	const element =
+		node.nodeType === NODE_TEXT_NODE ? node.parentElement : (node as Element)
+	return !element || element.closest(OWN_CONTENT_SELECTOR) !== null
+}
+
+export function collectCandidateElements(nodes: Node[]) {
+	const candidates: Element[] = []
+	for (const node of nodes) {
+		if (node.nodeType === NODE_ELEMENT_NODE) {
+			candidates.push(node as Element)
+		} else if (node.nodeType === NODE_TEXT_NODE) {
+			const parent = node.parentElement
+			if (parent) {
+				candidates.push(parent)
+			}
+		}
+	}
+	return candidates
+}
+
+let activeWords: string[] = []
+let initialized = false
+let intersectionObserver: IntersectionObserver | null = null
+let mutationObserver: MutationObserver | null = null
+let lastUrl: string | null = null
+
+function getIntersectionObserver() {
+	if (intersectionObserver) {
+		return intersectionObserver
+	}
+	intersectionObserver = new IntersectionObserver(
+		(entries) => {
+			for (const entry of entries) {
+				if (!entry.isIntersecting) {
+					continue
+				}
+				// one pass per target; content that re-renders later re-enters
+				// through the mutation observer
+				const target = entry.target
+				intersectionObserver?.unobserve(target)
+				// no pre-filter here: maskWordsInElement's walker rejects
+				// non-matching text nodes immediately anyway
+				maskWordsInElement(target, activeWords)
+			}
+		},
+		// any visibility is enough: a block taller than the viewport can never
+		// reach a higher threshold, so those would never mask
+		{ threshold: 0 },
+	)
+	return intersectionObserver
+}
+
+function hasAnyWord(ele: Element) {
+	return getWordsRegex(activeWords).test(ele.textContent ?? "")
+}
+
+function observeElements(elements: Element[]) {
+	if (!elements.length) {
+		return
+	}
+	const observer = getIntersectionObserver()
+	const viewPortHeight = document.documentElement.clientHeight
+	traverseElements(elements, {
+		thresholdHeight: viewPortHeight,
+		traverse(ele) {
+			observer.observe(ele)
+		},
+	})
+}
+
+// initial pass and post-route rescan; the word gate keeps it free on pages
+// without target words
+function scanBody() {
+	const body = document.body
+	if (!body || !hasAnyWord(body)) {
 		return
 	}
 	const enableElements = getEnableElement(Array.from(body.children), {
 		tags: ENABLE_TAG_ELEMENTS,
 	})
+	observeElements(enableElements)
+}
 
-	const intersectionObserverCallback = (
-		entries: IntersectionObserverEntry[],
-	) => {
-		for (const entry of entries) {
-			if (!entry.isIntersecting) {
-				continue
-			}
-			// one pass per target — nothing will change for it afterwards
-			const target = entry.target
-			intersectionObserver.unobserve(target)
+let pendingCandidates: Set<Element> | null = null
 
-			const text = target.textContent
-			if (!text) {
-				continue
+// SPA swaps render in batches; coalescing also merges our own wrapper
+// insertions with the framework's mutations into one pass. maxWait keeps
+// churning pages (editors, tickers) from postponing the flush forever
+const flushCandidates = debounce(
+	() => {
+		const candidates = pendingCandidates
+		pendingCandidates = null
+		if (!candidates || !activeWords.length) {
+			return
+		}
+		const fresh = Array.from(candidates).filter(
+			(ele) => ele.isConnected && !isOwnNode(ele) && hasAnyWord(ele),
+		)
+		observeElements(fresh)
+	},
+	300,
+	{ maxWait: 800 },
+)
+
+function addCandidate(ele: Element) {
+	pendingCandidates ??= new Set()
+	pendingCandidates.add(ele)
+	flushCandidates()
+}
+
+function onDomMutations(mutations: MutationRecord[]) {
+	if (!activeWords.length) {
+		return
+	}
+	for (const mutation of mutations) {
+		if (mutation.type === "childList") {
+			const candidates = collectCandidateElements(
+				Array.from(mutation.addedNodes),
+			)
+			for (const ele of candidates) {
+				addCandidate(ele)
 			}
-			const words = filterWordsFromText(filterWords, text)
-			if (!words.length) {
-				continue
+		} else if (mutation.type === "characterData") {
+			// framework reusing a text node in place (nodeValue update)
+			const parent = mutation.target.parentElement
+			if (parent) {
+				addCandidate(parent)
 			}
-			maskWordsInElement(target, words)
 		}
 	}
+}
 
-	const intersectionObserver = new IntersectionObserver(
-		intersectionObserverCallback,
-		{
-			threshold: 0.5,
-		},
-	)
-
-	const viewPortHeight = document.documentElement.clientHeight
-	traverseElements(enableElements, {
-		thresholdHeight: viewPortHeight,
-		traverse(ele) {
-			intersectionObserver.observe(ele)
-		},
+function ensureMutationObserver() {
+	if (mutationObserver || !document.body) {
+		return
+	}
+	mutationObserver = new MutationObserver(onDomMutations)
+	mutationObserver.observe(document.body, {
+		subtree: true,
+		childList: true,
+		characterData: true,
 	})
 }
 
+// history.pushState is not observable from the isolated content-script world;
+// popstate/hashchange still catch back/forward, while the mutation observer
+// covers whatever a route swap renders
+const scheduleScanBody = debounce(scanBody, 500)
+
+function onUrlMaybeChanged() {
+	if (lastUrl === null) {
+		lastUrl = location.href
+		return
+	}
+	if (location.href === lastUrl) {
+		return
+	}
+	lastUrl = location.href
+	scheduleScanBody()
+}
+
+function ensureUrlHooks() {
+	window.addEventListener("popstate", onUrlMaybeChanged)
+	window.addEventListener("hashchange", onUrlMaybeChanged)
+}
+
 export function rangeWords(words: string[]) {
-	const textContent = document.body.textContent
-	if (textContent === null) {
+	if (words.length === 0) {
 		return
 	}
-	const filterWords = filterWordsFromText(words, textContent)
-	if (filterWords.length === 0) {
+	// mid-session additions (query panel) must not drop already-active words
+	activeWords = Array.from(new Set([...activeWords, ...words]))
+
+	ensureMutationObserver()
+	ensureUrlHooks()
+	if (initialized) {
+		// later additions rescan coalesced and off the click path; the
+		// mutation observer picks up their effect on page content anyway
+		scheduleScanBody()
 		return
 	}
-	range(filterWords)
+	initialized = true
+	scanBody()
 }

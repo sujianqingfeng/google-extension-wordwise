@@ -201,7 +201,12 @@ export default defineContentScript({
 			return
 		}
 
-		document.addEventListener("mousemove", debounce(onTypographyMove, 500))
+		// maxWait keeps continuous mouse movement from postponing the hover
+		// indicator forever
+		document.addEventListener(
+			"mousemove",
+			debounce(onTypographyMove, 500, { maxWait: 1000 }),
+		)
 		document.addEventListener(
 			"scroll",
 			throttle(scrollToRemoveExtraElement, 500),

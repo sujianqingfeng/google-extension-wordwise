@@ -20,6 +20,8 @@ export function createSafePromise<R = any, T extends any[] = any[]>(
 interface Options {
 	leading?: boolean
 	trailing?: boolean
+	// cap on how long repeated calls may postpone the trailing call
+	maxWait?: number
 }
 
 export function debounce<F extends (...args: any[]) => any>(
@@ -28,12 +30,17 @@ export function debounce<F extends (...args: any[]) => any>(
 	options: Options = {},
 ) {
 	let timeout: null | ReturnType<typeof setTimeout> = null
+	let maxWaitTimeout: null | ReturnType<typeof setTimeout> = null
 
 	function cancel() {
 		if (timeout) {
 			clearTimeout(timeout)
 		}
+		if (maxWaitTimeout) {
+			clearTimeout(maxWaitTimeout)
+		}
 		timeout = null
+		maxWaitTimeout = null
 	}
 
 	function call(this: any, ...args: Parameters<F>) {
@@ -46,12 +53,28 @@ export function debounce<F extends (...args: any[]) => any>(
 		}
 
 		timeout = setTimeout(() => {
-			if (!options.trailing || timeout) {
+			timeout = null
+			if (options.trailing !== false) {
 				func.apply(this, args)
 			}
-
-			timeout = null
+			if (maxWaitTimeout) {
+				clearTimeout(maxWaitTimeout)
+				maxWaitTimeout = null
+			}
 		}, wait)
+
+		// anchored to the first call of a burst, not reset by later calls; useless
+		// in leading-only mode where the call already fired at the leading edge
+		if (options.trailing !== false && options.maxWait && !maxWaitTimeout) {
+			maxWaitTimeout = setTimeout(() => {
+				if (timeout) {
+					clearTimeout(timeout)
+				}
+				timeout = null
+				maxWaitTimeout = null
+				func.apply(this, args)
+			}, options.maxWait)
+		}
 	}
 
 	call.cancel = cancel

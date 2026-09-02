@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>WordWise E2E Fixture</title>
+<style>
+  body { font-family: Georgia, serif; max-width: 720px; margin: 40px auto; line-height: 1.7; }
+  button { font-size: 15px; padding: 8px 16px; margin-right: 12px; cursor: pointer; }
+  .view { margin-top: 24px; }
+  #deep-view { margin-top: 160vh; }
+  #churn-view { margin-top: 40px; border-top: 1px solid #ccc; padding-top: 16px; }
+</style>
+</head>
+<body>
+  <h1>The River Valley Expedition</h1>
+  <div id="toolbar">
+    <button id="btn-detail">查看详情</button>
+    <button id="btn-back">返回列表</button>
+    <button id="btn-push">pushState 详情</button>
+    <button id="btn-inplace" class="hidden">原地更新文本</button>
+  </div>
+  <div id="app" class="view"></div>
+
+<script>
+const LIST_HTML = `
+  <section id="list-view">
+    <p>High in the mountain passes, our team began to discover traces of an ancient civilization. The panda reserves nearby were established to protect the bamboo forests that line the river delta.</p>
+    <p>Every morning the panda keepers cross the river before dawn, following a path their grandparents built. Local guides say the mountain fog reveals the ancient stone bridges only at sunrise.</p>
+    <p id="char-update">The panda census began in spring, and the river water was still cold.</p>
+  </section>
+`
+
+const DETAIL_HTML = `
+  <section id="detail-view">
+    <h2>Expedition Detail</h2>
+    <p>The ancient trade route followed the river north through the valley. Merchants crossing the mountain pass discovered that pandas avoided the lower trails during the rainy season.</p>
+    <p>Modern researchers discovered pollen samples beneath the ancient bridge, proving the river once flowed closer to the mountain. The panda habitat now overlaps with the protected river basin.</p>
+  </section>
+`
+
+const app = document.getElementById("app")
+
+function renderList() {
+  app.innerHTML = LIST_HTML
+  document.getElementById("btn-inplace").classList.remove("hidden")
+}
+
+function renderDetail() {
+  app.innerHTML = DETAIL_HTML
+  document.getElementById("btn-inplace").classList.add("hidden")
+}
+
+document.getElementById("btn-detail").onclick = renderDetail
+document.getElementById("btn-back").onclick = () => {
+  renderList()
+}
+document.getElementById("btn-inplace").onclick = () => {
+  // characterData mutation: framework-style nodeValue rewrite of the first
+  // text fragment; stale wrappers from the original pass must stay single
+  document.getElementById("char-update").childNodes[0].nodeValue =
+    "The panda census ended in autumn, and the ancient river ice finally melted."
+}
+document.getElementById("btn-push").onclick = () => {
+  history.pushState({ view: "detail" }, "", "?view=detail")
+  renderDetail()
+}
+window.addEventListener("popstate", () => {
+  if (!location.search.includes("view=detail")) {
+    renderList()
+  }
+})
+
+// late async content, like an SPA rendering after document_end
+setTimeout(() => {
+  const late = document.createElement("section")
+  late.id = "late-view"
+  late.innerHTML = "<p>A late bulletin: rangers discovered a newborn panda near the river bend, hidden under an ancient cedar.</p>"
+  document.body.appendChild(late)
+}, 1500)
+
+// far below the fold: only reachable through the scroll/IntersectionObserver path
+const deep = document.createElement("section")
+deep.id = "deep-view"
+deep.innerHTML = "<p>Deep in the valley log: the survey team found ancient carvings where the river splits below the mountain. A panda was spotted fishing at dawn.</p>"
+document.body.appendChild(deep)
+
+// mutation churn: never lets the DOM go quiet, only maxWait can get a flush in
+let churnTimer = null
+let churnCount = 0
+window.startChurn = () => {
+  if (churnTimer) return
+  const view = document.createElement("section")
+  view.id = "churn-view"
+  view.innerHTML = "<h2>Live Log</h2>"
+  document.body.appendChild(view)
+  churnTimer = setInterval(() => {
+    churnCount += 1
+    const p = document.createElement("p")
+    p.textContent = `Log entry ${churnCount}: rangers discover a panda by the river.`
+    view.appendChild(p)
+  }, 150)
+}
+window.stopChurn = () => {
+  clearInterval(churnTimer)
+  churnTimer = null
+}
+window.churnState = () => ({
+  count: churnCount,
+  running: churnTimer !== null,
+  masks: document.querySelectorAll("#churn-view .word-wise-mask").length,
+})
+
+renderList()
+</script>
+</body>
+</html>
