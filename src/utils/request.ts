@@ -175,6 +175,10 @@ async function readResponseStream(
 	while (true) {
 		const { done, value } = await reader.read()
 		if (done) {
+			// final flush: stream-mode decoding holds the trailing bytes of a
+			// multi-byte character until the next decode() call — dropping it
+			// would corrupt the last Chinese character of the stream
+			buffer += decoder.decode()
 			if (buffer) {
 				onChunk(buffer)
 			}

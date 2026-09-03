@@ -36,7 +36,11 @@ function createSidebar(ctx: ContentScriptContext) {
 			ui?.remove()
 		}
 
-		isMounted ? remove() : ui.mount()
+		if (isMounted) {
+			remove()
+		} else {
+			ui.mount()
+		}
 	}
 }
 

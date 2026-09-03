@@ -4,6 +4,7 @@ export const CONTENT_MESSAGE_TYPE = {
 
 export const CUSTOM_EVENT_TYPE = {
 	RANGE_WORDS: "range_words",
+	RANGE_WORDS_REMOVE: "range_words_remove",
 	MASK_CLICK_EVENT: "mask_click_event",
 	TYPOGRAPHY_HOVER: "typography_hover",
 }

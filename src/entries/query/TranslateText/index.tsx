@@ -57,14 +57,6 @@ function TranslateText({ text }: TranslateTextProps) {
 		playAudioByUrl(data)
 	}, [fetchAudioBase64FromEdgeTTS])
 
-	const onSystemTTS = () => {
-		const msg = new SpeechSynthesisUtterance(text)
-		msg.lang = "en-GB"
-		msg.rate = 0.6
-		msg.volume = 1
-		window.speechSynthesis.speak(msg)
-	}
-
 	const onCopy = async () => {
 		try {
 			await navigator.clipboard.writeText(text)

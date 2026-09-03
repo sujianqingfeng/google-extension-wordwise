@@ -81,27 +81,23 @@ export function debounce<F extends (...args: any[]) => any>(
 	return call
 }
 
+// `this` is not forwarded — every current call site is a plain closure, and
+// forwarding it would require the no-this-alias pattern lints reject
 export function throttle<T extends (...args: any[]) => any>(
 	func: T,
 	wait: number,
 ): T {
 	let timeout: ReturnType<typeof setTimeout> | null = null
 	let lastArgs: Parameters<T> | null = null
-	let lastThis: ThisParameterType<T> | null = null
 
-	const throttled = function (
-		this: ThisParameterType<T>,
-		...args: Parameters<T>
-	) {
+	const throttled = (...args: Parameters<T>) => {
 		lastArgs = args
-		lastThis = this
 
 		if (timeout === null) {
 			timeout = setTimeout(() => {
 				if (lastArgs) {
-					func.apply(lastThis, lastArgs)
+					func(...lastArgs)
 					lastArgs = null
-					lastThis = null
 					timeout = null
 				}
 			}, wait)

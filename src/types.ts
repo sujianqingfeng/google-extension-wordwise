@@ -9,20 +9,6 @@ export type WrapperElementOptions = {
 	word: string
 }
 
-export type BackgroundFunctions = {
-	getAuthUser: (authUrl: string) => Promise<[false, any] | [true, UserResp]>
-	getIsLogin: () => Promise<boolean>
-	getUser: () => UserResp
-	getWords: () => IWordRespItem[]
-	addWord: (word: string) => void
-	removeWord: (word: string) => void
-}
-
-export type Context = {
-	isSelecting: boolean
-	isPressedAlt: boolean
-}
-
 export interface BackgroundContext {
 	user: UserResp | null
 	words: IWordRespItem[]
@@ -37,7 +23,6 @@ export interface QueryUI {
 }
 
 export interface QueryContentContext {
-	isPressedAlt: boolean
 	isSelecting: boolean
 	queryUI: QueryUI
 	currentQueryTriggerEl: HTMLElement | null

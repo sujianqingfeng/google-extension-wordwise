@@ -1,7 +1,8 @@
 import ReactDOM from "react-dom/client"
 import type { ContentScriptContext, ShadowRootContentScriptUi } from "#imports"
 import { CUSTOM_EVENT_TYPE, QUERY_SHADOW_TAG_NAME } from "@/constants"
-import { createBackgroundMessage } from "@/messaging/background"
+import { createBackgroundMessage, waitForUser } from "@/messaging/background"
+import { onBackgroundMessage } from "@/messaging/content"
 import type {
 	MaskClickEventDetail,
 	QueryContentContext,
@@ -11,14 +12,14 @@ import Query from "./query/Query"
 import "~/assets/main.css"
 
 function createWindowSelection(context: QueryContentContext) {
-	const onSelectionChange = (callback: () => void) => {
+	const onSelectionChange = (callback: (e: MouseEvent) => void) => {
 		document.addEventListener("selectstart", () => {
 			context.isSelecting = true
 		})
 
-		document.addEventListener("mouseup", () => {
+		document.addEventListener("mouseup", (e) => {
 			if (context.isSelecting) {
-				callback()
+				callback(e)
 				context.isSelecting = false
 			}
 		})
@@ -29,8 +30,14 @@ function createWindowSelection(context: QueryContentContext) {
 	}
 }
 
-const onSelectionChange = async (context: QueryContentContext) => {
-	if (!context.isPressedAlt) {
+// altKey is read straight off the event that ended the selection (mouseup) or
+// triggered the check (keydown) — tracking it across keydown/keyup goes stale
+// whenever the window loses focus mid-press and the keyup never arrives
+const onSelectionChange = async (
+	context: QueryContentContext,
+	e: { altKey: boolean },
+) => {
+	if (!e.altKey) {
 		return
 	}
 
@@ -116,20 +123,6 @@ function createQueryUI(ctx: ContentScriptContext): QueryUI {
 	}
 }
 
-function createKeyType(
-	context: QueryContentContext,
-	keydown: (e: KeyboardEvent) => void,
-) {
-	document.addEventListener("keydown", (e) => {
-		context.isPressedAlt = e.altKey
-		keydown(e)
-	})
-
-	document.addEventListener("keyup", (e) => {
-		context.isPressedAlt = e.altKey
-	})
-}
-
 export default defineContentScript({
 	matches: ["<all_urls>"],
 	cssInjectionMode: "ui",
@@ -137,33 +130,49 @@ export default defineContentScript({
 	async main(ctx) {
 		const bgs = createBackgroundMessage()
 
-		const user = await bgs.getUser()
-		if (!user) {
-			return
-		}
-
-		const queryUI = createQueryUI(ctx)
-
-		const context: QueryContentContext = {
-			isPressedAlt: false,
-			isSelecting: false,
-			queryUI,
-			currentQueryTriggerEl: null,
-		}
-
-		document.addEventListener(CUSTOM_EVENT_TYPE.MASK_CLICK_EVENT, (e: any) => {
-			const { word, rect } = e.detail as MaskClickEventDetail
-			queryUI.mount({ text: word, triggerRect: rect })
-		})
-
-		createKeyType(context, (e) => {
-			if (e.altKey) {
-				onSelectionChange(context)
+		let initialized = false
+		const init = async () => {
+			if (initialized) {
+				return
 			}
-		})
+			const user = await waitForUser(bgs)
+			if (!user) {
+				return
+			}
+			initialized = true
 
-		createWindowSelection(context).onSelectionChange(
-			onSelectionChange.bind(null, context),
-		)
+			const queryUI = createQueryUI(ctx)
+
+			const context: QueryContentContext = {
+				isSelecting: false,
+				queryUI,
+				currentQueryTriggerEl: null,
+			}
+
+			document.addEventListener(
+				CUSTOM_EVENT_TYPE.MASK_CLICK_EVENT,
+				(e: any) => {
+					const { word, rect } = e.detail as MaskClickEventDetail
+					queryUI.mount({ text: word, triggerRect: rect })
+				},
+			)
+
+			// alt pressed while a selection already exists
+			document.addEventListener("keydown", (e) => {
+				if (e.altKey) {
+					onSelectionChange(context, e)
+				}
+			})
+
+			// alt+drag selection: the mouseup event carries altKey itself
+			createWindowSelection(context).onSelectionChange(
+				onSelectionChange.bind(null, context),
+			)
+		}
+
+		// logging in on the sidebar must enable already-open pages without a
+		// reload — the background broadcasts to every tab once auth succeeds
+		onBackgroundMessage("userChanged", () => init())
+		await init()
 	},
 })

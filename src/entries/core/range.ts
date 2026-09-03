@@ -21,7 +21,11 @@ function wordToPattern(word: string) {
 }
 
 function buildWordsRegex(words: string[]) {
-	const valid = words.filter((word) => word.trim())
+	// longest first: alternation takes the first branch matching at a position,
+	// so "running" must be tried before "run" or only "run" gets masked
+	const valid = words
+		.filter((word) => word.trim())
+		.sort((a, b) => b.length - a.length)
 	return new RegExp(
 		valid.length ? valid.map(wordToPattern).join("|") : "(?!)",
 		"gi",
@@ -439,4 +443,32 @@ export function rangeWords(words: string[]) {
 	}
 	initialized = true
 	scanBody()
+}
+
+// inverse of rangeWords: drops words from the active set and unwraps their
+// existing masks (un-collecting from the query panel), so masking stays
+// reversible instead of only ever accumulating
+export function unrangeWords(words: string[]) {
+	if (words.length === 0) {
+		return
+	}
+	const removed = new Set(words.map((word) => word.toLowerCase()))
+	activeWords = activeWords.filter((word) => !removed.has(word.toLowerCase()))
+
+	const masks = document.querySelectorAll<HTMLElement>(MASK_SELECTOR)
+	const parents = new Set<Node>()
+	for (const mask of Array.from(masks)) {
+		const word = mask.dataset.word?.toLowerCase()
+		const parent = mask.parentNode
+		if (!word || !removed.has(word) || !parent) {
+			continue
+		}
+		parents.add(parent)
+		mask.replaceWith(document.createTextNode(mask.textContent ?? ""))
+	}
+	// merge the split text fragments left behind, or a future scan would
+	// never see whole words spanning the old wrapper boundaries again
+	for (const parent of parents) {
+		parent.normalize()
+	}
 }

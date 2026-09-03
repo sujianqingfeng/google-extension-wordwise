@@ -64,13 +64,27 @@ export default function TranslateWord({ word: _word }: TranslateWordProps) {
 			return
 		}
 
-		next ? await collectWord(word) : await removeWord(word)
-
-		// TODO: remove range words
-		if (next) {
-			document.dispatchEvent(
-				new CustomEvent(CUSTOM_EVENT_TYPE.RANGE_WORDS, { detail: [word] }),
-			)
+		try {
+			if (next) {
+				await collectWord(word)
+				// the background also broadcasts, but the local event applies
+				// the mask without waiting for that round-trip
+				document.dispatchEvent(
+					new CustomEvent(CUSTOM_EVENT_TYPE.RANGE_WORDS, { detail: [word] }),
+				)
+			} else {
+				await removeWord(word)
+				document.dispatchEvent(
+					new CustomEvent(CUSTOM_EVENT_TYPE.RANGE_WORDS_REMOVE, {
+						detail: [word],
+					}),
+				)
+			}
+		} catch (error) {
+			// the API call failed — the collected state is unchanged, so
+			// refetching would show stale data anyway
+			console.error("收藏操作失败:", error)
+			return
 		}
 		fetchWordCollected()
 	}

@@ -5,6 +5,7 @@ import {
 	isOwnNode,
 	matchWordsIndices,
 	onMaskClickCapture,
+	unrangeWords,
 } from "../range"
 
 function fakeElement(options: { own?: boolean } = {}) {
@@ -74,6 +75,21 @@ describe("matchWordsIndices", () => {
 
 	test("empty word lists match nothing", () => {
 		expect(matchWordsIndices("anything at all", [])).toEqual([])
+	})
+
+	test("a prefix word must not cut a longer word short", () => {
+		// "c" ends in a word char but "c++" continues with a non-word char, so
+		// the shorter branch's \b succeeds and swallows the match first —
+		// branches must be ordered longest-first
+		expect(matchWordsIndices("write c++ today", ["c", "c++"])).toEqual([
+			{ word: "c++", start: 6 },
+		])
+	})
+
+	test("a longer word wins even when listed after its prefix", () => {
+		expect(matchWordsIndices("running fast", ["run", "running"])).toEqual([
+			{ word: "running", start: 0 },
+		])
 	})
 })
 
@@ -217,5 +233,63 @@ describe("onMaskClickCapture", () => {
 
 		expect(e.preventDefault).toHaveBeenCalled()
 		expect(dispatch).not.toHaveBeenCalled()
+	})
+})
+
+describe("unrangeWords", () => {
+	afterEach(() => {
+		vi.unstubAllGlobals()
+	})
+
+	function makeMask(word: string) {
+		const parent = { normalize: vi.fn() }
+		const mask = {
+			dataset: { word },
+			textContent: word,
+			parentNode: parent,
+			replaceWith: vi.fn(),
+		}
+		return { mask, parent }
+	}
+
+	function stubMasks(...masks: ReturnType<typeof makeMask>[]) {
+		vi.stubGlobal("document", {
+			createTextNode: (text: string) => ({ textContent: text }),
+			querySelectorAll: vi.fn(() => masks.map(({ mask }) => mask)),
+		})
+	}
+
+	test("unwraps matching masks case-insensitively and normalizes only their parents", () => {
+		const kept = makeMask("hello")
+		const removed = makeMask("World")
+		stubMasks(kept, removed)
+
+		unrangeWords(["world"])
+
+		// the wrapper is replaced by a plain text node, and the parent's split
+		// text fragments are merged so future scans see whole words again
+		expect(removed.mask.replaceWith).toHaveBeenCalledTimes(1)
+		expect(removed.parent.normalize).toHaveBeenCalledTimes(1)
+		expect(kept.mask.replaceWith).not.toHaveBeenCalled()
+		expect(kept.parent.normalize).not.toHaveBeenCalled()
+	})
+
+	test("masks of other words are left untouched", () => {
+		const other = makeMask("river")
+		stubMasks(other)
+
+		unrangeWords(["mountain"])
+
+		expect(other.mask.replaceWith).not.toHaveBeenCalled()
+		expect(other.parent.normalize).not.toHaveBeenCalled()
+	})
+
+	test("empty word list is a no-op", () => {
+		const mask = makeMask("hello")
+		stubMasks(mask)
+
+		unrangeWords([])
+
+		expect(mask.mask.replaceWith).not.toHaveBeenCalled()
 	})
 })

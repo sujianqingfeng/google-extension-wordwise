@@ -52,6 +52,16 @@ export default function Query({
 		left: left ?? initialPosition.left,
 	}))
 	const [isDragging, setIsDragging] = useState(false)
+	// unbinds the document-level drag listeners if the panel is torn down
+	// mid-drag (Escape / outside click) before mouseup fires
+	const dragCleanupRef = useRef<(() => void) | null>(null)
+
+	useEffect(
+		() => () => {
+			dragCleanupRef.current?.()
+		},
+		[],
+	)
 
 	useOutsideClick({
 		ref: queryRef as RefObject<Element>,
@@ -89,6 +99,7 @@ export default function Query({
 		}
 
 		const onDragEnd = () => {
+			dragCleanupRef.current = null
 			setIsDragging(false)
 			document.removeEventListener("mousemove", onDrag)
 			document.removeEventListener("mouseup", onDragEnd)
@@ -96,6 +107,7 @@ export default function Query({
 
 		document.addEventListener("mousemove", onDrag)
 		document.addEventListener("mouseup", onDragEnd)
+		dragCleanupRef.current = onDragEnd
 	}
 
 	return (

@@ -11,10 +11,17 @@ export default function Auth({ success }: AuthProps) {
 
 	const onAuthClick = async () => {
 		setLoading(true)
-		const bgs = createBackgroundMessage()
-		await bgs.auth()
-		setLoading(false)
-		success()
+		// the user closing the Google window or a failed token exchange must
+		// not leave the button spinning forever — this resets it either way
+		try {
+			const bgs = createBackgroundMessage()
+			await bgs.auth()
+			success()
+		} catch (error) {
+			console.error("登录失败:", error)
+		} finally {
+			setLoading(false)
+		}
 	}
 
 	return (

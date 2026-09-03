@@ -35,12 +35,6 @@ export default function Phonetic({
 		enabled: false,
 	})
 
-	const { refetch: fetchAudioBase64FromEdgeTTS } = useQuery({
-		queryKey: ["edge-tts", word],
-		queryFn: () => bgs.fetchAudioBase64FromEdgeTTS(word),
-		enabled: false,
-	})
-
 	const onPlay = useCallback(async () => {
 		const { error, data } = await fetchAudioBase64FromDictionUrl()
 		if (error || !data) {
@@ -48,14 +42,6 @@ export default function Phonetic({
 		}
 		playAudioByUrl(data)
 	}, [fetchAudioBase64FromDictionUrl])
-
-	const onEdgeTTSPlay = useCallback(async () => {
-		const { error, data } = await fetchAudioBase64FromEdgeTTS()
-		if (error || !data) {
-			return
-		}
-		playAudioByUrl(data)
-	}, [fetchAudioBase64FromEdgeTTS])
 
 	const onToggle = () => {
 		setCurrentType((prev) => (prev === "uk" ? "us" : "uk"))

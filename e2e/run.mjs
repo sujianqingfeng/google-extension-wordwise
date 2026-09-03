@@ -286,7 +286,7 @@ function exec(cmd, args, label, env = {}) {
 	console.log(`  · ${label} ok`)
 }
 
-async function cleanup(extensionId, server, pageUrl) {
+async function cleanup(extensionId, server, _pageUrl) {
 	console.log("\ncleanup:")
 	try {
 		server?.close()

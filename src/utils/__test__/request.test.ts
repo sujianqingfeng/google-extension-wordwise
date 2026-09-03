@@ -49,7 +49,8 @@ describe("token refresh on 401", () => {
 				})
 			}
 
-			authHeader = init?.headers?.authorization as string | undefined
+			authHeader = (init?.headers as Record<string, string> | undefined)
+				?.authorization
 			return authHeader === "Bearer new-access"
 				? jsonResponse(200, { data: "done" })
 				: jsonResponse(401, null)
@@ -85,7 +86,10 @@ describe("token refresh on 401", () => {
 		// both requests were retried, not dropped
 		expect(apiCalls).toHaveLength(4)
 		for (const call of apiCalls.slice(2)) {
-			expect(call.init?.headers?.authorization).toBe("Bearer new-access")
+			expect(
+				(call.init?.headers as Record<string, string> | undefined)
+					?.authorization,
+			).toBe("Bearer new-access")
 		}
 	})
 
@@ -184,6 +188,24 @@ describe("readResponseSSELine", () => {
 
 		expect(snapshots.at(-2)).toBe("一\n二")
 		expect(snapshots.at(-1)).toBe("done:一\n二")
+	})
+
+	test("multi-byte characters split across chunk boundaries are reassembled", async () => {
+		const char = new TextEncoder().encode("中")
+		const response = sseResponse([char.slice(0, 1), char.slice(1)])
+
+		const snapshots: string[] = []
+		await loadModule().then(({ readResponseSSELine }) =>
+			readResponseSSELine(
+				response,
+				(buff) => snapshots.push(buff),
+				(finalBuff) => snapshots.push(`done:${finalBuff}`),
+			),
+		)
+
+		// stream-mode decoding must carry the split bytes, and the final
+		// flush must not drop them
+		expect(snapshots.at(-1)).toBe("done:中")
 	})
 
 	test("mid-stream errors propagate so callers can send their own failure message", async () => {

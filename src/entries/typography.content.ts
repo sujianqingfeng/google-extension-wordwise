@@ -1,7 +1,8 @@
 import { EXCLUDE_TAG_ELEMENTS } from "@/constants"
-import { createBackgroundMessage } from "@/messaging/background"
+import { createBackgroundMessage, waitForUser } from "@/messaging/background"
+import { onBackgroundMessage } from "@/messaging/content"
 import "./core/typography.css"
-import { throttle } from "@/utils"
+import { debounce, throttle } from "@/utils"
 
 function isInlineElement(el: Element) {
 	// computed display catches styled spans / custom elements a tag list would miss
@@ -35,30 +36,48 @@ function removeElement(container: HTMLElement, el: HTMLElement | null) {
 	}
 }
 
+// double-clicks on the "W" bubble must not stack two translation paragraphs —
+// a target with a request in flight is guarded until that request settles
+const pendingTargets = new WeakSet<HTMLElement>()
+
 async function onTranslateTypography(target: HTMLElement) {
-	const cloneTargetEl = target.cloneNode(true) as HTMLElement
-	const hoverEls = cloneTargetEl.querySelectorAll(".word-wise-typography-hover")
-	for (const el of hoverEls) {
-		el.remove()
-	}
-
-	const text = cloneTargetEl.textContent?.trim()
-	if (!text) {
+	if (pendingTargets.has(target)) {
 		return
 	}
+	pendingTargets.add(target)
 
-	const parent = target.parentElement
-	if (!parent) {
-		return
+	try {
+		const cloneTargetEl = target.cloneNode(true) as HTMLElement
+		const hoverEls = cloneTargetEl.querySelectorAll(
+			".word-wise-typography-hover",
+		)
+		for (const el of hoverEls) {
+			el.remove()
+		}
+
+		const text = cloneTargetEl.textContent?.trim()
+		if (!text) {
+			return
+		}
+
+		const parent = target.parentElement
+		if (!parent) {
+			return
+		}
+
+		const bgs = createBackgroundMessage()
+		const result = await bgs.fetchTranslate({ text, provider: "deepL" })
+
+		target.classList.add("word-wise-typography-original")
+		cloneTargetEl.classList.add("word-wise-typography-translation")
+		cloneTargetEl.textContent = result
+		parent.insertBefore(cloneTargetEl, target.nextSibling)
+	} catch (error) {
+		// nothing was inserted, the original paragraph stays readable
+		console.error("wordwise: paragraph translation failed", error)
+	} finally {
+		pendingTargets.delete(target)
 	}
-
-	const bgs = createBackgroundMessage()
-	const result = await bgs.fetchTranslate({ text, provider: "deepL" })
-
-	target.classList.add("word-wise-typography-original")
-	cloneTargetEl.classList.add("word-wise-typography-translation")
-	cloneTargetEl.textContent = result
-	parent.insertBefore(cloneTargetEl, target.nextSibling)
 }
 
 let globalTranslatorElement: HTMLDivElement | null = null
@@ -195,21 +214,32 @@ export default defineContentScript({
 	cssInjectionMode: "manifest",
 	main: async () => {
 		const bgs = createBackgroundMessage()
-		const user = await bgs.getUser()
 
-		if (!user) {
-			return
+		let initialized = false
+		const init = async () => {
+			if (initialized) {
+				return
+			}
+			const user = await waitForUser(bgs)
+			if (!user) {
+				return
+			}
+			initialized = true
+
+			// maxWait keeps continuous mouse movement from postponing the hover
+			// indicator forever
+			document.addEventListener(
+				"mousemove",
+				debounce(onTypographyMove, 500, { maxWait: 1000 }),
+			)
+			document.addEventListener(
+				"scroll",
+				throttle(scrollToRemoveExtraElement, 500),
+			)
 		}
 
-		// maxWait keeps continuous mouse movement from postponing the hover
-		// indicator forever
-		document.addEventListener(
-			"mousemove",
-			debounce(onTypographyMove, 500, { maxWait: 1000 }),
-		)
-		document.addEventListener(
-			"scroll",
-			throttle(scrollToRemoveExtraElement, 500),
-		)
+		// logging in on the sidebar enables this page without a reload
+		onBackgroundMessage("userChanged", () => init())
+		await init()
 	},
 })

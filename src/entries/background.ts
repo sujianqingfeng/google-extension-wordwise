@@ -70,12 +70,19 @@ const DEV_MOCK_WORDS: IWordRespItem[] = [
 ].map((word, index) => ({ id: `mock-${index}`, word }))
 
 async function fetchContext(context: BackgroundContext) {
-	context.user = await fetchUser()
-	context.words = await fetchAllWords()
-	if (__WORDWISE_DEV_MOCK__ && !context.user) {
+	if (__WORDWISE_DEV_MOCK__) {
+		// mock builds never carry a real token, so the network calls below
+		// would 401 and could stall past the ready timeout — leaving pages
+		// with a null user and no features. serve the mock account instantly
+		// and skip the doomed requests entirely.
 		context.user = DEV_MOCK_USER
 		context.words = DEV_MOCK_WORDS
+		return
 	}
+	context.user = await fetchUser()
+	// logged-out: skip the word fetch — /word/all would 401 and trigger a
+	// pointless refresh round-trip on every service worker start
+	context.words = context.user ? await fetchAllWords() : []
 }
 
 export default defineBackground(() => {
