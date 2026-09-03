@@ -4,6 +4,7 @@ import {
 	CUSTOM_EVENT_TYPE,
 	ENABLE_TAG_ELEMENTS,
 	EXCLUDE_TAG_ELEMENTS,
+	MASK_CLASS_NAME,
 	QUERY_ROOT_ID,
 	SIDE_ROOT_ID,
 } from "../../constants"
@@ -154,7 +155,7 @@ function wrapMatchesInTextNode(node: Text, words: string[]) {
 		if (start > cursor) {
 			fragment.appendChild(document.createTextNode(text.slice(cursor, start)))
 		}
-		const wrapper = createWrapperElement({ word, onClick: maskWordClickEvent })
+		const wrapper = createWrapperElement({ word })
 		wrapper.appendChild(document.createTextNode(word))
 		fragment.appendChild(wrapper)
 		cursor = start + word.length
@@ -166,30 +167,65 @@ function wrapMatchesInTextNode(node: Text, words: string[]) {
 	node.replaceWith(fragment)
 }
 
-function createWrapperElement({ word, onClick }: WrapperElementOptions) {
+function createWrapperElement({ word }: WrapperElementOptions) {
 	const strong = document.createElement("span")
-	strong.className = "word-wise-mask"
+	strong.className = MASK_CLASS_NAME
 	strong.dataset.word = word
 	strong.dataset.wordWise = "true"
-	strong.addEventListener("click", onClick)
 	return strong
 }
 
-function maskWordClickEvent(e: MouseEvent) {
-	const target = e.target as HTMLElement
-	const word = target.dataset.word
+// ---------------------------------------------------------------------------
+// mask click interception
+//
+// a click on a masked word must belong to wordwise alone, otherwise the same
+// click reaches the page's own handlers (React root, jQuery, inline onclick)
+// or an <a> default navigation and the content behind the panel changes. the
+// capture-phase delegate runs before every bubble listener and preventDefault
+// cancels default actions, so opening the query panel never mutates the page.
+// cmd+click is the escape hatch: it passes through untouched for following the
+// link or triggering the page's own behavior.
+// ---------------------------------------------------------------------------
+
+const MASK_SELECTOR = `.${MASK_CLASS_NAME}`
+
+export function onMaskClickCapture(e: MouseEvent) {
+	if (e.metaKey) {
+		return
+	}
+	const target = e.target as Element | null
+	const mask = target?.closest?.<HTMLElement>(MASK_SELECTOR)
+	if (!mask) {
+		return
+	}
+
+	e.preventDefault()
+	e.stopPropagation()
+
+	const word = mask.dataset.word
 	if (!word) {
 		return
 	}
-	const rect = target.getBoundingClientRect()
 	document.dispatchEvent(
 		new CustomEvent<MaskClickEventDetail>(CUSTOM_EVENT_TYPE.MASK_CLICK_EVENT, {
 			detail: {
 				word,
-				rect,
+				rect: mask.getBoundingClientRect(),
 			},
 		}),
 	)
+}
+
+let maskClickInterceptorInstalled = false
+
+function ensureMaskClickInterceptor() {
+	if (maskClickInterceptorInstalled) {
+		return
+	}
+	maskClickInterceptorInstalled = true
+	// one delegated listener instead of one per wrapper: pages can carry
+	// thousands of masks
+	document.addEventListener("click", onMaskClickCapture, true)
 }
 
 // ---------------------------------------------------------------------------
@@ -392,6 +428,7 @@ export function rangeWords(words: string[]) {
 	// mid-session additions (query panel) must not drop already-active words
 	activeWords = Array.from(new Set([...activeWords, ...words]))
 
+	ensureMaskClickInterceptor()
 	ensureMutationObserver()
 	ensureUrlHooks()
 	if (initialized) {

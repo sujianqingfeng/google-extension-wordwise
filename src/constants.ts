@@ -33,6 +33,10 @@ export const EXCLUDE_TAG_ELEMENTS = [
 	"pre",
 ]
 
+// class of the span wrapping each masked word; the click interceptor and the
+// query panel's outside-click check both key off it
+export const MASK_CLASS_NAME = "word-wise-mask"
+
 export const QUERY_ROOT_ID = "wordwise-query-crx-root"
 export const SIDE_ROOT_ID = "wordwise-side-crx-root"
 

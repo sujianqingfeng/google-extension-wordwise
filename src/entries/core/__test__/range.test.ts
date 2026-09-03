@@ -1,8 +1,10 @@
-import { describe, expect, test } from "vitest"
+import { afterEach, describe, expect, test, vi } from "vitest"
+import { CUSTOM_EVENT_TYPE } from "@/constants"
 import {
 	collectCandidateElements,
 	isOwnNode,
 	matchWordsIndices,
+	onMaskClickCapture,
 } from "../range"
 
 function fakeElement(options: { own?: boolean } = {}) {
@@ -135,5 +137,85 @@ describe("isOwnNode", () => {
 	test("detached text nodes are treated as own nodes", () => {
 		const textNode = { nodeType: 3, parentElement: null } as unknown as Node
 		expect(isOwnNode(textNode)).toBe(true)
+	})
+})
+
+describe("onMaskClickCapture", () => {
+	afterEach(() => {
+		vi.unstubAllGlobals()
+	})
+
+	function makeMask(word = "hello") {
+		const mask = {
+			dataset: { word },
+			getBoundingClientRect: () => ({ top: 10, left: 20 }),
+			closest: (selector: string) =>
+				selector === ".word-wise-mask" ? mask : null,
+		}
+		return mask
+	}
+
+	function makeEvent(overrides: { metaKey?: boolean; target?: unknown } = {}) {
+		return {
+			metaKey: false,
+			preventDefault: vi.fn(),
+			stopPropagation: vi.fn(),
+			target: makeMask(),
+			...overrides,
+		} as unknown as MouseEvent
+	}
+
+	function stubDocument() {
+		const dispatch = vi.fn()
+		vi.stubGlobal("document", { dispatchEvent: dispatch })
+		return dispatch
+	}
+
+	test("intercepts: swallows the click and dispatches the query event", () => {
+		const dispatch = stubDocument()
+
+		const e = makeEvent()
+		onMaskClickCapture(e)
+
+		// both are required: stopPropagation starves page bubble handlers,
+		// preventDefault cancels <a> navigation
+		expect(e.preventDefault).toHaveBeenCalled()
+		expect(e.stopPropagation).toHaveBeenCalled()
+		expect(dispatch).toHaveBeenCalledTimes(1)
+		const event = dispatch.mock.calls[0][0]
+		expect(event.type).toBe(CUSTOM_EVENT_TYPE.MASK_CLICK_EVENT)
+		expect(event.detail.word).toBe("hello")
+	})
+
+	test("cmd+click passes through untouched so the page keeps its click", () => {
+		const dispatch = stubDocument()
+
+		const e = makeEvent({ metaKey: true })
+		onMaskClickCapture(e)
+
+		expect(e.preventDefault).not.toHaveBeenCalled()
+		expect(e.stopPropagation).not.toHaveBeenCalled()
+		expect(dispatch).not.toHaveBeenCalled()
+	})
+
+	test("clicks outside masks are ignored", () => {
+		const dispatch = stubDocument()
+
+		const e = makeEvent({ target: { closest: () => null } })
+		onMaskClickCapture(e)
+
+		expect(e.preventDefault).not.toHaveBeenCalled()
+		expect(e.stopPropagation).not.toHaveBeenCalled()
+		expect(dispatch).not.toHaveBeenCalled()
+	})
+
+	test("a mask without a word is swallowed but dispatches nothing", () => {
+		const dispatch = stubDocument()
+
+		const e = makeEvent({ target: makeMask("") })
+		onMaskClickCapture(e)
+
+		expect(e.preventDefault).toHaveBeenCalled()
+		expect(dispatch).not.toHaveBeenCalled()
 	})
 })

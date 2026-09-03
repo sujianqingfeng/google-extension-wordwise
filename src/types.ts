@@ -7,7 +7,6 @@ export type MaskClickEventDetail = {
 
 export type WrapperElementOptions = {
 	word: string
-	onClick: (e: MouseEvent) => void
 }
 
 export type BackgroundFunctions = {
