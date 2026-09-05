@@ -130,10 +130,9 @@ export default function Query({
 					<div
 						className={`
 							w-full h-8 flex items-center justify-center relative
-							bg-gradient-to-r from-gray-50/80 to-gray-100/80 dark:from-gray-800/80 dark:to-gray-700/80
+							ww-gradient-subtle
 							border-b border-gray-200/30 dark:border-gray-700/30
 							cursor-grab active:cursor-grabbing
-							hover:from-gray-100/80 hover:to-gray-200/80 dark:hover:from-gray-700/80 dark:hover:to-gray-600/80
 							transition-all duration-200
 							${isDragging ? "bg-primary-100/50 dark:bg-primary-900/50" : ""}
 						`}

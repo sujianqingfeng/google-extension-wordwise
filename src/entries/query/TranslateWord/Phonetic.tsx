@@ -68,7 +68,7 @@ export default function Phonetic({
 					<button
 						type="button"
 						onClick={onToggle}
-						className="px-1.5 py-0.5 bg-gradient-to-r from-amber-50 to-amber-100 dark:from-amber-900/20 dark:to-amber-800/20 rounded border border-amber-200/50 dark:border-amber-700/50 hover:bg-amber-100 dark:hover:bg-amber-800/30 transition-colors flex items-center gap-1"
+						className="px-1.5 py-0.5 ww-gradient-chip-amber rounded border border-amber-200/50 dark:border-amber-700/50 hover:bg-amber-100 dark:hover:bg-amber-800/30 transition-colors flex items-center gap-1"
 					>
 						<span className="text-xs text-amber-800 dark:text-amber-300 font-mono">
 							/{phonetic}/

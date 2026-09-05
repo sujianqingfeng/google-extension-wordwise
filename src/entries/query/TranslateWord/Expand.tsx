@@ -52,9 +52,9 @@ export default function Expand({ forms = [], word }: ExpandProps) {
 		<div>
 			{/* 单词变形展开区域 */}
 			{isExpand && forms.length > 0 && (
-				<div className="px-3 py-2 bg-gradient-to-r from-indigo-50/30 via-white to-indigo-50/30 dark:from-indigo-900/10 dark:via-slate-800 dark:to-indigo-900/10 border-t border-gray-200/30 dark:border-gray-700/30">
+				<div className="px-3 py-2 ww-gradient-header-indigo border-t border-gray-200/30 dark:border-gray-700/30">
 					<div className="flex items-center gap-2 mb-2">
-						<div className="w-4 h-4 bg-gradient-to-br from-indigo-400 to-indigo-600 rounded flex items-center justify-center">
+						<div className="w-4 h-4 ww-gradient-icon-indigo rounded flex items-center justify-center">
 							<BookOpenCheck size={10} className="text-white" />
 						</div>
 						<h4 className="text-xs font-medium text-gray-900 dark:text-gray-100">
@@ -73,7 +73,7 @@ export default function Expand({ forms = [], word }: ExpandProps) {
 			<Analyze result={analyzeResult} />
 
 			{/* 底部操作区域 */}
-			<div className="px-3 py-2 bg-gradient-to-r from-gray-50/80 to-gray-100/80 dark:from-gray-800/80 dark:to-gray-700/80 border-t border-gray-200/30 dark:border-gray-700/30">
+			<div className="px-3 py-2 ww-gradient-subtle border-t border-gray-200/30 dark:border-gray-700/30">
 				<div className="flex justify-end items-center gap-1.5">
 					{/* 语法分析按钮 */}
 					<button

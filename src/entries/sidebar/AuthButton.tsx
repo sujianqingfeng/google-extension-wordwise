@@ -34,7 +34,7 @@ export default function AuthButton({
 				}
 			>
 				{/* 背景光效 */}
-				<div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out" />
+				<div className="absolute inset-0 ww-gradient-shine -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out" />
 
 				{/* 按钮文本 */}
 				<span className="relative font-medium tracking-wide">
@@ -42,7 +42,7 @@ export default function AuthButton({
 				</span>
 
 				{/* 底部装饰线 */}
-				<div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-white/30 to-transparent" />
+				<div className="absolute bottom-0 left-0 right-0 h-0.5 ww-gradient-shine-thin" />
 			</Button>
 
 			{/* 提示文本 */}

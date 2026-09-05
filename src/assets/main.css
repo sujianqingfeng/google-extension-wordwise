@@ -120,6 +120,263 @@
 	@apply bg-gray-300 dark:bg-gray-600 rounded-full hover:bg-gray-400 dark:hover:bg-gray-500;
 }
 
+/*
+ * 面板渐变必须用字面量写死,不能走 Tailwind 的 bg-gradient-* 工具类:
+ * 那条路径依赖 --tw-gradient-* 变量链,而宿主页面(如 Tailwind v4 站点)的
+ * @property 注册是全文档生效、会穿透 shadow DOM 的 —— 它把 v3 写入的
+ * "<颜色> var(--tw-gradient-from-position)" 判为非法,回退成透明色,
+ * 导致单词标题(渐变文字)和图标在部分网站上完全隐形。
+ */
+.ww-gradient-icon-primary {
+	background-image: linear-gradient(135deg, #f472b6, #db2777);
+}
+
+.ww-gradient-icon-blue {
+	background-image: linear-gradient(135deg, #60a5fa, #2563eb);
+}
+
+.ww-gradient-icon-indigo {
+	background-image: linear-gradient(135deg, #818cf8, #4f46e5);
+}
+
+.ww-gradient-word-title {
+	background-image: linear-gradient(to right, #0f172a, #475569);
+	-webkit-background-clip: text;
+	background-clip: text;
+	color: transparent;
+}
+
+.ww-gradient-header-primary {
+	background-image: linear-gradient(
+		to right,
+		rgba(253, 242, 248, 0.3),
+		#fff,
+		rgba(253, 242, 248, 0.3)
+	);
+}
+
+.ww-gradient-header-blue {
+	background-image: linear-gradient(
+		to right,
+		rgba(239, 246, 255, 0.3),
+		#fff,
+		rgba(239, 246, 255, 0.3)
+	);
+}
+
+.ww-gradient-header-indigo {
+	background-image: linear-gradient(
+		to right,
+		rgba(238, 242, 255, 0.3),
+		#fff,
+		rgba(238, 242, 255, 0.3)
+	);
+}
+
+.ww-gradient-subtle {
+	background-image: linear-gradient(
+		to right,
+		rgba(248, 250, 252, 0.8),
+		rgba(241, 245, 249, 0.8)
+	);
+}
+
+.ww-gradient-subtle:hover {
+	background-image: linear-gradient(
+		to right,
+		rgba(241, 245, 249, 0.8),
+		rgba(226, 232, 240, 0.8)
+	);
+}
+
+.ww-gradient-chip-amber {
+	background-image: linear-gradient(to right, #fffbeb, #fef3c7);
+}
+
+.ww-gradient-chip-emerald {
+	background-image: linear-gradient(to right, #ecfdf5, #d1fae5);
+}
+
+.ww-gradient-chip-emerald:hover {
+	background-image: linear-gradient(to right, #d1fae5, #a7f3d0);
+}
+
+.ww-gradient-btn-primary {
+	background-image: linear-gradient(to right, #de7897, #db2777);
+}
+
+.ww-gradient-btn-primary:hover {
+	background-image: linear-gradient(to right, #db2777, #be185d);
+}
+
+.ww-gradient-btn-danger {
+	background-image: linear-gradient(to right, #ef4444, #dc2626);
+}
+
+.ww-gradient-btn-danger:hover {
+	background-image: linear-gradient(to right, #dc2626, #b91c1c);
+}
+
+.ww-gradient-wordmark {
+	background-image: linear-gradient(to right, #db2777, #de7897);
+	-webkit-background-clip: text;
+	background-clip: text;
+	color: transparent;
+}
+
+.ww-gradient-hover-soft {
+	background-image: linear-gradient(135deg, #f8fafc, #f1f5f9);
+}
+
+.ww-gradient-shine {
+	background-image: linear-gradient(
+		to right,
+		transparent,
+		rgba(255, 255, 255, 0.2),
+		transparent
+	);
+}
+
+.ww-gradient-shine-thin {
+	background-image: linear-gradient(
+		to right,
+		transparent,
+		rgba(255, 255, 255, 0.3),
+		transparent
+	);
+}
+
+.ww-gradient-bg-primary-soft {
+	background-image: linear-gradient(
+		135deg,
+		rgba(253, 242, 248, 0.3),
+		transparent,
+		rgba(252, 231, 243, 0.2)
+	);
+}
+
+.ww-gradient-line {
+	background-image: linear-gradient(
+		to right,
+		transparent,
+		#e2e8f0,
+		transparent
+	);
+}
+
+.ww-gradient-meter {
+	background-image: linear-gradient(
+		to right,
+		rgba(251, 207, 232, 0.2),
+		rgba(249, 168, 212, 0.3),
+		rgba(251, 207, 232, 0.2)
+	);
+}
+
+@media (prefers-color-scheme: dark) {
+	.ww-gradient-word-title {
+		background-image: linear-gradient(to right, #f1f5f9, #cbd5e1);
+	}
+
+	.ww-gradient-header-primary {
+		background-image: linear-gradient(
+			to right,
+			rgba(131, 24, 67, 0.1),
+			#1e293b,
+			rgba(131, 24, 67, 0.1)
+		);
+	}
+
+	.ww-gradient-header-blue {
+		background-image: linear-gradient(
+			to right,
+			rgba(30, 58, 138, 0.1),
+			#1e293b,
+			rgba(30, 58, 138, 0.1)
+		);
+	}
+
+	.ww-gradient-header-indigo {
+		background-image: linear-gradient(
+			to right,
+			rgba(49, 46, 129, 0.1),
+			#1e293b,
+			rgba(49, 46, 129, 0.1)
+		);
+	}
+
+	.ww-gradient-subtle {
+		background-image: linear-gradient(
+			to right,
+			rgba(30, 41, 59, 0.8),
+			rgba(51, 65, 85, 0.8)
+		);
+	}
+
+	.ww-gradient-subtle:hover {
+		background-image: linear-gradient(
+			to right,
+			rgba(51, 65, 85, 0.8),
+			rgba(71, 85, 105, 0.8)
+		);
+	}
+
+	.ww-gradient-chip-amber {
+		background-image: linear-gradient(
+			to right,
+			rgba(120, 53, 15, 0.2),
+			rgba(146, 64, 14, 0.2)
+		);
+	}
+
+	.ww-gradient-chip-emerald {
+		background-image: linear-gradient(
+			to right,
+			rgba(6, 78, 59, 0.2),
+			rgba(6, 95, 70, 0.2)
+		);
+	}
+
+	.ww-gradient-chip-emerald:hover {
+		background-image: linear-gradient(
+			to right,
+			rgba(6, 95, 70, 0.3),
+			rgba(4, 120, 87, 0.3)
+		);
+	}
+
+	.ww-gradient-hover-soft {
+		background-image: linear-gradient(135deg, #1e293b, #334155);
+	}
+
+	.ww-gradient-line {
+		background-image: linear-gradient(
+			to right,
+			transparent,
+			#334155,
+			transparent
+		);
+	}
+
+	.ww-gradient-bg-primary-soft {
+		background-image: linear-gradient(
+			135deg,
+			rgba(131, 24, 67, 0.2),
+			transparent,
+			rgba(157, 23, 77, 0.1)
+		);
+	}
+
+	.ww-gradient-meter {
+		background-image: linear-gradient(
+			to right,
+			rgba(157, 23, 77, 0.2),
+			rgba(219, 39, 119, 0.3),
+			rgba(157, 23, 77, 0.2)
+		);
+	}
+}
+
 /* 动画效果 */
 .animate-in {
 	@apply animate-fade-in;

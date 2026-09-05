@@ -10,7 +10,7 @@ export default function SideHeader({ onClose }: SideHeaderProps) {
 			{/* Logo和标题 */}
 			<div className="flex items-center gap-3">
 				<div className="relative">
-					<div className="w-10 h-10 bg-gradient-to-br from-primary-400 to-primary-600 rounded-xl flex items-center justify-center shadow-soft hover-glow">
+					<div className="w-10 h-10 ww-gradient-icon-primary rounded-xl flex items-center justify-center shadow-soft hover-glow">
 						<Sparkles size={20} className="text-white" />
 					</div>
 					{/* 装饰性光点 */}
@@ -18,7 +18,7 @@ export default function SideHeader({ onClose }: SideHeaderProps) {
 				</div>
 
 				<div>
-					<h1 className="text-xl font-bold font-sassy-frass tracking-wide bg-gradient-to-r from-primary-600 to-primary-500 bg-clip-text text-transparent">
+					<h1 className="text-xl font-bold font-sassy-frass tracking-wide ww-gradient-wordmark">
 						Wordwise
 					</h1>
 					<p className="text-xs text-gray-500 dark:text-gray-400 font-medium">
@@ -40,7 +40,7 @@ export default function SideHeader({ onClose }: SideHeaderProps) {
 				/>
 
 				{/* 悬浮提示背景 */}
-				<div className="absolute inset-0 rounded-lg bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700 opacity-0 group-hover:opacity-100 transition-opacity duration-200 -z-10" />
+				<div className="absolute inset-0 rounded-lg ww-gradient-hover-soft opacity-0 group-hover:opacity-100 transition-opacity duration-200 -z-10" />
 			</button>
 		</header>
 	)

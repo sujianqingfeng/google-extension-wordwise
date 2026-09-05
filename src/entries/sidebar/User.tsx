@@ -16,10 +16,10 @@ export default function User({ avatar, name, email }: UserProps) {
 				<div className="flex flex-col items-center mb-4">
 					<div className="relative group">
 						{/* 头像背景光环 */}
-						<div className="absolute inset-0 bg-gradient-to-br from-primary-400 to-primary-600 rounded-full blur-md opacity-20 group-hover:opacity-30 transition-opacity duration-300" />
+						<div className="absolute inset-0 ww-gradient-icon-primary rounded-full blur-md opacity-20 group-hover:opacity-30 transition-opacity duration-300" />
 
 						{/* 头像容器 */}
-						<div className="relative w-20 h-20 rounded-full p-1 bg-gradient-to-br from-primary-400 to-primary-600 shadow-soft">
+						<div className="relative w-20 h-20 rounded-full p-1 ww-gradient-icon-primary shadow-soft">
 							<img
 								src={avatar}
 								alt={`${name}的头像`}

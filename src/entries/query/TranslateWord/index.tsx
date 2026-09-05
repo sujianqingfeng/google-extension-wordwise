@@ -92,18 +92,18 @@ export default function TranslateWord({ word: _word }: TranslateWordProps) {
 	return (
 		<div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm rounded-lg shadow-soft ring-1 ring-gray-200/50 dark:ring-gray-700/50 overflow-hidden hover-glow animate-slide-in-up">
 			{/* 头部区域 */}
-			<div className="px-3 py-2 bg-gradient-to-r from-primary-50/30 via-white to-primary-50/30 dark:from-primary-900/10 dark:via-slate-800 dark:to-primary-900/10 border-b border-gray-200/30 dark:border-gray-700/30">
+			<div className="px-3 py-2 ww-gradient-header-primary border-b border-gray-200/30 dark:border-gray-700/30">
 				<div className="flex justify-between items-start gap-2">
 					<div className="flex items-start gap-2 flex-1 min-w-0">
 						{/* 单词图标 */}
-						<div className="w-7 h-7 bg-gradient-to-br from-primary-400 to-primary-600 rounded-lg flex items-center justify-center shadow-soft flex-shrink-0 mt-0.5">
+						<div className="w-7 h-7 ww-gradient-icon-primary rounded-lg flex items-center justify-center shadow-soft flex-shrink-0 mt-0.5">
 							<BookOpen size={14} className="text-white" />
 						</div>
 
 						<div className="flex-1 min-w-0">
 							{/* 单词标题和音标 */}
 							<div className="flex items-center gap-2 mb-1">
-								<h1 className="text-lg font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-gray-100 dark:to-gray-300 bg-clip-text text-transparent truncate">
+								<h1 className="text-lg font-bold ww-gradient-word-title truncate">
 									{result?.word}
 								</h1>
 								<Phonetic type="uk" {...result} />

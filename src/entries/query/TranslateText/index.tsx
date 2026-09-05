@@ -86,10 +86,10 @@ function TranslateText({ text }: TranslateTextProps) {
 	return (
 		<div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm rounded-xl shadow-soft ring-1 ring-gray-200/50 dark:ring-gray-700/50 overflow-hidden hover-glow animate-slide-in-up">
 			{/* 头部区域 */}
-			<div className="p-4 bg-gradient-to-r from-blue-50/30 via-white to-blue-50/30 dark:from-blue-900/10 dark:via-slate-800 dark:to-blue-900/10 border-b border-gray-200/30 dark:border-gray-700/30">
+			<div className="p-4 ww-gradient-header-blue border-b border-gray-200/30 dark:border-gray-700/30">
 				<div className="flex items-center gap-3">
 					{/* 翻译图标 */}
-					<div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-blue-600 rounded-xl flex items-center justify-center shadow-soft">
+					<div className="w-10 h-10 ww-gradient-icon-blue rounded-xl flex items-center justify-center shadow-soft">
 						<Languages size={20} className="text-white" />
 					</div>
 
@@ -148,7 +148,7 @@ function TranslateText({ text }: TranslateTextProps) {
 			<Analyze result={analyzeResult} />
 
 			{/* 操作按钮区域 */}
-			<div className="p-4 bg-gradient-to-r from-gray-50/80 to-gray-100/80 dark:from-gray-800/80 dark:to-gray-700/80">
+			<div className="p-4 ww-gradient-subtle">
 				<div className="flex justify-end items-center gap-2">
 					{/* 复制按钮 */}
 					<Button

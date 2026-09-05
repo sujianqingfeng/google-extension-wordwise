@@ -30,7 +30,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 
 		const variantClasses = {
 			primary:
-				"bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white shadow-soft hover:shadow-medium focus:ring-primary-500",
+				"ww-gradient-btn-primary text-white shadow-soft hover:shadow-medium focus:ring-primary-500",
 			secondary:
 				"bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 focus:ring-gray-500",
 			outline:
@@ -38,7 +38,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 			ghost:
 				"bg-transparent hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 focus:ring-gray-500",
 			danger:
-				"bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white shadow-soft hover:shadow-medium focus:ring-red-500",
+				"ww-gradient-btn-danger text-white shadow-soft hover:shadow-medium focus:ring-red-500",
 		}
 
 		const sizeClasses = {
