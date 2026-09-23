@@ -39,6 +39,48 @@
 		</div>
 		<div id="app" class="view"></div>
 
+		<!-- framework-owned text: the node is created once and the reference is
+		     kept forever, exactly like a React text fiber. Updates are written
+		     straight into that node, and the rendered text has to change -->
+		<section id="framework-view">
+			<h2>Framework-owned text</h2>
+			<p id="framework-text">
+				The ancient river runs through the mountain valley, and our team began
+				to discover a panda.
+			</p>
+			<button id="btn-framework-toggle">Show translation</button>
+		</section>
+
+		<script>
+			// captured before any marking runs, the way a framework captures it
+			// at mount
+			const frameworkTextEl = document.getElementById("framework-text")
+			const frameworkTextNode = frameworkTextEl.firstChild
+			const FRAMEWORK_ORIGINAL = frameworkTextNode.nodeValue
+			// the "translation" deliberately shares no word with the original
+			const FRAMEWORK_TRANSLATED =
+				"克劳德在你那边强得离谱吗？我们开始发现山谷里的河流。"
+			let frameworkTranslated = false
+
+			document.getElementById("btn-framework-toggle").onclick = () => {
+				frameworkTranslated = !frameworkTranslated
+				// a plain nodeValue write on the held node — no DOM rebuild
+				frameworkTextNode.nodeValue = frameworkTranslated
+					? FRAMEWORK_TRANSLATED
+					: FRAMEWORK_ORIGINAL
+				document.getElementById("btn-framework-toggle").textContent =
+					frameworkTranslated ? "Show original" : "Show translation"
+			}
+
+			window.frameworkToggleState = () => ({
+				label: document.getElementById("btn-framework-toggle").textContent,
+				text: frameworkTextEl.textContent.trim(),
+				// if this goes false, the page's own update was written into a
+				// node nobody renders
+				heldNodeStillRendered: frameworkTextNode.parentNode !== null,
+			})
+		</script>
+
 		<script>
 			const LIST_HTML = `
   <section id="list-view">
@@ -124,11 +166,18 @@
 				clearInterval(churnTimer)
 				churnTimer = null
 			}
-			window.churnState = () => ({
-				count: churnCount,
-				running: churnTimer !== null,
-				masks: document.querySelectorAll("#churn-view .word-wise-mask").length,
-			})
+			window.churnState = () => {
+				const registry = CSS.highlights.get("word-wise")
+				const view = document.getElementById("churn-view")
+				return {
+					count: churnCount,
+					running: churnTimer !== null,
+					masks: registry
+						? [...registry].filter((r) => view.contains(r.startContainer))
+								.length
+						: 0,
+				}
+			}
 
 			renderList()
 		</script>

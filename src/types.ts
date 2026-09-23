@@ -5,10 +5,6 @@ export type MaskClickEventDetail = {
 	rect: DOMRect
 }
 
-export type WrapperElementOptions = {
-	word: string
-}
-
 export interface BackgroundContext {
 	user: UserResp | null
 	words: IWordRespItem[]

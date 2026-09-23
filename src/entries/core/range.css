@@ -1,4 +1,11 @@
-.word-wise-mask {
-	border-bottom: 2px dashed #de7897;
+/* marks are painted as ranges, so only highlight-eligible properties apply —
+   border-bottom is not one of them; the underline replaces it */
+::highlight(word-wise) {
+	text-decoration: underline dashed #de7897;
+	text-decoration-thickness: 2px;
+	text-underline-offset: 3px;
+}
+
+[data-word-wise-hover] {
 	cursor: pointer;
 }

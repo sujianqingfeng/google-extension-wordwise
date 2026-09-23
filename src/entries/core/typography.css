@@ -25,7 +25,19 @@
 	pointer-events: none;
 }
 
+/* wordwise-owned card under the paragraph; the page's own DOM is untouched.
+   never interactive: it sits over whatever follows the paragraph, so accepting
+   pointer events would swallow clicks meant for the page */
 .word-wise-typography-translation {
+	position: absolute;
+	z-index: 1001;
+	pointer-events: none;
+	box-sizing: border-box;
+	padding: 8px 12px;
+	border-radius: 6px;
+	box-shadow: 0 2px 12px rgba(0, 0, 0, 0.16);
 	font-size: 0.9em;
-	opacity: 0.5;
+	line-height: 1.6;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
 }

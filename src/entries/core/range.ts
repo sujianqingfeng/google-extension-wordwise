@@ -1,12 +1,13 @@
-import type { MaskClickEventDetail, WrapperElementOptions } from "@/types"
-import { debounce } from "@/utils"
+import type { MaskClickEventDetail } from "@/types"
+import { debounce, throttle } from "@/utils"
 import {
 	CUSTOM_EVENT_TYPE,
 	ENABLE_TAG_ELEMENTS,
 	EXCLUDE_TAG_ELEMENTS,
-	MASK_CLASS_NAME,
-	QUERY_ROOT_ID,
-	SIDE_ROOT_ID,
+	HIGHLIGHT_NAME,
+	MASK_HOVER_ATTR,
+	QUERY_SHADOW_TAG_NAME,
+	SIDEBAR_SHADOW_TAG_NAME,
 } from "../../constants"
 
 // words are user input; regex metacharacters ("c++", "c#") must not break or
@@ -33,7 +34,7 @@ function buildWordsRegex(words: string[]) {
 }
 
 // compiling is memoized on the array reference; activeWords keeps one
-// reference between rangeWords calls, so the regex is built once per change
+// reference between calls, so the regex is built once per change
 let cachedWordsRef: string[] | null = null
 let cachedWordsRegex: RegExp | null = null
 function getWordsRegex(words: string[]) {
@@ -64,6 +65,26 @@ export function matchWordsIndices(text: string, words: string[]) {
 	}
 
 	return indices
+}
+
+// caret positions land on the boundary nearest the click, so a click in the
+// right half of a word's last glyph reports the offset *after* it — probing the
+// preceding offset too keeps that click on the word the user aimed at
+export function findWordAtOffset(
+	text: string,
+	offset: number,
+	words: string[],
+) {
+	for (const probe of offset > 0 ? [offset, offset - 1] : [offset]) {
+		const hit = matchWordsIndices(text, words).find(
+			(match) =>
+				probe >= match.start && probe < match.start + match.word.length,
+		)
+		if (hit) {
+			return hit
+		}
+	}
+	return null
 }
 
 function getEnableElement(elements: Element[], { tags }: { tags: string[] }) {
@@ -104,159 +125,104 @@ function isExcludeElement(tagName: string) {
 	return EXCLUDE_TAG_ELEMENTS.includes(tagName.toLowerCase())
 }
 
-export function maskWordsInElement(ele: Element, words: string[]) {
-	if (words.length === 0) {
+// ---------------------------------------------------------------------------
+// highlighting
+//
+// marks are painted through the CSS Custom Highlight API instead of wrapping
+// each word in a <span>. wrapping swapped out text nodes the page framework had
+// created and kept a live reference to, so React's own text updates were
+// written into detached nodes (silently invisible) and any re-render that
+// rebuilt a container wiped every wrapper inside it. a highlight is a plain
+// Range over the existing text node: the page's DOM is never touched, so
+// nothing the framework does can be broken by a mark, and no mark can be
+// destroyed by a re-render — the ranges are simply recomputed after one.
+// ---------------------------------------------------------------------------
+
+const NODE_ELEMENT_NODE = 1
+const NODE_TEXT_NODE = 3
+
+function isHighlightSupported() {
+	return (
+		typeof globalThis.CSS !== "undefined" &&
+		typeof CSS.highlights !== "undefined" &&
+		typeof globalThis.Highlight !== "undefined"
+	)
+}
+
+let highlight: Highlight | null = null
+// registered ranges per text node; a Map (not a WeakMap) because the stale
+// entries have to be swept when a node leaves the document
+const textRanges = new Map<Text, Range[]>()
+
+function getHighlight() {
+	if (!highlight) {
+		highlight = new Highlight()
+		CSS.highlights.set(HIGHLIGHT_NAME, highlight)
+	}
+	return highlight
+}
+
+function clearTextNode(node: Text) {
+	const ranges = textRanges.get(node)
+	if (!ranges) {
+		return
+	}
+	const target = getHighlight()
+	for (const range of ranges) {
+		target.delete(range)
+	}
+	textRanges.delete(node)
+}
+
+// idempotent by construction: the node's ranges are dropped and rebuilt from
+// its current text, so re-running it after any mutation is always safe and no
+// "already processed" marker is needed
+export function applyToTextNode(node: Text) {
+	if (!isHighlightSupported()) {
+		return
+	}
+	clearTextNode(node)
+
+	const text = node.nodeValue
+	if (!text || !activeWords.length) {
 		return
 	}
 
-	// single walk: collect matching text nodes first, then wrap each one —
-	// wrapping mutates the tree, so it must not interleave with the walk
-	const matchingNodes: Text[] = []
-	const treeWalker = document.createTreeWalker(
-		ele,
-		NodeFilter.SHOW_TEXT,
-		(node) => {
-			const parentElement = node.parentElement
-			// exclude some elements and already masked word wise elements
-			if (
-				parentElement &&
-				(isExcludeElement(parentElement.tagName) ||
-					parentElement.dataset.wordWise)
-			) {
-				return NodeFilter.FILTER_REJECT
-			}
-
-			const text = node.textContent
-			if (!text || !getWordsRegex(words).test(text)) {
-				return NodeFilter.FILTER_REJECT
-			}
-
-			return NodeFilter.FILTER_ACCEPT
-		},
-	)
-	while (treeWalker.nextNode()) {
-		matchingNodes.push(treeWalker.currentNode as Text)
-	}
-
-	for (const node of matchingNodes) {
-		wrapMatchesInTextNode(node, words)
-	}
-}
-
-// replaces the text node once with [text, wrapper, text, ...] fragments,
-// covering all of its matches — the old per-match recursion re-walked the
-// whole subtree for every single word
-function wrapMatchesInTextNode(node: Text, words: string[]) {
-	const text = node.textContent ?? ""
-	const matches = matchWordsIndices(text, words)
+	const matches = matchWordsIndices(text, activeWords)
 	if (matches.length === 0) {
 		return
 	}
 
-	const fragment = document.createDocumentFragment()
-	let cursor = 0
+	const target = getHighlight()
+	const ranges: Range[] = []
 	for (const { word, start } of matches) {
-		if (start > cursor) {
-			fragment.appendChild(document.createTextNode(text.slice(cursor, start)))
+		const end = start + word.length
+		// a stale scan must never set an out-of-range boundary (throws)
+		if (end > text.length) {
+			continue
 		}
-		const wrapper = createWrapperElement({ word })
-		wrapper.appendChild(document.createTextNode(word))
-		fragment.appendChild(wrapper)
-		cursor = start + word.length
+		const range = new Range()
+		range.setStart(node, start)
+		range.setEnd(node, end)
+		target.add(range)
+		ranges.push(range)
 	}
-	if (cursor < text.length) {
-		fragment.appendChild(document.createTextNode(text.slice(cursor)))
+	if (ranges.length > 0) {
+		textRanges.set(node, ranges)
 	}
-
-	node.replaceWith(fragment)
 }
 
-function createWrapperElement({ word }: WrapperElementOptions) {
-	const strong = document.createElement("span")
-	strong.className = MASK_CLASS_NAME
-	strong.dataset.word = word
-	strong.dataset.wordWise = "true"
-	return strong
-}
-
-// ---------------------------------------------------------------------------
-// mask click interception
-//
-// a click on a masked word must belong to wordwise alone, otherwise the same
-// click reaches the page's own handlers (React root, jQuery, inline onclick)
-// or an <a> default navigation and the content behind the panel changes. the
-// capture-phase delegate runs before every bubble listener and preventDefault
-// cancels default actions, so opening the query panel never mutates the page.
-// cmd+click is the escape hatch: it passes through untouched for following the
-// link or triggering the page's own behavior.
-// ---------------------------------------------------------------------------
-
-const MASK_SELECTOR = `.${MASK_CLASS_NAME}`
-
-export function onMaskClickCapture(e: MouseEvent) {
-	if (e.metaKey) {
-		return
-	}
-	const target = e.target as Element | null
-	const mask = target?.closest?.<HTMLElement>(MASK_SELECTOR)
-	if (!mask) {
-		return
-	}
-
-	e.preventDefault()
-	e.stopPropagation()
-
-	const word = mask.dataset.word
-	if (!word) {
-		return
-	}
-	document.dispatchEvent(
-		new CustomEvent<MaskClickEventDetail>(CUSTOM_EVENT_TYPE.MASK_CLICK_EVENT, {
-			detail: {
-				word,
-				rect: mask.getBoundingClientRect(),
-			},
-		}),
-	)
-}
-
-let maskClickInterceptorInstalled = false
-
-function ensureMaskClickInterceptor() {
-	if (maskClickInterceptorInstalled) {
-		return
-	}
-	maskClickInterceptorInstalled = true
-	// one delegated listener instead of one per wrapper: pages can carry
-	// thousands of masks
-	document.addEventListener("click", onMaskClickCapture, true)
-}
-
-// ---------------------------------------------------------------------------
-// incremental masking
-//
-// SPA pages swap views without reloading: frameworks destroy the text nodes we
-// wrapped and insert fresh ones, so a one-shot pass at document_end loses its
-// marks on every route/layout change. The observers below keep feeding new
-// content into the same lazy masking pipeline (traverse -> IntersectionObserver
-// -> maskWordsInElement).
-// ---------------------------------------------------------------------------
-
-// wordwise-injected elements must never become mask candidates, otherwise the
-// observer would feed on its own wrappers and on the query/sidebar/typography UI
-// ([data-word-wise] covers every .word-wise-mask wrapper)
+// wordwise's own output must never become a mark candidate. the query panel and
+// the sidebar render into a shadow root, which a TreeWalker cannot enter — but
+// their host elements are in the light DOM and are what elementFromPoint
+// retargets a click inside them to, so they are named here as well
 const OWN_CONTENT_SELECTOR = [
-	"[data-word-wise]",
+	QUERY_SHADOW_TAG_NAME,
+	SIDEBAR_SHADOW_TAG_NAME,
 	".word-wise-typography-hover",
 	".word-wise-typography-range",
 	".word-wise-typography-translation",
-	".word-wise-typography-original",
-	`#${QUERY_ROOT_ID}`,
-	`#${SIDE_ROOT_ID}`,
 ].join(",")
-
-const NODE_ELEMENT_NODE = 1
-const NODE_TEXT_NODE = 3
 
 export function isOwnNode(node: Node) {
 	const element =
@@ -279,6 +245,205 @@ export function collectCandidateElements(nodes: Node[]) {
 	return candidates
 }
 
+export function applyHighlightInElement(ele: Element) {
+	if (!isHighlightSupported()) {
+		return
+	}
+
+	const treeWalker = document.createTreeWalker(ele, NodeFilter.SHOW_TEXT, {
+		acceptNode(node) {
+			const parentElement = node.parentElement
+			if (
+				!parentElement ||
+				isExcludeElement(parentElement.tagName) ||
+				parentElement.closest(OWN_CONTENT_SELECTOR)
+			) {
+				return NodeFilter.FILTER_REJECT
+			}
+			return NodeFilter.FILTER_ACCEPT
+		},
+	})
+
+	// collect first: applyToTextNode only reads, but keeping the walk separate
+	// from the work lets a single walk serve every match in the subtree
+	const nodes: Text[] = []
+	while (treeWalker.nextNode()) {
+		nodes.push(treeWalker.currentNode as Text)
+	}
+	for (const node of nodes) {
+		applyToTextNode(node)
+	}
+}
+
+// ranges hold strong references to their text nodes; nodes dropped by the
+// framework would keep their subtrees alive forever without this sweep
+function pruneDetachedTextNodes() {
+	for (const node of Array.from(textRanges.keys())) {
+		if (!node.isConnected) {
+			clearTextNode(node)
+		}
+	}
+}
+
+// ---------------------------------------------------------------------------
+// hit testing
+//
+// without wrapper elements there is nothing for closest() to find, so a point
+// is resolved through the caret position at that point and matched against the
+// same word regex the highlights were built from
+// ---------------------------------------------------------------------------
+
+type CaretPosition = { node: Text; offset: number }
+
+function caretAtPoint(x: number, y: number): CaretPosition | null {
+	const doc = document as Document & {
+		caretPositionFromPoint?: (
+			x: number,
+			y: number,
+		) => { offsetNode: Node; offset: number } | null
+		caretRangeFromPoint?: (x: number, y: number) => Range | null
+	}
+
+	if (typeof doc.caretPositionFromPoint === "function") {
+		const position = doc.caretPositionFromPoint(x, y)
+		if (!position || position.offsetNode.nodeType !== NODE_TEXT_NODE) {
+			return null
+		}
+		return { node: position.offsetNode as Text, offset: position.offset }
+	}
+
+	const range = doc.caretRangeFromPoint?.(x, y)
+	if (!range || range.startContainer.nodeType !== NODE_TEXT_NODE) {
+		return null
+	}
+	return { node: range.startContainer as Text, offset: range.startOffset }
+}
+
+export function wordRangeAtPoint(
+	x: number,
+	y: number,
+): { word: string; range: Range } | null {
+	if (!isHighlightSupported() || !activeWords.length) {
+		return null
+	}
+
+	// the topmost element is what a click would actually reach (elementFromPoint
+	// retargets into a shadow root to its host, the same element the click event
+	// would carry), so wordwise's own panel is dismissed before hit-testing —
+	// otherwise a click on the panel would resolve against whatever page text
+	// sits underneath it
+	const topmost = document.elementFromPoint(x, y)
+	if (!topmost || isOwnNode(topmost)) {
+		return null
+	}
+
+	const caret = caretAtPoint(x, y)
+	if (!caret || isOwnNode(caret.node)) {
+		return null
+	}
+	// marks only ever cover light-DOM text, so a caret that resolved inside some
+	// shadow tree cannot be over one
+	if (caret.node.getRootNode() !== document) {
+		return null
+	}
+
+	const text = caret.node.nodeValue ?? ""
+	const match = findWordAtOffset(text, caret.offset, activeWords)
+	if (!match) {
+		return null
+	}
+
+	const range = new Range()
+	range.setStart(caret.node, match.start)
+	range.setEnd(caret.node, match.start + match.word.length)
+	return { word: match.word, range }
+}
+
+// ---------------------------------------------------------------------------
+// click and hover behaviour
+//
+// a click on a marked word must belong to wordwise alone, otherwise the same
+// click reaches the page's own handlers (React root, jQuery, inline onclick)
+// or an <a> default navigation and the content behind the panel changes. the
+// capture-phase delegate runs before every bubble listener and preventDefault
+// cancels default actions, so opening the query panel never mutates the page.
+// cmd+click is the escape hatch: it passes through untouched for following the
+// link or triggering the page's own behavior.
+// ---------------------------------------------------------------------------
+
+export function onMaskClickCapture(e: MouseEvent) {
+	if (e.metaKey) {
+		return
+	}
+	const hit = wordRangeAtPoint(e.clientX, e.clientY)
+	if (!hit) {
+		return
+	}
+
+	e.preventDefault()
+	e.stopPropagation()
+
+	document.dispatchEvent(
+		new CustomEvent<MaskClickEventDetail>(CUSTOM_EVENT_TYPE.MASK_CLICK_EVENT, {
+			detail: {
+				word: hit.word,
+				rect: hit.range.getBoundingClientRect(),
+			},
+		}),
+	)
+}
+
+// a highlight pseudo-element cannot carry `cursor`, so the pointer is applied
+// to the host element under the cursor instead. the attribute is also what the
+// query panel's outside-click check keys off, and it stays a plain attribute:
+// frameworks neither manage nor remove it.
+let hoveredElement: HTMLElement | null = null
+
+function setHoveredElement(element: HTMLElement | null) {
+	if (hoveredElement === element) {
+		return
+	}
+	hoveredElement?.removeAttribute(MASK_HOVER_ATTR)
+	element?.setAttribute(MASK_HOVER_ATTR, "")
+	hoveredElement = element
+}
+
+function onPointerMove(e: MouseEvent) {
+	if (!activeWords.length) {
+		return
+	}
+	const hit = wordRangeAtPoint(e.clientX, e.clientY)
+	setHoveredElement(hit ? hit.range.startContainer.parentElement : null)
+}
+
+let pointerHandlersInstalled = false
+
+function ensurePointerHandlers() {
+	if (pointerHandlersInstalled) {
+		return
+	}
+	pointerHandlersInstalled = true
+	ensureMaskClickInterceptor()
+	// matching a word per mousemove runs the alternation regex, so the cursor
+	// update is rate-limited; the attribute only changes when the host element
+	// changes anyway
+	document.addEventListener("mousemove", throttle(onPointerMove, 60))
+	// mouseleave does not bubble, so it has to sit on the element actually left
+	document.documentElement.addEventListener("mouseleave", () =>
+		setHoveredElement(null),
+	)
+}
+
+// ---------------------------------------------------------------------------
+// incremental scanning
+//
+// SPA pages swap views without reloading: frameworks destroy the text nodes
+// behind the marks and insert fresh ones, so a one-shot pass at document_end
+// loses its marks on every route/layout change. the observers below keep
+// feeding new content into the same lazy pipeline (traverse ->
+// IntersectionObserver -> applyHighlightInElement).
+// ---------------------------------------------------------------------------
+
 let activeWords: string[] = []
 let initialized = false
 let intersectionObserver: IntersectionObserver | null = null
@@ -299,13 +464,11 @@ function getIntersectionObserver() {
 				// through the mutation observer
 				const target = entry.target
 				intersectionObserver?.unobserve(target)
-				// no pre-filter here: maskWordsInElement's walker rejects
-				// non-matching text nodes immediately anyway
-				maskWordsInElement(target, activeWords)
+				applyHighlightInElement(target)
 			}
 		},
 		// any visibility is enough: a block taller than the viewport can never
-		// reach a higher threshold, so those would never mask
+		// reach a higher threshold, so those would never be marked
 		{ threshold: 0 },
 	)
 	return intersectionObserver
@@ -344,13 +507,14 @@ function scanBody() {
 
 let pendingCandidates: Set<Element> | null = null
 
-// SPA swaps render in batches; coalescing also merges our own wrapper
-// insertions with the framework's mutations into one pass. maxWait keeps
-// churning pages (editors, tickers) from postponing the flush forever
+// SPA swaps render in batches; coalescing keeps the rescan off the render path.
+// maxWait keeps churning pages (editors, tickers) from postponing the flush
+// forever
 const flushCandidates = debounce(
 	() => {
 		const candidates = pendingCandidates
 		pendingCandidates = null
+		pruneDetachedTextNodes()
 		if (!candidates || !activeWords.length) {
 			return
 		}
@@ -382,10 +546,11 @@ function onDomMutations(mutations: MutationRecord[]) {
 				addCandidate(ele)
 			}
 		} else if (mutation.type === "characterData") {
-			// framework reusing a text node in place (nodeValue update)
-			const parent = mutation.target.parentElement
-			if (parent) {
-				addCandidate(parent)
+			// framework reusing a text node in place (nodeValue update): the
+			// ranges built from the old value no longer describe the text
+			const target = mutation.target
+			if (target.nodeType === NODE_TEXT_NODE) {
+				applyToTextNode(target as Text)
 			}
 		}
 	}
@@ -432,7 +597,7 @@ export function rangeWords(words: string[]) {
 	// mid-session additions (query panel) must not drop already-active words
 	activeWords = Array.from(new Set([...activeWords, ...words]))
 
-	ensureMaskClickInterceptor()
+	ensurePointerHandlers()
 	ensureMutationObserver()
 	ensureUrlHooks()
 	if (initialized) {
@@ -445,9 +610,21 @@ export function rangeWords(words: string[]) {
 	scanBody()
 }
 
-// inverse of rangeWords: drops words from the active set and unwraps their
-// existing masks (un-collecting from the query panel), so masking stays
-// reversible instead of only ever accumulating
+let maskClickInterceptorInstalled = false
+
+function ensureMaskClickInterceptor() {
+	if (maskClickInterceptorInstalled) {
+		return
+	}
+	maskClickInterceptorInstalled = true
+	// one delegated listener instead of one per word: pages can carry
+	// thousands of marks
+	document.addEventListener("click", onMaskClickCapture, true)
+}
+
+// inverse of rangeWords: drops words from the active set and rebuilds the
+// ranges of every text node already carrying marks, so masking stays reversible
+// instead of only ever accumulating
 export function unrangeWords(words: string[]) {
 	if (words.length === 0) {
 		return
@@ -455,20 +632,9 @@ export function unrangeWords(words: string[]) {
 	const removed = new Set(words.map((word) => word.toLowerCase()))
 	activeWords = activeWords.filter((word) => !removed.has(word.toLowerCase()))
 
-	const masks = document.querySelectorAll<HTMLElement>(MASK_SELECTOR)
-	const parents = new Set<Node>()
-	for (const mask of Array.from(masks)) {
-		const word = mask.dataset.word?.toLowerCase()
-		const parent = mask.parentNode
-		if (!word || !removed.has(word) || !parent) {
-			continue
-		}
-		parents.add(parent)
-		mask.replaceWith(document.createTextNode(mask.textContent ?? ""))
-	}
-	// merge the split text fragments left behind, or a future scan would
-	// never see whole words spanning the old wrapper boundaries again
-	for (const parent of parents) {
-		parent.normalize()
+	// only the nodes already marked need recomputing — a node that had no range
+	// still has none, because the word set only ever shrinks here
+	for (const node of Array.from(textRanges.keys())) {
+		applyToTextNode(node)
 	}
 }

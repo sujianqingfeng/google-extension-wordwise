@@ -1,6 +1,6 @@
 import { type RefObject, useEffect } from "react"
 import {
-	MASK_CLASS_NAME,
+	MASK_HOVER_ATTR,
 	QUERY_SHADOW_TAG_NAME,
 	SIDEBAR_SHADOW_TAG_NAME,
 } from "@/constants"
@@ -18,9 +18,10 @@ export function useOutsideClick(options: UseOutsideClickOptions) {
 			if (
 				tagName === QUERY_SHADOW_TAG_NAME ||
 				tagName === SIDEBAR_SHADOW_TAG_NAME ||
-				// mask clicks swap the panel through the mount path; closing first
-				// on mousedown would flicker while the async remount lands
-				(event.target as HTMLElement).closest(`.${MASK_CLASS_NAME}`)
+				// word clicks swap the panel through the mount path; closing first
+				// on mousedown would flicker while the async remount lands. the
+				// attribute is set by the pointer tracking in core/range
+				(event.target as HTMLElement).closest(`[${MASK_HOVER_ATTR}]`)
 			) {
 				return
 			}

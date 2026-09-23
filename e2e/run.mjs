@@ -6,7 +6,9 @@
  * chrome-devtools-mcp managed Chrome, then asserts the masking scenarios
  * against e2e/fixture/index.html: initial masking, SPA view swaps, history
  * back, in-place text rewrites, pushState navigation, scroll-triggered lazy
- * masking, mutation churn (debounce maxWait) and mid-session word additions.
+ * masking, mutation churn (debounce maxWait), mid-session word additions and
+ * — the regression that drove the switch to the highlight registry — a
+ * page-owned text node whose updates must still render while it is marked.
  *
  * The e2e build overwrites output/chrome-mv3; a production build is restored
  * at the end. Requires the `chrome-devtools` CLI on PATH.
@@ -125,8 +127,18 @@ async function waitFor(name, probe, timeoutMs = 8000, intervalMs = 300) {
 	throw new Error(`timeout waiting for "${name}": ${JSON.stringify(last)}`)
 }
 
+// marks live in CSS.highlights as ranges, not as elements — the page's main
+// world can read the registry directly
 const maskInfo = (selector) =>
-	`JSON.stringify((root => ({ total: root.querySelectorAll('.word-wise-mask').length, words: [...root.querySelectorAll('.word-wise-mask')].map(m => m.dataset.word) }))(${selector}))`
+	`JSON.stringify((root => {
+		const registry = CSS.highlights.get('word-wise')
+		const ranges = registry ? [...registry].filter(r => root.contains(r.startContainer)) : []
+		return {
+			total: ranges.length,
+			words: ranges.map(r => r.toString().toLowerCase()),
+			injectedElements: document.querySelectorAll('[data-word-wise]').length,
+		}
+	})(${selector}))`
 
 async function run() {
 	// ---- setup -------------------------------------------------------------
@@ -171,6 +183,12 @@ async function run() {
 				throw new Error(`word not masked on load: ${word} in ${info.words}`)
 			}
 		}
+		// the whole point of the highlight registry: marking injects nothing
+		if (info.injectedElements !== 0) {
+			throw new Error(
+				`marking injected ${info.injectedElements} element(s) into the page`,
+			)
+		}
 	})
 
 	await check(
@@ -194,22 +212,24 @@ async function run() {
 		)
 	})
 
-	await check(
-		"文本原地更新（nodeValue）：新增内容补标且标记不嵌套",
-		async () => {
-			await evalJs(`document.getElementById('btn-inplace').click()`)
-			await waitFor("in-place update", async () => {
-				const info = await evalJs(`JSON.stringify({
-				words: [...document.getElementById('char-update').querySelectorAll('.word-wise-mask')].map(m => m.dataset.word),
-				nested: document.querySelector('.word-wise-mask .word-wise-mask') !== null
-			})`)
-				return {
-					ok: info.words.includes("ancient") && !info.nested,
-					...info,
-				}
-			})
-		},
-	)
+	await check("文本原地更新（nodeValue）：改写后标记跟着重算", async () => {
+		await evalJs(`document.getElementById('btn-inplace').click()`)
+		await waitFor("in-place update", async () => {
+			const info = await evalJs(`JSON.stringify({
+					text: document.getElementById('char-update').textContent,
+					loaded: (() => {
+						const r = CSS.highlights.get('word-wise')
+						return r ? [...r].filter(x => document.getElementById('char-update').contains(x.startContainer)).map(x => x.toString().toLowerCase()) : []
+					})()
+				})`)
+			// the rewrite dropped "began"/"spring"/"cold" and added
+			// "ancient"; ranges built from the old text must be gone
+			return {
+				ok: info.loaded.includes("ancient") && info.loaded.length === 3,
+				...info,
+			}
+		})
+	})
 
 	await check("pushState 路由跳转：详情视图打标（≥ 6 处）", async () => {
 		await evalJs(`document.getElementById('btn-push').click()`)
@@ -261,15 +281,70 @@ async function run() {
 			`document.dispatchEvent(new CustomEvent('range_words', { detail: ['bulletin', 'newborn'] }))`,
 		)
 		await waitFor("added words", async () => {
-			const info = await evalJs(`JSON.stringify({
-				total: document.querySelectorAll('.word-wise-mask').length,
-				added: [...document.querySelectorAll('.word-wise-mask')]
-					.map(m => m.dataset.word)
-					.filter(w => w === 'bulletin' || w === 'newborn').length
-			})`)
+			const info = await evalJs(`JSON.stringify(
+				(() => {
+					const registry = CSS.highlights.get('word-wise')
+					const words = registry ? [...registry].map(r => r.toString().toLowerCase()) : []
+					return {
+						total: words.length,
+						added: words.filter(w => w === 'bulletin' || w === 'newborn').length,
+					}
+				})()
+			)`)
 			return { ok: info.added >= 2, ...info }
 		})
 	})
+
+	await check(
+		"框架持有文本节点引用时，页面自己的更新仍然生效（回归）",
+		async () => {
+			const before = await evalJs(
+				`JSON.stringify(window.frameworkToggleState())`,
+			)
+			if (!before.heldNodeStillRendered) {
+				throw new Error(
+					"marking detached the text node the page holds a reference to",
+				)
+			}
+
+			await evalJs(`document.getElementById('btn-framework-toggle').click()`)
+			await sleep(600)
+			const translated = await evalJs(
+				`JSON.stringify(window.frameworkToggleState())`,
+			)
+			if (!translated.heldNodeStillRendered) {
+				throw new Error("the held node was detached by the toggle")
+			}
+			if (translated.text === before.text) {
+				throw new Error(
+					`page's own text update never rendered: ${JSON.stringify(translated)}`,
+				)
+			}
+			if (translated.label === before.label) {
+				throw new Error("the toggle label did not update")
+			}
+
+			// switching back must restore the original text *and* its marks
+			await evalJs(`document.getElementById('btn-framework-toggle').click()`)
+			await sleep(600)
+			const restored = await evalJs(
+				`JSON.stringify(window.frameworkToggleState())`,
+			)
+			if (restored.text !== before.text) {
+				throw new Error(
+					`text did not come back: ${JSON.stringify(restored.text.slice(0, 40))}`,
+				)
+			}
+			const marks = await evalJs(
+				maskInfo(`document.getElementById('framework-view')`),
+			)
+			if (marks.total < 5) {
+				throw new Error(
+					`marks lost after the framework re-rendered: ${JSON.stringify(marks)}`,
+				)
+			}
+		},
+	)
 
 	return { results, server, pageUrl: url, extensionId: expectedId }
 }

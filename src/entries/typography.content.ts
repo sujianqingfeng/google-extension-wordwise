@@ -40,6 +40,104 @@ function removeElement(container: HTMLElement, el: HTMLElement | null) {
 // a target with a request in flight is guarded until that request settles
 const pendingTargets = new WeakSet<HTMLElement>()
 
+// ---------------------------------------------------------------------------
+// paragraph translation
+//
+// the translation used to be a clone inserted as a *sibling* of the paragraph.
+// that put a node into the page framework's child list, which the framework
+// neither knows about nor cleans up — a re-render left the stale translation
+// behind — and it tagged a framework-owned element with a class the framework
+// overwrote on its next render. it now renders into an element wordwise owns,
+// positioned under the paragraph, so the page's tree is never touched.
+// only one translation is kept: it is a reading aid for the paragraph under the
+// pointer, not something to accumulate down the page.
+// ---------------------------------------------------------------------------
+
+let translationEl: HTMLDivElement | null = null
+let translationTarget: HTMLElement | null = null
+
+function ensureTranslationElement() {
+	if (!translationEl) {
+		translationEl = document.createElement("div")
+		translationEl.className = "word-wise-typography-translation"
+	}
+	return translationEl
+}
+
+// the card has to be opaque or the text underneath shows through, and asking
+// the page for its own background stops it turning into a white slab on a dark
+// site; ancestors are walked because paragraphs are usually transparent
+function getEffectiveBackgroundColor(element: HTMLElement) {
+	let current: HTMLElement | null = element
+	while (current) {
+		const color = window.getComputedStyle(current).backgroundColor
+		if (color && color !== "transparent" && color !== "rgba(0, 0, 0, 0)") {
+			return color
+		}
+		current = current.parentElement
+	}
+	return "Canvas"
+}
+
+// absolute inside <body> rather than fixed: the translation then scrolls with
+// the paragraph the way the in-flow clone did, with no scroll listener.
+// coordinates are relative to body's own box because an absolutely positioned
+// child is offset by body's margin
+function positionTypographyTranslation(target: HTMLElement) {
+	const el = ensureTranslationElement()
+	if (!document.body) {
+		return
+	}
+	const rect = target.getBoundingClientRect()
+	const bodyRect = document.body.getBoundingClientRect()
+	const style = window.getComputedStyle(target)
+
+	el.style.top = `${rect.bottom - bodyRect.top + 2}px`
+	el.style.left = `${rect.left - bodyRect.left}px`
+	el.style.width = `${rect.width}px`
+	el.style.backgroundColor = getEffectiveBackgroundColor(target)
+	// fades the text without fading the background behind it, which opacity on
+	// the card itself would do
+	el.style.color = `color-mix(in srgb, ${style.color} 65%, transparent)`
+}
+
+function renderTypographyTranslation(target: HTMLElement, text: string) {
+	const el = ensureTranslationElement()
+	if (!document.body) {
+		return
+	}
+
+	// textContent, not innerHTML: this is machine output
+	el.textContent = text
+	positionTypographyTranslation(target)
+	translationTarget = target
+
+	if (!el.isConnected) {
+		document.body.appendChild(el)
+	}
+}
+
+// the paragraph can be swapped out by the page at any time; the translation
+// would otherwise sit under a rectangle that no longer holds text
+function dropStaleTypographyTranslation() {
+	if (translationEl?.isConnected && !translationTarget?.isConnected) {
+		translationEl.remove()
+		translationTarget = null
+	}
+}
+
+// the card cannot reflow the page, so it necessarily covers whatever follows
+// the paragraph (a tweet's action bar, say). it is therefore disposable: any
+// click and any scroll puts it away, which bounds how long it can sit over
+// something the user might want. it accepts no pointer events, so the click
+// that dismisses it still reaches the page
+function dropTypographyTranslation() {
+	if (translationEl?.isConnected) {
+		translationEl.remove()
+		translationTarget = null
+	}
+}
+
 async function onTranslateTypography(target: HTMLElement) {
 	if (pendingTargets.has(target)) {
 		return
@@ -47,33 +145,25 @@ async function onTranslateTypography(target: HTMLElement) {
 	pendingTargets.add(target)
 
 	try {
-		const cloneTargetEl = target.cloneNode(true) as HTMLElement
-		const hoverEls = cloneTargetEl.querySelectorAll(
-			".word-wise-typography-hover",
-		)
-		for (const el of hoverEls) {
-			el.remove()
-		}
-
-		const text = cloneTargetEl.textContent?.trim()
+		// no clone any more: the hover bubble and range box live on <body>, so
+		// the paragraph's own text is already clean
+		const text = target.textContent?.trim()
 		if (!text) {
-			return
-		}
-
-		const parent = target.parentElement
-		if (!parent) {
 			return
 		}
 
 		const bgs = createBackgroundMessage()
 		const result = await bgs.fetchTranslate({ text, provider: "deepL" })
 
-		target.classList.add("word-wise-typography-original")
-		cloneTargetEl.classList.add("word-wise-typography-translation")
-		cloneTargetEl.textContent = result
-		parent.insertBefore(cloneTargetEl, target.nextSibling)
+		// the paragraph can be re-rendered or removed while the request is in
+		// flight; rendering under a dead rectangle would be worse than nothing
+		if (!target.isConnected) {
+			return
+		}
+
+		renderTypographyTranslation(target, result)
 	} catch (error) {
-		// nothing was inserted, the original paragraph stays readable
+		// nothing was rendered, the original paragraph stays readable
 		console.error("wordwise: paragraph translation failed", error)
 	} finally {
 		pendingTargets.delete(target)
@@ -189,23 +279,15 @@ function onTypographyMove(e: MouseEvent) {
 		return
 	}
 
-	const isTranslated = target.querySelector(".word-wise-typography-translation")
-	if (isTranslated) {
-		return
-	}
-
-	if (
-		target.classList.contains("word-wise-typography-translation") ||
-		target.classList.contains("word-wise-typography-original")
-	) {
-		return
-	}
-
+	// no "already translated" guard is needed any more: the translation is not
+	// inserted into the paragraph, so nothing about it can be mistaken for page
+	// content, and asking for it again simply refreshes it
 	showTypographyTranslatorElement(target, { clientX, clientY })
 }
 
 function scrollToRemoveExtraElement() {
 	endActiveHoverSession?.()
+	dropStaleTypographyTranslation()
 }
 
 export default defineContentScript({
@@ -232,10 +314,15 @@ export default defineContentScript({
 				"mousemove",
 				debounce(onTypographyMove, 500, { maxWait: 1000 }),
 			)
+			// capture, because scroll does not bubble: without it a scroll inside
+			// a nested scroller (a timeline column, a modal) leaves both the hover
+			// indicators and the translation card stranded over stale content
 			document.addEventListener(
 				"scroll",
 				throttle(scrollToRemoveExtraElement, 500),
+				true,
 			)
+			document.addEventListener("mousedown", dropTypographyTranslation, true)
 		}
 
 		// logging in on the sidebar enables this page without a reload

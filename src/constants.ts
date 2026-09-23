@@ -34,12 +34,14 @@ export const EXCLUDE_TAG_ELEMENTS = [
 	"pre",
 ]
 
-// class of the span wrapping each masked word; the click interceptor and the
-// query panel's outside-click check both key off it
-export const MASK_CLASS_NAME = "word-wise-mask"
+// name the marked words are registered under in CSS.highlights; words are
+// painted as ranges, never as injected elements
+export const HIGHLIGHT_NAME = "word-wise"
 
-export const QUERY_ROOT_ID = "wordwise-query-crx-root"
-export const SIDE_ROOT_ID = "wordwise-side-crx-root"
+// attribute put on the element under a marked word — a highlight pseudo-element
+// cannot carry `cursor`, and the query panel's outside-click check needs a way
+// to tell a word click from a click elsewhere on the page
+export const MASK_HOVER_ATTR = "data-word-wise-hover"
 
 export const TOKEN = "local:token"
 export const REFRESH_TOKEN = "local:refresh-token"

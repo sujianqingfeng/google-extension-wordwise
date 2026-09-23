@@ -1,12 +1,15 @@
-import { afterEach, describe, expect, test, vi } from "vitest"
-import { CUSTOM_EVENT_TYPE } from "@/constants"
+import { describe, expect, test } from "vitest"
 import {
 	collectCandidateElements,
+	findWordAtOffset,
 	isOwnNode,
 	matchWordsIndices,
-	onMaskClickCapture,
-	unrangeWords,
 } from "../range"
+
+// marking is painted through the CSS Custom Highlight API and the click path is
+// resolved by caret hit-testing — both need a real layout engine, so they are
+// covered by the browser suite (e2e/run.mjs). everything below is the pure
+// logic those paths are built on.
 
 function fakeElement(options: { own?: boolean } = {}) {
 	return {
@@ -15,11 +18,10 @@ function fakeElement(options: { own?: boolean } = {}) {
 	}
 }
 
-describe("range", () => {
-	test("", () => {
+describe("matchWordsIndices", () => {
+	test("finds every occurrence in order", () => {
 		const text = "hello word, hello world, word hello"
-		const words = ["hello", "word"]
-		const indices = matchWordsIndices(text, words)
+		const indices = matchWordsIndices(text, ["hello", "word"])
 		expect(indices).toMatchInlineSnapshot(`
       [
         {
@@ -45,9 +47,7 @@ describe("range", () => {
       ]
     `)
 	})
-})
 
-describe("matchWordsIndices", () => {
 	test("finds all matches case-insensitively", () => {
 		expect(matchWordsIndices("Hello WORLD", ["hello", "world"])).toEqual([
 			{ word: "Hello", start: 0 },
@@ -90,6 +90,39 @@ describe("matchWordsIndices", () => {
 		expect(matchWordsIndices("running fast", ["run", "running"])).toEqual([
 			{ word: "running", start: 0 },
 		])
+	})
+})
+
+describe("findWordAtOffset", () => {
+	const words = ["hello", "world"]
+
+	test("an offset inside a word resolves to that word", () => {
+		expect(findWordAtOffset("say hello now", 5, words)).toEqual({
+			word: "hello",
+			start: 4,
+		})
+	})
+
+	test("the first and last offset of a word both count as hits", () => {
+		// 4 is the word's first character, 8 its last
+		expect(findWordAtOffset("say hello now", 4, words)?.word).toBe("hello")
+		expect(findWordAtOffset("say hello now", 8, words)?.word).toBe("hello")
+	})
+
+	test("the offset just past a word still hits it", () => {
+		// caretPositionFromPoint rounds to the nearest boundary, so a click on
+		// the right half of the last glyph reports the offset after the word
+		expect(findWordAtOffset("say hello now", 9, words)?.word).toBe("hello")
+	})
+
+	test("an offset in plain text is not a hit", () => {
+		expect(findWordAtOffset("say hello now", 1, words)).toBeNull()
+		// offset 0 has no preceding offset to probe
+		expect(findWordAtOffset("nomatch here", 0, words)).toBeNull()
+	})
+
+	test("no words means no hits", () => {
+		expect(findWordAtOffset("say hello now", 5, [])).toBeNull()
 	})
 })
 
@@ -153,143 +186,5 @@ describe("isOwnNode", () => {
 	test("detached text nodes are treated as own nodes", () => {
 		const textNode = { nodeType: 3, parentElement: null } as unknown as Node
 		expect(isOwnNode(textNode)).toBe(true)
-	})
-})
-
-describe("onMaskClickCapture", () => {
-	afterEach(() => {
-		vi.unstubAllGlobals()
-	})
-
-	function makeMask(word = "hello") {
-		const mask = {
-			dataset: { word },
-			getBoundingClientRect: () => ({ top: 10, left: 20 }),
-			closest: (selector: string) =>
-				selector === ".word-wise-mask" ? mask : null,
-		}
-		return mask
-	}
-
-	function makeEvent(overrides: { metaKey?: boolean; target?: unknown } = {}) {
-		return {
-			metaKey: false,
-			preventDefault: vi.fn(),
-			stopPropagation: vi.fn(),
-			target: makeMask(),
-			...overrides,
-		} as unknown as MouseEvent
-	}
-
-	function stubDocument() {
-		const dispatch = vi.fn()
-		vi.stubGlobal("document", { dispatchEvent: dispatch })
-		return dispatch
-	}
-
-	test("intercepts: swallows the click and dispatches the query event", () => {
-		const dispatch = stubDocument()
-
-		const e = makeEvent()
-		onMaskClickCapture(e)
-
-		// both are required: stopPropagation starves page bubble handlers,
-		// preventDefault cancels <a> navigation
-		expect(e.preventDefault).toHaveBeenCalled()
-		expect(e.stopPropagation).toHaveBeenCalled()
-		expect(dispatch).toHaveBeenCalledTimes(1)
-		const event = dispatch.mock.calls[0][0]
-		expect(event.type).toBe(CUSTOM_EVENT_TYPE.MASK_CLICK_EVENT)
-		expect(event.detail.word).toBe("hello")
-	})
-
-	test("cmd+click passes through untouched so the page keeps its click", () => {
-		const dispatch = stubDocument()
-
-		const e = makeEvent({ metaKey: true })
-		onMaskClickCapture(e)
-
-		expect(e.preventDefault).not.toHaveBeenCalled()
-		expect(e.stopPropagation).not.toHaveBeenCalled()
-		expect(dispatch).not.toHaveBeenCalled()
-	})
-
-	test("clicks outside masks are ignored", () => {
-		const dispatch = stubDocument()
-
-		const e = makeEvent({ target: { closest: () => null } })
-		onMaskClickCapture(e)
-
-		expect(e.preventDefault).not.toHaveBeenCalled()
-		expect(e.stopPropagation).not.toHaveBeenCalled()
-		expect(dispatch).not.toHaveBeenCalled()
-	})
-
-	test("a mask without a word is swallowed but dispatches nothing", () => {
-		const dispatch = stubDocument()
-
-		const e = makeEvent({ target: makeMask("") })
-		onMaskClickCapture(e)
-
-		expect(e.preventDefault).toHaveBeenCalled()
-		expect(dispatch).not.toHaveBeenCalled()
-	})
-})
-
-describe("unrangeWords", () => {
-	afterEach(() => {
-		vi.unstubAllGlobals()
-	})
-
-	function makeMask(word: string) {
-		const parent = { normalize: vi.fn() }
-		const mask = {
-			dataset: { word },
-			textContent: word,
-			parentNode: parent,
-			replaceWith: vi.fn(),
-		}
-		return { mask, parent }
-	}
-
-	function stubMasks(...masks: ReturnType<typeof makeMask>[]) {
-		vi.stubGlobal("document", {
-			createTextNode: (text: string) => ({ textContent: text }),
-			querySelectorAll: vi.fn(() => masks.map(({ mask }) => mask)),
-		})
-	}
-
-	test("unwraps matching masks case-insensitively and normalizes only their parents", () => {
-		const kept = makeMask("hello")
-		const removed = makeMask("World")
-		stubMasks(kept, removed)
-
-		unrangeWords(["world"])
-
-		// the wrapper is replaced by a plain text node, and the parent's split
-		// text fragments are merged so future scans see whole words again
-		expect(removed.mask.replaceWith).toHaveBeenCalledTimes(1)
-		expect(removed.parent.normalize).toHaveBeenCalledTimes(1)
-		expect(kept.mask.replaceWith).not.toHaveBeenCalled()
-		expect(kept.parent.normalize).not.toHaveBeenCalled()
-	})
-
-	test("masks of other words are left untouched", () => {
-		const other = makeMask("river")
-		stubMasks(other)
-
-		unrangeWords(["mountain"])
-
-		expect(other.mask.replaceWith).not.toHaveBeenCalled()
-		expect(other.parent.normalize).not.toHaveBeenCalled()
-	})
-
-	test("empty word list is a no-op", () => {
-		const mask = makeMask("hello")
-		stubMasks(mask)
-
-		unrangeWords([])
-
-		expect(mask.mask.replaceWith).not.toHaveBeenCalled()
 	})
 })
